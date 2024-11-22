@@ -64,6 +64,7 @@ package main
 
 import (
     "fmt"
+
     "github.com/Joker666/goworkerpool/basic"
     "github.com/Joker666/goworkerpool/model"
     "github.com/Joker666/goworkerpool/worker"
