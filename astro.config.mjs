@@ -13,4 +13,9 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
+  markdown: {
+    shikiConfig: {
+      theme: "material-theme",
+    },
+  },
 });
