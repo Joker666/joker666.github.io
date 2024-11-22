@@ -73,23 +73,19 @@ const siteConfig: SiteConfig = {
       text: "Contact",
       href: "/contact",
     },
-    {
-      text: "Terms",
-      href: "/terms",
-    },
   ],
   socialLinks: [
     {
-      text: "Dribbble",
-      href: "https://dribbble.com/",
+      text: "GitHub",
+      href: "https://github.com/Joker666",
     },
     {
-      text: "Instagram",
-      href: "https://instagram.com/",
+      text: "LinkedIn",
+      href: "https://www.linkedin.com/in/hasanrafi",
     },
     {
       text: "X/Twitter",
-      href: "https://twitter.com/",
+      href: "https://x.com/rafi_talks",
     },
   ],
   hero: {
