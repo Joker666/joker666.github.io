@@ -41,7 +41,7 @@ const siteConfig: SiteConfig = {
   title: "Rafi",
   subtitle: "Software engineer, indie hacker, and amateur traveller.",
   description:
-    "Astro.js and Tailwind CSS theme for blog and portfolio by justgoodui.com",
+    "Rafi is a software engineer and indie hacker based in Canada. He's currently working for Slumber Group as a senior software engineer. Right now he's hacking some side projects, learning photography, and doing masters in machine learning.",
   image: {
     src: "/portrait.jpg",
     alt: "Dante - Astro.js and Tailwind CSS theme",
