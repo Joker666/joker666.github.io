@@ -2,6 +2,7 @@
 title: "Golang Concurrency And Workerpool: Part 1"
 excerpt: Concurrency limiting worker pool. We deep dive into building a simple workerpool solution.
 publishDate: "Nov 27 2020"
+isFeatured: true
 tags:
   - golang
   - concurrency
