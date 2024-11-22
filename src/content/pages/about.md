@@ -10,7 +10,7 @@ seo:
 
 ![Alt text for image](/about.jpeg)
 
-## MD Ahad Hasan - Software Engineer based in Canada
+## Hello 👋! I'm a Software Engineer based in Canada.
 
 I've been a writing software for almost 10 years now and wrote my first program in C# when I was 16 years old. It was a little console game. Thanks to my friend who inspired me.
 
