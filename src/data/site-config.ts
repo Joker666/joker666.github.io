@@ -41,10 +41,10 @@ const siteConfig: SiteConfig = {
   title: "Rafi",
   subtitle: "Software engineer, indie hacker, and amateur traveller.",
   description:
-    "Rafi is a software engineer and indie hacker based in Canada. He's currently working for Slumber Studios as a senior software engineer. Right now he's hacking some side projects, learning photography, and doing masters in machine learning.",
+    "Rafi is a software engineer and indie hacker. He's currently working for Slumber Studios as a senior software engineer. Right now he's hacking some side projects, learning photography, and doing masters in machine learning.",
   image: {
     src: "/portrait.jpg",
-    alt: "Rafi is a software engineer and indie hacker based in Canada",
+    alt: "Rafi is a software engineer and indie hacker",
   },
   headerNavLinks: [
     {
@@ -90,7 +90,7 @@ const siteConfig: SiteConfig = {
   ],
   hero: {
     title: "sudo welcome-to-my-world",
-    text: "I'm **Rafi**, a software engineer and indie hacker based in Canada. I'm currently working for Slumber Studios as a senior software engineer. Right now I'm hacking some side projects, learning photography, and doing masters in machine learning. Explore my <a href='https://github.com/Joker666'>GitHub</a> or follow me on <a href='https://x.com/rafi_talks'>Twitter/X</a>.",
+    text: "I'm **Rafi**, a software engineer and indie hacker. I'm currently working for Slumber Studios as a senior software engineer. Right now I'm hacking some side projects, learning photography, and doing masters in machine learning. Explore my <a href='https://github.com/Joker666'>GitHub</a> or follow me on <a href='https://x.com/rafi_talks'>Twitter/X</a>.",
     image: {
       src: "/portrait.jpg",
       alt: "A person sitting at a desk in front of a computer",

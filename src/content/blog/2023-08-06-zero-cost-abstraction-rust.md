@@ -1,13 +1,14 @@
 ---
-title: "Zero cost abstraction in Rust"
-excerpt: Concurrency limiting worker pool. We deep dive into building a robust worker pool.
+title: Zero cost abstraction in Rust
+excerpt: Zero cost abstraction is a fancy term that simply means that adding high-level constructs like a newtype, type class or generics do not contribute to any runtime cost.
 publishDate: "Aug 06 2023"
+isFeatured: true
 tags:
   - rust
   - optimization
 ---
 
-Zero-cost abstraction is a fancy term that simply means that adding high-level constructs like a `newtype`, iterators, traits, or [generics](https://www.hasanrafi.com/articles/generics-in-rust-with-monomorphization) do not
+Zero-cost abstraction is a fancy term that simply means that adding high-level constructs like a `newtype`, iterators, traits, or [generics](https://joker666.github.io/blog/2023-08-25-generics-in-rust-with-monomorphization) do not
 contribute to any runtime cost. Zero-cost abstractions don't make anything faster, rather they make the runtime the same
 as if you wrote the lower-level unabstracted version (usually at the expense of compile time). You can write expressive,
 high-level code without incurring runtime overhead. This is fantastic because in most other programming languages
@@ -74,7 +75,7 @@ easier to understand. But even though we use an `iterator` and `filter` through 
 numbers to get its sum, the compiler generates the same assembly code as the second function.
 
 Generics are also implemented without any runtime overhead in Rust with a technique called _`Monomorphization`_ which we
-will discuss in a [different article](https://www.hasanrafi.com/articles/generics-in-rust-with-monomorphization).
+will discuss in a [different article](https://joker666.github.io/blog/2023-08-25-generics-in-rust-with-monomorphization).
 
 ## Takeaway
 
