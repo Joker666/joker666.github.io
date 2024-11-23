@@ -50,12 +50,6 @@
 }
 
 /* Code Block */
-html .astro-code,
-html .astro-code span {
-  font-family: "JetBrains Mono";
-  font-weight: 600;
-}
-
 html.dark .astro-code,
 html.dark .astro-code span {
   color: var(--shiki-dark) !important;
