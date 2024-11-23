@@ -12,7 +12,6 @@ tags:
   - golang
   - concurrency
   - workerpool
-  - software engineering
 ---
 
 ![logo](https://hackernoon.com/images/3Ur17PtJhkV5UkAAJFu6z8t0fKg1-cz631ep.jpeg)
