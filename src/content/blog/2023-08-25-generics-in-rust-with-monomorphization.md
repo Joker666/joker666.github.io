@@ -1,12 +1,12 @@
 ---
 title: Generics in Rust with Monomorphization
 excerpt: Generics in Rust is not like in any other mainstream programming language except for C++ and uses something called Monomorphization. This approach is fantastic since it is basically zero cost.
-isFeatured: true
-publishDate: "Aug 25 2023"
+isFeatured: false
+publishDate: 'Aug 25 2023'
 tags:
-  - rust
-  - generics
-  - optimization
+    - rust
+    - generics
+    - optimization
 ---
 
 Generics in Rust is not like in any other mainstream programming language except for C++ and uses something called `Monomorphization` for compile-time generics. This approach is fantastic since it is [zero cost](https://joker666.github.io/blog/2023-08-06-zero-cost-abstraction-rust) but if we are not careful it can lead to code bloat. We discussed Rust's runtime polymorphism in a [different article](https://www.hasanrafi.com/articles/what-is-dyn-in-rust-and-how-it-powers-polymorphism).

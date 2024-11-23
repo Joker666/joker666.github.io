@@ -1,7 +1,7 @@
 import { type CollectionEntry } from 'astro:content';
 import { slugify } from './common-utils';
 
-export function sortItemsByDateDesc(itemA: CollectionEntry<'blog' | 'projects'>, itemB: CollectionEntry<'blog' | 'projects'>) {
+export function sortItemsByDateDesc(itemA: CollectionEntry<'blog'>, itemB: CollectionEntry<'blog'>) {
     return new Date(itemB.data.publishDate).getTime() - new Date(itemA.data.publishDate).getTime();
 }
 
@@ -11,7 +11,7 @@ export function getAllTags(posts: CollectionEntry<'blog'>[]) {
         .map((tag) => {
             return {
                 name: tag,
-                slug: slugify(tag)
+                slug: slugify(tag),
             };
         })
         .filter((obj, pos, arr) => {
@@ -20,6 +20,8 @@ export function getAllTags(posts: CollectionEntry<'blog'>[]) {
 }
 
 export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagSlug: string) {
-    const filteredPosts: CollectionEntry<'blog'>[] = posts.filter((post) => (post.data.tags || []).map((tag) => slugify(tag)).includes(tagSlug));
+    const filteredPosts: CollectionEntry<'blog'>[] = posts.filter((post) =>
+        (post.data.tags || []).map((tag) => slugify(tag)).includes(tagSlug),
+    );
     return filteredPosts;
 }
