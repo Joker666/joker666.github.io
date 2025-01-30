@@ -10,23 +10,38 @@
     </button>
     <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-36 overflow-hidden rounded-xl bg-white dark:bg-neutral-900 ring-1 ring-gray-200 dark:ring-gray-700 shadow-lg transform scale-95 transition-all">
         <div class="py-1">
-            <button class="theme-option w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="light">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <button class="theme-option w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="light">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Light
+                </div>
+                <svg class="theme-check w-4 h-4 hidden" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                 </svg>
-                Light
             </button>
-            <button class="theme-option w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="dark">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <button class="theme-option w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="dark">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    Dark
+                </div>
+                <svg class="theme-check w-4 h-4 hidden" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                 </svg>
-                Dark
             </button>
-            <button class="theme-option w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="system">
-                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <button class="theme-option w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-theme="system">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    System
+                </div>
+                <svg class="theme-check w-4 h-4 hidden" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                 </svg>
-                System
             </button>
         </div>
     </div>
@@ -69,12 +84,29 @@
             dropdown?.classList.toggle('hidden');
         });
 
+        const updateSelectedMarker = (selectedTheme: string) => {
+            document.querySelectorAll('.theme-option').forEach(option => {
+                const checkmark = option.querySelector('.theme-check');
+                if (checkmark) {
+                    if ((option as HTMLElement).dataset.theme === selectedTheme) {
+                        checkmark.classList.remove('hidden');
+                    } else {
+                        checkmark.classList.add('hidden');
+                    }
+                }
+            });
+        };
+
+        // Update initial selected marker
+        updateSelectedMarker(theme);
+
         // Handle theme options
         document.querySelectorAll('.theme-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 const newTheme = (e.currentTarget as HTMLElement).dataset.theme;
                 if (newTheme) {
                     updateTheme(newTheme);
+                    updateSelectedMarker(newTheme);
                     dropdown?.classList.add('hidden');
                 }
             });
