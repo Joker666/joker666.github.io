@@ -7,9 +7,9 @@ import { sortItemsByDateDesc, getAllTags, getPostsByTag } from '../../utils/data
 
 const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
 const tags = getAllTags(posts).sort((tagA, tagB) => {
-    const postCountTagA = getPostsByTag(posts, tagA.slug).length;
-    const postCountTagB = getPostsByTag(posts, tagB.slug).length;
-    return postCountTagB - postCountTagA;
+  const postCountTagA = getPostsByTag(posts, tagA.slug).length;
+  const postCountTagB = getPostsByTag(posts, tagB.slug).length;
+  return postCountTagB - postCountTagA;
 });
 ---
 

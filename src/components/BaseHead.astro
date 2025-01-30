@@ -3,34 +3,34 @@ import siteConfig from '../data/site-config';
 import '../styles/global.css';
 
 export type Props = {
-    title?: string;
-    description?: string;
-    image?: { src: string; alt?: string };
-    pageType?: 'website' | 'article';
+  title?: string;
+  description?: string;
+  image?: { src: string; alt?: string };
+  pageType?: 'website' | 'article';
 };
 
 const { description = '', image = siteConfig.image, pageType = 'website' } = Astro.props;
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ');
 const resolvedImage = image?.src
-    ? {
-          src: new URL(image.src, Astro.site).toString(),
-          alt: image.alt
-      }
-    : undefined;
+  ? {
+      src: new URL(image.src, Astro.site).toString(),
+      alt: image.alt,
+    }
+  : undefined;
 const canonicalURL = new URL(Astro.request.url, Astro.site);
 
 /**
  * Enforce some standard canonical URL formatting across the site.
  */
 function formatCanonicalURL(url: string | URL) {
-    const path = url.toString();
-    const hasQueryParams = path.includes('?');
-    // If there are query params, make sure the URL has no trailing slash
-    if (hasQueryParams) {
-        path.replace(/\/?$/, '');
-    }
-    // otherwise, canonical URL always has a trailing slash
-    return path.replace(/\/?$/, hasQueryParams ? '' : '/');
+  const path = url.toString();
+  const hasQueryParams = path.includes('?');
+  // If there are query params, make sure the URL has no trailing slash
+  if (hasQueryParams) {
+    path.replace(/\/?$/, '');
+  }
+  // otherwise, canonical URL always has a trailing slash
+  return path.replace(/\/?$/, hasQueryParams ? '' : '/');
 }
 ---
 

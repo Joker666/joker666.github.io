@@ -1,4 +1,4 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from 'astro:content';
 
 const seoSchema = z.object({
   title: z.string().min(5).max(120).optional(),
@@ -9,7 +9,7 @@ const seoSchema = z.object({
       alt: z.string().optional(),
     })
     .optional(),
-  pageType: z.enum(["website", "article"]).default("website"),
+  pageType: z.enum(['website', 'article']).default('website'),
 });
 
 const blog = defineCollection({

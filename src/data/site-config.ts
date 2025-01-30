@@ -38,67 +38,67 @@ export type SiteConfig = {
 };
 
 const siteConfig: SiteConfig = {
-  title: "Rafi",
-  subtitle: "Software engineer, indie hacker, and amateur traveller.",
+  title: 'Rafi',
+  subtitle: 'Software engineer, indie hacker, and amateur traveller.',
   description:
     "Rafi is a software engineer and indie hacker. He's currently working for Slumber Studios as a senior software engineer. Right now he's hacking some side projects, learning photography, and doing masters in machine learning.",
   image: {
-    src: "/portrait.jpg",
-    alt: "Rafi is a software engineer and indie hacker",
+    src: '/portrait.jpg',
+    alt: 'Rafi is a software engineer and indie hacker',
   },
   headerNavLinks: [
     {
-      text: "Home",
-      href: "/",
+      text: 'Home',
+      href: '/',
     },
     {
-      text: "Projects",
-      href: "/projects",
+      text: 'Projects',
+      href: '/projects',
     },
     {
-      text: "Blog",
-      href: "/blog",
+      text: 'Blog',
+      href: '/blog',
     },
     {
-      text: "Tags",
-      href: "/tags",
+      text: 'Tags',
+      href: '/tags',
     },
   ],
   footerNavLinks: [
     {
-      text: "About",
-      href: "/about",
+      text: 'About',
+      href: '/about',
     },
     {
-      text: "Contact",
-      href: "/contact",
+      text: 'Contact',
+      href: '/contact',
     },
   ],
   socialLinks: [
     {
-      text: "GitHub",
-      href: "https://github.com/Joker666",
+      text: 'GitHub',
+      href: 'https://github.com/Joker666',
     },
     {
-      text: "LinkedIn",
-      href: "https://www.linkedin.com/in/hasanrafi",
+      text: 'LinkedIn',
+      href: 'https://www.linkedin.com/in/hasanrafi',
     },
     {
-      text: "X/Twitter",
-      href: "https://x.com/rafi_talks",
+      text: 'X/Twitter',
+      href: 'https://x.com/rafi_talks',
     },
   ],
   hero: {
-    title: "sudo welcome-to-my-world",
+    title: 'sudo welcome-to-my-world',
     text: "I'm **Rafi**, a software engineer and indie hacker. I'm currently working for Slumber Studios as a senior software engineer. Right now I'm hacking some side projects, learning photography, and doing masters in machine learning. Explore my <a href='https://github.com/Joker666'>GitHub</a> or follow me on <a href='https://x.com/rafi_talks'>Twitter/X</a>.",
     image: {
-      src: "/portrait.jpg",
-      alt: "A person sitting at a desk in front of a computer",
+      src: '/portrait.jpg',
+      alt: 'A person sitting at a desk in front of a computer',
     },
     actions: [
       {
-        text: "Get in Touch",
-        href: "/contact",
+        text: 'Get in Touch',
+        href: '/contact',
       },
     ],
   },

@@ -9,16 +9,16 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../../utils/data-utils';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
-    const tags = getAllTags(posts);
+  const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+  const tags = getAllTags(posts);
 
-    return tags.flatMap((tag) => {
-        const filteredPosts = getPostsByTag(posts, tag.slug);
-        return paginate(filteredPosts, {
-            params: { slug: tag.slug },
-            pageSize: siteConfig.postsPerPage || 4
-        });
+  return tags.flatMap((tag) => {
+    const filteredPosts = getPostsByTag(posts, tag.slug);
+    return paginate(filteredPosts, {
+      params: { slug: tag.slug },
+      pageSize: siteConfig.postsPerPage || 4,
     });
+  });
 }
 
 type Props = { page: Page<CollectionEntry<'blog'>> };
@@ -29,7 +29,7 @@ const params = Astro.params;
 const allPosts = await getCollection('blog');
 const allTags = getAllTags(allPosts);
 const currentTag = allTags.find((tag) => {
-    return tag.slug === params.slug;
+  return tag.slug === params.slug;
 });
 ---
 

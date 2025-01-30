@@ -1,12 +1,16 @@
 ---
 import ArrowRight from '../icons/ArrowRight.astro';
 
-type Props = { project: {
+type Props = {
+  project: {
     title: string;
     description: string;
     url: string;
     isFeatured: boolean;
-}; class?: string; headingLevel?: 'h2' | 'h3' };
+  };
+  class?: string;
+  headingLevel?: 'h2' | 'h3';
+};
 
 const { project, class: className, headingLevel = 'h2' } = Astro.props;
 const { title, description } = project;

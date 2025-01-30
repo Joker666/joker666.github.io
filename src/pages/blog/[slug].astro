@@ -9,19 +9,23 @@ import { sortItemsByDateDesc } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
 
 export async function getStaticPaths() {
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
-    const postCount = posts.length;
-    return posts.map((post, index) => ({
-        params: { slug: post.slug },
-        props: {
-            post,
-            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
-            nextPost: index !== 0 ? posts[index - 1] : null
-        }
-    }));
+  const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+  const postCount = posts.length;
+  return posts.map((post, index) => ({
+    params: { slug: post.slug },
+    props: {
+      post,
+      prevPost: index + 1 !== postCount ? posts[index + 1] : null,
+      nextPost: index !== 0 ? posts[index - 1] : null,
+    },
+  }));
 }
 
-type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>; nextPost: CollectionEntry<'blog'> };
+type Props = {
+  post: CollectionEntry<'blog'>;
+  prevPost: CollectionEntry<'blog'>;
+  nextPost: CollectionEntry<'blog'>;
+};
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;

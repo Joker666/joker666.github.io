@@ -7,8 +7,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { portfolio } from '../../utils/projects.json';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const projects = portfolio;
-    return paginate(projects, { pageSize: siteConfig.projectsPerPage || 6 });
+  const projects = portfolio;
+  return paginate(projects, { pageSize: siteConfig.projectsPerPage || 6 });
 }
 
 const { page } = Astro.props;
