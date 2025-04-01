@@ -11,10 +11,10 @@
   }
   html.dark {
     --color-text-main: 242 241 236; /* #F2F1EC */
-    --color-bg-main: 23 23 23; /* #171717 */
-    --color-bg-muted: 36 36 36; /* #242424 */
+    --color-bg-main: 32 32 32; /* #202020 - lighter than before */
+    --color-bg-muted: 47 47 47; /* #2F2F2F - lighter than before */
     --color-border-main: 242 241 236; /* #F2F1EC */
-  }
+}
 
   /* Cyan */
   /*
