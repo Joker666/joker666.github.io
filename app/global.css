@@ -1,3 +1,59 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+@theme {
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+:root {
+  --radius: 0px;
+  /* Brutalist light theme overrides */
+  --color-fd-background: #FFFCF0; /* Off-white/Cream */
+  --color-fd-foreground: #101010; /* Near black */
+  --color-fd-card: #FFFCF0;
+  --color-fd-card-foreground: #101010;
+  --color-fd-popover: #FFFCF0;
+  --color-fd-popover-foreground: #101010;
+  --color-fd-primary: #D946EF; /* Magenta pop */
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #E6E4D5;
+  --color-fd-secondary-foreground: #101010;
+  --color-fd-muted: #E6E4D5;
+  --color-fd-muted-foreground: #606060;
+  --color-fd-accent: #E6E4D5;
+  --color-fd-accent-foreground: #101010;
+  --color-fd-border: #101010;
+  --color-fd-input: #101010;
+  --color-fd-ring: #101010;
+}
+
+.dark {
+  /* Brutalist dark theme overrides */
+  --color-fd-background: #101010; /* Near black */
+  --color-fd-foreground: #FFFCF0; /* Off-white */
+  --color-fd-card: #101010;
+  --color-fd-card-foreground: #FFFCF0;
+  --color-fd-popover: #101010;
+  --color-fd-popover-foreground: #FFFCF0;
+  --color-fd-primary: #D946EF;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #202020;
+  --color-fd-secondary-foreground: #FFFCF0;
+  --color-fd-muted: #202020;
+  --color-fd-muted-foreground: #A0A0A0;
+  --color-fd-accent: #202020;
+  --color-fd-accent-foreground: #FFFCF0;
+  --color-fd-border: #FFFCF0;
+  --color-fd-input: #FFFCF0;
+  --color-fd-ring: #FFFCF0;
+}
+
+* {
+  border-radius: 0 !important;
+}
+
+body {
+  font-family: var(--font-mono);
+}
+
