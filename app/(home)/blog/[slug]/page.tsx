@@ -14,10 +14,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   return (
     <main className="w-full max-w-5xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link
-          href="/blog"
-          className="font-mono text-sm hover:bg-fd-foreground hover:text-fd-background px-2 py-1 transition-colors"
-        >
+        <Link href="/blog" className="font-mono text-sm px-2 py-1 transition-colors">
           ← BACK
         </Link>
       </div>
@@ -33,7 +30,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
           <p className="mt-6 text-lg font-mono text-fd-muted-foreground leading-relaxed">{page.data.description}</p>
         </div>
 
-        <div className="prose prose-neutral prose-lg max-w-none font-mono prose-headings:font-bold prose-headings:uppercase prose-h1:text-2xl prose-h2:text-xl prose-p:text-fd-foreground prose-a:text-fd-primary prose-a:no-underline prose-a:border-b-2 prose-a:border-fd-primary hover:prose-a:bg-fd-primary hover:prose-a:text-fd-primary-foreground prose-blockquote:border-l-4 prose-blockquote:border-fd-foreground prose-blockquote:not-italic prose-code:bg-fd-secondary prose-code:text-fd-foreground prose-code:px-1 prose-code:before:content-none prose-code:after:content-none">
+        <div className="prose prose-neutral prose-lg max-w-none font-mono prose-headings:font-bold prose-headings:uppercase prose-h1:text-2xl prose-h2:text-xl prose-p:text-fd-foreground prose-a:text-fd-primary prose-blockquote:border-l-4 prose-blockquote:border-fd-foreground prose-blockquote:not-italic prose-code:bg-fd-secondary prose-code:text-fd-foreground prose-code:px-1 prose-code:before:content-none prose-code:after:content-none">
           <InlineTOC items={page.data.toc} />
           <Mdx components={defaultMdxComponents} />
         </div>
