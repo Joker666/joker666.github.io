@@ -1,3 +1,4 @@
+import { RehypeCodeOptions } from "fumadocs-core/mdx-plugins";
 import { defineConfig, defineCollections, frontmatterSchema } from "fumadocs-mdx/config";
 import { z } from "zod";
 
@@ -28,8 +29,15 @@ export const blogs = defineCollections({
   }),
 });
 
+const rehypeCodeOptions: RehypeCodeOptions = {
+  themes: {
+    light: "github-light",
+    dark: "vitesse-dark",
+  },
+};
+
 export default defineConfig({
   mdxOptions: {
-    // MDX options
+    rehypeCodeOptions: rehypeCodeOptions,
   },
 });
