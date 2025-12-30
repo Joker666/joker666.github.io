@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
+import { slugifyTag } from "@/lib/string-utils";
 import { notFound } from "next/navigation";
-import { getAllTags, getPostsByTagSlug, slugifyTag } from "@/lib/tags";
 
 type PageProps = {
   params: Promise<{ tag: string }>;

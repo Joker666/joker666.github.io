@@ -8,6 +8,7 @@ interface Post {
   url: string;
   date: string;
   description?: string;
+  tags?: string[];
 }
 
 export function PostList({ posts }: { posts: Post[] }) {
@@ -28,7 +29,7 @@ export function PostList({ posts }: { posts: Post[] }) {
           <Link
             key={post.url}
             href={post.url}
-            className="group flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+            className="group flex flex-col gap-1 rounded-lg border-2 border-muted bg-card p-4 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
           >
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-semibold group-hover:underline">

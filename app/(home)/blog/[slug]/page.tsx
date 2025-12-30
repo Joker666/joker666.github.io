@@ -3,7 +3,8 @@ import Link from "next/link";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { blogPosts } from "@/lib/source";
-import { slugifyTag } from "@/lib/tags";
+import { slugifyTag } from "@/lib/string-utils";
+import type { Metadata } from "next";
 
 export default async function Page(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;

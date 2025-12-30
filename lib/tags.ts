@@ -1,20 +1,11 @@
 import { blogPosts } from "@/lib/source";
+import { slugifyTag } from "@/lib/string-utils";
 
 export type TagInfo = {
   label: string;
   slug: string;
   count: number;
 };
-
-export function slugifyTag(tag: string): string {
-  return tag
-    .toLowerCase()
-    .trim()
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 export function getAllTags(): TagInfo[] {
   const tags = new Map<string, TagInfo>();

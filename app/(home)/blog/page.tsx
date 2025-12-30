@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { blogPosts } from "@/lib/source";
-import { slugifyTag } from "@/lib/tags";
+import { slugifyTag } from "@/lib/string-utils";
 
 export default function Home() {
   const posts = [...blogPosts.getPages()].sort(
