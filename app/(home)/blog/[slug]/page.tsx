@@ -3,6 +3,7 @@ import Link from "next/link";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { blogPosts } from "@/lib/source";
+import { slugifyTag } from "@/lib/tags";
 
 export default async function Page(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
@@ -43,9 +44,13 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
           {page.data.tags && (
             <div className="flex gap-2">
               {page.data.tags.map((tag) => (
-                <span key={tag} className="bg-fd-secondary px-2 py-1 uppercase text-xs">
+                <Link
+                  key={tag}
+                  href={`/blog/tags/${slugifyTag(tag)}`}
+                  className="bg-fd-secondary px-2 py-1 uppercase text-xs hover:bg-fd-foreground hover:text-fd-background transition-colors"
+                >
                   {tag}
-                </span>
+                </Link>
               ))}
             </div>
           )}
