@@ -15,6 +15,10 @@ export function baseOptions(): BaseLayoutProps {
         text: "Projects",
         url: "/projects",
       },
+      {
+        text: "Contact",
+        url: "/contact",
+      },
     ],
     githubUrl: "https://github.com/Joker666",
   };

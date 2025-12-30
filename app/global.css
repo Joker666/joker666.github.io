@@ -15,7 +15,7 @@
   --color-fd-card-foreground: #101010;
   --color-fd-popover: #FFFCF0;
   --color-fd-popover-foreground: #101010;
-  --color-fd-primary: #D946EF; /* Magenta pop */
+  --color-fd-primary: #F97316; /* Orange pop */ /* Magenta pop */
   --color-fd-primary-foreground: #ffffff;
   --color-fd-secondary: #E6E4D5;
   --color-fd-secondary-foreground: #101010;
@@ -36,7 +36,7 @@
   --color-fd-card-foreground: #FFFCF0;
   --color-fd-popover: #101010;
   --color-fd-popover-foreground: #FFFCF0;
-  --color-fd-primary: #D946EF;
+  --color-fd-primary: #F97316; /* Orange pop */
   --color-fd-primary-foreground: #ffffff;
   --color-fd-secondary: #202020;
   --color-fd-secondary-foreground: #FFFCF0;
