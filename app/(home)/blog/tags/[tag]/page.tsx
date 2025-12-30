@@ -46,7 +46,7 @@ export default async function TagPage({ params }: PageProps) {
             {posts.map((post) => (
               <article
                 key={post.url}
-                className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
+                className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
               >
                 <Link href={post.url} className="flex flex-col">
                   <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
