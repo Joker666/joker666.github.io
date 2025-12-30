@@ -2,16 +2,22 @@ import Link from "next/link";
 
 const projects = [
   {
-    title: "Project One",
-    description: "A cool project I am working on.",
-    url: "/",
-    status: "In Progress",
+    title: "Cogman",
+    description: "Simple, efficient, distributed task runner for Golang backed by RabbitMQ and Redis.",
+    url: "https://github.com/Joker666/cogman",
+    status: "Completed",
   },
   {
-    title: "Project Two",
-    description: "Another awesome project.",
-    url: "/",
+    title: "Journey+",
+    description: "A journaling app for iOS.",
+    url: "https://apps.apple.com/us/app/journey-daily-diary-journal/id6457254962",
     status: "Completed",
+  },
+  {
+    title: "Imgforge",
+    description: "Image Processing Reimagined in Rust.",
+    url: "https://imgforger.github.io/",
+    status: "Beta",
   },
 ];
 
