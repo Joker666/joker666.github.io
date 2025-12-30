@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { blogPosts } from "@/lib/source";
+import { slugifyTag } from "@/lib/tags";
 
 export default function Home() {
   const posts = [...blogPosts.getPages()].sort(
@@ -10,12 +11,11 @@ export default function Home() {
     <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12">
       <div className="flex flex-col gap-12">
         {posts.map((post) => (
-          <Link
+          <article
             key={post.url}
-            href={post.url}
-            className="group block border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
+            className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
           >
-            <div className="flex flex-col h-full">
+            <Link href={post.url} className="flex flex-col">
               <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
                 {new Date(post.data.date).toLocaleDateString("en-US", {
                   month: "long",
@@ -29,21 +29,22 @@ export default function Home() {
               </h2>
 
               <p className="text-lg leading-relaxed mb-8 font-mono text-fd-muted-foreground">{post.data.description}</p>
+            </Link>
 
-              {post.data.tags && post.data.tags.length > 0 && (
-                <div className="flex flex-wrap gap-4 mt-auto">
-                  {post.data.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-sm font-mono underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Link>
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div className="flex flex-wrap gap-4">
+                {post.data.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/blog/tags/${slugifyTag(tag)}`}
+                    className="text-sm font-mono underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </article>
         ))}
       </div>
     </main>
