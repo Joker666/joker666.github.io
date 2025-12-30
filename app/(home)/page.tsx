@@ -18,9 +18,9 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold">Hello,</h1>
         <div className="prose text-muted-foreground">
           <p>
-            I&apos;m <span className="font-bold text-foreground">Rafi</span>, a software engineer and indie hacker.
-            I&apos;m currently working for Slumber Studios as a senior software engineer. These days, I&apos;m hacking
-            some side projects, learning photography, and doing master's in machine learning.
+            I&apos;m <span className="font-bold text-foreground">Rafi</span>, a senior software engineer with over ten
+            years of experience, currently working at Slumber Studios. These days, I&apos;m hacking some side projects,
+            exploring photography, and pursuing a master's degree in machine learning.
           </p>
         </div>
       </div>
