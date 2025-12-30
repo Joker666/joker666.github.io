@@ -25,7 +25,7 @@ export default function ProjectsPage() {
         {projects.map((project, i) => (
           <div
             key={i}
-            className="group border-2 border-muted bg-card p-8 flex flex-col gap-4 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
+            className="group border-2 border-muted bg-card p-8 flex flex-col gap-4 transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
           >
             <h3 className="text-2xl font-bold font-mono uppercase">{project.title}</h3>
             <p className="text-muted-foreground font-mono leading-relaxed">{project.description}</p>

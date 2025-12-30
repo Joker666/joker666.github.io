@@ -13,7 +13,7 @@ export default function Home() {
         {posts.map((post) => (
           <article
             key={post.url}
-            className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
+            className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
           >
             <Link href={post.url} className="flex flex-col">
               <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
