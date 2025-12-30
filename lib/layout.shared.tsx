@@ -5,5 +5,17 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: "Rafi Hasan",
     },
+    links: [
+      {
+        text: "Blog",
+        url: "/blog",
+        active: "nested-url",
+      },
+      {
+        text: "Projects",
+        url: "/projects",
+      },
+    ],
+    githubUrl: "https://github.com/Joker666",
   };
 }

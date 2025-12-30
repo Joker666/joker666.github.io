@@ -12,10 +12,10 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   const Mdx = page.data.body;
 
   return (
-    <main className="w-full max-w-3xl mx-auto px-4 py-12">
+    <main className="w-full max-w-5xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link 
-          href="/blog" 
+        <Link
+          href="/blog"
           className="font-mono text-sm hover:bg-fd-foreground hover:text-fd-background px-2 py-1 transition-colors"
         >
           ← BACK
@@ -25,14 +25,12 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
       <article className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-12">
         <div className="mb-12 border-b-2 border-fd-foreground pb-8">
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
-            <span>{new Date(page.data.date).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span>
+              {new Date(page.data.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">
-            {page.data.title}
-          </h1>
-          <p className="mt-6 text-lg font-mono text-fd-muted-foreground leading-relaxed">
-            {page.data.description}
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">{page.data.title}</h1>
+          <p className="mt-6 text-lg font-mono text-fd-muted-foreground leading-relaxed">{page.data.description}</p>
         </div>
 
         <div className="prose prose-neutral prose-lg max-w-none font-mono prose-headings:font-bold prose-headings:uppercase prose-h1:text-2xl prose-h2:text-xl prose-p:text-fd-foreground prose-a:text-fd-primary prose-a:no-underline prose-a:border-b-2 prose-a:border-fd-primary hover:prose-a:bg-fd-primary hover:prose-a:text-fd-primary-foreground prose-blockquote:border-l-4 prose-blockquote:border-fd-foreground prose-blockquote:not-italic prose-code:bg-fd-secondary prose-code:text-fd-foreground prose-code:px-1 prose-code:before:content-none prose-code:after:content-none">
@@ -46,11 +44,13 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
             <span className="font-bold">{page.data.author}</span>
           </div>
           {page.data.tags && (
-             <div className="flex gap-2">
-                {page.data.tags.map(tag => (
-                   <span key={tag} className="bg-fd-secondary px-2 py-1 uppercase text-xs">{tag}</span>
-                ))}
-             </div>
+            <div className="flex gap-2">
+              {page.data.tags.map((tag) => (
+                <span key={tag} className="bg-fd-secondary px-2 py-1 uppercase text-xs">
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </article>
