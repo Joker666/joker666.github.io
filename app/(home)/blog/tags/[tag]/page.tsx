@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
 import { slugifyTag } from "@/lib/string-utils";
+import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type PageProps = {
@@ -32,9 +32,7 @@ export default async function TagPage({ params }: PageProps) {
 
       <header className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 mb-12">
         <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground">Tag</span>
-        <h1 className="mt-4 text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">
-          {currentTag.label}
-        </h1>
+        <h1 className="mt-4 text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">{currentTag.label}</h1>
         <p className="mt-4 text-lg font-mono text-fd-muted-foreground">
           {posts.length} post{posts.length === 1 ? "" : "s"}
         </p>

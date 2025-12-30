@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { getAllTags } from "@/lib/tags";
+import Link from "next/link";
 
 export default function TagsPage() {
   const tags = getAllTags();
@@ -15,9 +15,7 @@ export default function TagsPage() {
       <section className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-10">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">Tags</h1>
-          <p className="mt-4 text-lg font-mono text-fd-muted-foreground">
-            Browse all tags used in blog posts.
-          </p>
+          <p className="mt-4 text-lg font-mono text-fd-muted-foreground">Browse all tags used in blog posts.</p>
         </div>
 
         {tags.length === 0 ? (
