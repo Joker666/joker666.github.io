@@ -1,4 +1,4 @@
-import { blogPosts } from '@/lib/source';
+import { blogPosts } from "@/lib/source";
 
 export const revalidate = false;
 
@@ -9,5 +9,5 @@ export async function GET() {
   });
   const scanned = await Promise.all(scan);
 
-  return new Response(scanned.join('\n\n'));
+  return new Response(scanned.join("\n\n"));
 }

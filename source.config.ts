@@ -4,6 +4,9 @@ import { z } from "zod";
 export const blogs = defineCollections({
   type: "doc",
   dir: "content/blogs",
+  postprocess: {
+    includeProcessedMarkdown: true,
+  },
   schema: frontmatterSchema.extend({
     author: z.string(),
     date: z
