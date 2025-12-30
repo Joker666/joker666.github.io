@@ -10,6 +10,7 @@ export default function HomePage() {
       url: post.url,
       date: post.data.date.toISOString(),
       description: post.data.description,
+      tags: post.data.tags,
     }));
 
   return (

@@ -21,13 +21,19 @@ const projects = [
 export default function ProjectsPage() {
   return (
     <main className="container max-w-5xl mx-auto py-12 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project, i) => (
-          <div key={i} className="border p-6 flex flex-col gap-3 rounded-lg hover:bg-fd-accent/50 transition-colors">
-            <h3 className="text-xl font-bold">{project.title}</h3>
-            <p className="text-muted-foreground">{project.description}</p>
+          <div
+            key={i}
+            className="group border-2 border-muted bg-card p-8 flex flex-col gap-4 transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
+          >
+            <h3 className="text-2xl font-bold font-mono uppercase">{project.title}</h3>
+            <p className="text-muted-foreground font-mono leading-relaxed">{project.description}</p>
             {project.url !== "#" && (
-              <Link href={project.url} className="text-fd-primary hover:underline mt-auto">
+              <Link
+                href={project.url}
+                className="text-fd-primary font-mono text-sm underline underline-offset-4 decoration-1 hover:decoration-2 mt-auto"
+              >
                 View Project →
               </Link>
             )}
