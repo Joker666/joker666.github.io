@@ -30,19 +30,19 @@
 
 .dark {
   /* Brutalist dark theme overrides */
-  --color-fd-background: #101010; /* Near black */
+  --color-fd-background: #1a1a1a; /* Softer dark */
   --color-fd-foreground: #FFFCF0; /* Off-white */
-  --color-fd-card: #101010;
+  --color-fd-card: #1a1a1a;
   --color-fd-card-foreground: #FFFCF0;
-  --color-fd-popover: #101010;
+  --color-fd-popover: #1a1a1a;
   --color-fd-popover-foreground: #FFFCF0;
   --color-fd-primary: #F97316; /* Orange pop */
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #202020;
+  --color-fd-secondary: #2a2a2a;
   --color-fd-secondary-foreground: #FFFCF0;
-  --color-fd-muted: #202020;
+  --color-fd-muted: #2a2a2a;
   --color-fd-muted-foreground: #A0A0A0;
-  --color-fd-accent: #202020;
+  --color-fd-accent: #2a2a2a;
   --color-fd-accent-foreground: #FFFCF0;
   --color-fd-border: #FFFCF0;
   --color-fd-input: #FFFCF0;
