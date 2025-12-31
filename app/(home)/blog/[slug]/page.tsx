@@ -15,12 +15,12 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   return (
     <main className="w-full max-w-5xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <Link href="/blog" className="font-mono text-sm px-2 py-1 transition-colors">
+        <Link href="/blog" className="font-mono text-sm sm:px-2 py-1 transition-colors">
           ← BACK
         </Link>
       </div>
 
-      <article className="border-0 sm:border-2 dark:sm:border border-fd-foreground bg-fd-card px-4 py-8 sm:p-12">
+      <article className="border-0 sm:border-2 dark:sm:border border-fd-foreground bg-fd-card px-1 py-8 sm:p-12">
         <div className="mb-12 border-b-2 border-fd-foreground pb-8">
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
             <span>

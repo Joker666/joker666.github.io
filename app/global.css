@@ -61,3 +61,9 @@ pre {
   line-height: 1.8;
   padding: 1rem;
 }
+
+@media (max-width: 640px) {
+  pre {
+    padding: 0;
+  }
+}
