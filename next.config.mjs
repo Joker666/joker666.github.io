@@ -7,7 +7,11 @@ const config = {
   reactStrictMode: true,
   output: "export",
   images: {
-    remotePatterns: [new URL("https://hackernoon.com/images/**")],
+    remotePatterns: [
+      new URL("https://hackernoon.com/images/**"),
+      new URL("https://cdn.draftdock.com/file/draftdock/hasanrafi/**"),
+    ],
+    unoptimized: true, // Since output is "export"
   },
 };
 

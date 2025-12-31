@@ -1,0 +1,99 @@
+---
+title: What is `dyn` in Rust and How it Powers Polymorphism
+description: An exploration of the `dyn` keyword in Rust, trait objects, and how they enable polymorphism through dynamic dispatch.
+author: Rafi Hasan
+date: 2023-08-15
+tags:
+  - rust
+  - optimization
+---
+
+Ok, the title packs a bunch of keywords: `dyn`, `trait objects` and `polymorphism`. I expect everyone to be at least familiar with polymorphism. In the previous [article](./2023-08-06-zero-cost-abstraction-rust), we talked about the zero-cost abstraction in Rust. But there are costs to certain actions and dyn is a good example of this. We will learn about a few things in this article that tripped me first when I started learning Rust: `dyn`, `trait objects`, `dynamic dispatch`, `fat pointers` etc. In Rust:
+
+> If there is any sort of added cost, we have to add that cost explictly.
+
+`Dyn` refers to dynamic dispatch which is in contrast to static dispatch. We discussed static dispatch briefly in our [zero-cost](./2023-08-06-zero-cost-abstraction-rust) article. We will discuss it more when we get to [Generics](./2023-08-14-generics-in-rust-with-monomorphization). But mainly static dispatch is free. With dynamic dispatch, we have to incur a runtime penalty. But it is not all sunshine in static dispatch land and we will see why dynamic dispatch is useful in certain cases. Let's try to implement polymorphism in Rust first.
+
+```rust
+trait ProductBuilder {
+    fn work(&self);
+}
+
+struct Engineer;
+
+impl ProductBuilder for Engineer {
+    fn work(&self) {
+        println!("Engineer is coding");
+        println!("Engineer is attending daily standups"); // sucks right?
+    }
+}
+
+struct Designer;
+
+impl ProductBuilder for Designer {
+    fn work(&self) {
+        println!("Designer is prototyping")
+    }
+}
+
+// error: trait objects must include the `dyn` keyword
+fn launch(staff: &ProductBuilder) {
+    staff.work()
+}
+
+fn main() {
+    let designer = Designer;
+    launch(&designer);
+}
+```
+
+We have a trait `ProductBuilder` that has one method `work`. Traits are similar to interfaces in Java with some subtle differences. Then we have two structs `Engineer` and `Designer` that implements this trait. In the main function, we have a designer and we send it to the lunch function. The launch function takes a staff of type `ProductBuilder` and calls the `work` method. But we are shown an error: **_trait objects must include the `dyn` keyword._**
+
+From our understanding of polymorphism from Java, this should work. But it doesn't. Let's see if adding the `dyn` keyword solves this issue.
+
+```rust
+fn launch(staff: &dyn ProductBuilder) {
+    staff.work()
+}
+```
+
+And the error is gone. But traits are not types. You cannot write `designer: ProductBuilder`. The line we wrote before "The launch function takes a staff of type `ProductBuilder`" is incorrect. Traits can be bound on types but that's a discussion for another time. The point is what is this `dyn` keyword doing to the `ProductBuilder` trait that is enabling it to look like a type? It is creating a trait object.
+
+## Trait Object
+
+Rust provides dynamic dispatch through a feature called trait objects. Dynamic dispatch means that the compiler does not know at compile time which implementation of a trait to use for a given value (in our case, `staff`), instead, it determines it at run time based on the actual type of the value. Why is this? Because different implementations can have different sizes in memory. The way `Engineer` is implementing `ProductBuilder` can be vastly different from how `Designer` is implementing it.
+
+How do the trait objects handle dynamic dispatch? And what is it? A trait object in Rust is similar to an object in Java that store a value of any type that implements the given trait, where the precise type can only be known at runtime. And the `dyn` keyword is used when declaring a trait object. I'm sure the web is starting to untangle now.
+
+Trait objects are implemented using `fat pointers` that contain two regular pointers:
+
+- To the data of the concrete type that implements the trait.
+- To a `vtable` ([Virtual Method Table](https://en.wikipedia.org/wiki/Virtual_method_table)) that has pointers to all the functions that the type implements. The vtable also stores the concrete type destructor, alignment, and size information.
+
+```
+                                           +--> |  Concrete data       |
+                                           |    +----------------------+
++--------------------------+               |
+| 00 | data pointer      •-|---------------+
++--------------------------+
+| 08 | vtable pointer    •-|---------------+
++--------------------------+               |
+                                           |    +----------------------+
+                                           +--> | 00 | destructor    • |
+                                                +----------------------+
+                                                | 08 | size         32 |
+                                                +----------------------+
+                                                | 16 | align         8 |
+                                                +----------------------+
+                                                | 24 | method1       • |
+                                                +----------------------+
+                                                | 32 | method2       • |
+                                                +----------------------+
+```
+*Mapping of a fat pointer*
+
+A trait object is always passed by a pointer (a borrowed reference, `Box` or other smart pointers). But Rust does not put things behind a pointer by default, unlike many managed languages. Knowing the size of the value at compile time is important for things like passing it as an argument to a function, moving it about on the stack, and allocating (and deallocating) space on the heap to store it. Putting the value behind a pointer means the size of the value is not relevant when we are tossing a trait object around, only the size of the pointer itself.
+
+## Takeaway
+
+I hope we were able to uncover some of the mysteries around the `dyn` keyword and how you can implement polymorphism in Rust. But if static dispatch is zero cost why isn't it the better choice every time? The idea is in static dispatch Rust will create different a copy of the code of a generic function for each concrete type needed in the compiled binary. If this goes above your head don't worry, we will learn more about it when we explore [generics](./2023-08-25-generics-in-rust-with-monomorphization). Just know that this increases the binary size and compilation time which can add up in a large codebase.
