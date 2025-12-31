@@ -20,7 +20,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
         </Link>
       </div>
 
-      <article className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-12">
+      <article className="border-2 dark:border border-fd-foreground bg-fd-card p-8 sm:p-12">
         <div className="mb-12 border-b-2 border-fd-foreground pb-8">
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
             <span>
