@@ -24,11 +24,13 @@ export default function Home() {
                 })}
               </span>
 
-              <h2 className="text-3xl font-bold mb-6 font-mono group-hover:text-fd-primary transition-colors">
+              <h2 className="text-2xl font-bold mb-6 font-mono group-hover:text-fd-primary transition-colors">
                 {post.data.title}
               </h2>
 
-              <p className="text-lg leading-relaxed mb-8 font-mono text-fd-muted-foreground">{post.data.description}</p>
+              <p className="text-base leading-relaxed mb-8 font-mono text-fd-muted-foreground">
+                {post.data.description}
+              </p>
             </Link>
 
             {post.data.tags && post.data.tags.length > 0 && (

@@ -22,7 +22,7 @@ export default function Icon() {
         alignItems: "center",
         justifyContent: "center",
         color: "#f97316",
-        borderRadius: 0, // Brutalist style
+        borderRadius: 50,
         fontWeight: 900,
       }}
     >
