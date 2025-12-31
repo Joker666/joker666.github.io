@@ -12,7 +12,7 @@ Ok, the title packs a bunch of keywords: `dyn`, `trait objects` and `polymorphis
 
 > If there is any sort of added cost, we have to add that cost explictly.
 
-`Dyn` refers to dynamic dispatch which is in contrast to static dispatch. We discussed static dispatch briefly in our [zero-cost](./2023-08-06-zero-cost-abstraction-rust) article. We will discuss it more when we get to [Generics](./2023-08-14-generics-in-rust-with-monomorphization). But mainly static dispatch is free. With dynamic dispatch, we have to incur a runtime penalty. But it is not all sunshine in static dispatch land and we will see why dynamic dispatch is useful in certain cases. Let's try to implement polymorphism in Rust first.
+`Dyn` refers to dynamic dispatch which is in contrast to static dispatch. We discussed static dispatch briefly in our [zero-cost](./2023-08-06-zero-cost-abstraction-rust) article. We will discuss it more when we get to [generics](./2023-08-25-generics-in-rust-with-monomorphization). But mainly static dispatch is free. With dynamic dispatch, we have to incur a runtime penalty. But it is not all sunshine in static dispatch land and we will see why dynamic dispatch is useful in certain cases. Let's try to implement polymorphism in Rust first.
 
 ```rust
 trait ProductBuilder {
