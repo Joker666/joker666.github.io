@@ -8,11 +8,11 @@ tags:
   - optimization
 ---
 
-Ok, the title packs a bunch of keywords: `dyn`, `trait objects` and `polymorphism`. I expect everyone to be at least familiar with polymorphism. In the previous [article](./2023-08-06-zero-cost-abstraction-rust), we talked about the zero-cost abstraction in Rust. But there are costs to certain actions and dyn is a good example of this. We will learn about a few things in this article that tripped me first when I started learning Rust: `dyn`, `trait objects`, `dynamic dispatch`, `fat pointers` etc. In Rust:
+Ok, the title packs a bunch of keywords: `dyn`, `trait objects` and `polymorphism`. I expect everyone to be at least familiar with polymorphism. In the previous [article](2023-08-06-zero-cost-abstraction-rust), we talked about the zero-cost abstraction in Rust. But there are costs to certain actions and dyn is a good example of this. We will learn about a few things in this article that tripped me first when I started learning Rust: `dyn`, `trait objects`, `dynamic dispatch`, `fat pointers` etc. In Rust:
 
 > If there is any sort of added cost, we have to add that cost explictly.
 
-`Dyn` refers to dynamic dispatch which is in contrast to static dispatch. We discussed static dispatch briefly in our [zero-cost](./2023-08-06-zero-cost-abstraction-rust) article. We will discuss it more when we get to [generics](./2023-08-25-generics-in-rust-with-monomorphization). But mainly static dispatch is free. With dynamic dispatch, we have to incur a runtime penalty. But it is not all sunshine in static dispatch land and we will see why dynamic dispatch is useful in certain cases. Let's try to implement polymorphism in Rust first.
+`Dyn` refers to dynamic dispatch which is in contrast to static dispatch. We discussed static dispatch briefly in our [zero-cost](2023-08-06-zero-cost-abstraction-rust) article. We will discuss it more when we get to [generics](2023-08-25-generics-in-rust-with-monomorphization). But mainly static dispatch is free. With dynamic dispatch, we have to incur a runtime penalty. But it is not all sunshine in static dispatch land and we will see why dynamic dispatch is useful in certain cases. Let's try to implement polymorphism in Rust first.
 
 ```rust
 trait ProductBuilder {
@@ -96,4 +96,4 @@ A trait object is always passed by a pointer (a borrowed reference, `Box` or oth
 
 ## Takeaway
 
-I hope we were able to uncover some of the mysteries around the `dyn` keyword and how you can implement polymorphism in Rust. But if static dispatch is zero cost why isn't it the better choice every time? The idea is in static dispatch Rust will create different a copy of the code of a generic function for each concrete type needed in the compiled binary. If this goes above your head don't worry, we will learn more about it when we explore [generics](./2023-08-25-generics-in-rust-with-monomorphization). Just know that this increases the binary size and compilation time which can add up in a large codebase.
+I hope we were able to uncover some of the mysteries around the `dyn` keyword and how you can implement polymorphism in Rust. But if static dispatch is zero cost why isn't it the better choice every time? The idea is in static dispatch Rust will create different a copy of the code of a generic function for each concrete type needed in the compiled binary. If this goes above your head don't worry, we will learn more about it when we explore [generics](2023-08-25-generics-in-rust-with-monomorphization). Just know that this increases the binary size and compilation time which can add up in a large codebase.

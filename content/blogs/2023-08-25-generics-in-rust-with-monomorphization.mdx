@@ -9,7 +9,7 @@ tags:
   - optimization
 ---
 
-Generics in Rust is not like in any other mainstream programming language except for C++ and uses something called `Monomorphization` for compile-time generics. This approach is fantastic since it is [zero cost](./2023-08-06-zero-cost-abstraction-rust) but if we are not careful it can lead to code bloat. We discussed Rust's runtime polymorphism in a [different article](https://www.hasanrafi.com/articles/what-is-dyn-in-rust-and-how-it-powers-polymorphism).
+Generics in Rust is not like in any other mainstream programming language except for C++ and uses something called `Monomorphization` for compile-time generics. This approach is fantastic since it is [zero cost](2023-08-06-zero-cost-abstraction-rust) but if we are not careful it can lead to code bloat. We discussed Rust's runtime polymorphism in a [different article](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism).
 
 So what is generics? In simple words, it means parameterized types. The idea is to allow types to be parameters to structs, functions, traits, methods, etc. Let's consider a function that swaps elements in an array:
 
@@ -94,7 +94,7 @@ We have headfirst dived into the generics implementation but let's discuss it no
 
 ## Monomorphization
 
-This is a big name for a simple process that the Rust compiler performs. It generates separate concrete implementations of generic functions or types for each set of type parameters used at compile time. This eliminates the need for runtime type checks or [dynamic dispatch](https://www.hasanrafi.com/articles/what-is-dyn-in-rust-and-how-it-powers-polymorphism).
+This is a big name for a simple process that the Rust compiler performs. It generates separate concrete implementations of generic functions or types for each set of type parameters used at compile time. This eliminates the need for runtime type checks or [dynamic dispatch](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism).
 
 For our example, when the Rust compiler encounters the generic function `swap_elements`, it doesn't immediately generate code for every possible type `T` that could be used with the function. Instead, it generates specialized versions of the function for the concrete types that are used. In our case it's `i32` and `&str` since there are two invocations of `swap_elements`: one with an integer array and another with a string array in the `main` function. So the monomorphized version will look exactly like what we handcoded in the typed-out versions.
 
@@ -213,4 +213,4 @@ fn main() {
 
 ## Takeaway
 
-Generics in Rust is quite powerful. We just scratched the surface here. In some other articles, we will explore more advanced Generics features of Rust. The best part about it is, that you don't need to worry about the runtime performance of it. However, having too many generics can lead to slow compile time and bloating of binary. [Trait objects](https://www.hasanrafi.com/articles/what-is-dyn-in-rust-and-how-it-powers-polymorphism) offer the flexibility of faster compile time at the cost of runtime performance. But it's not a bad thing, in all other languages Generic types are checked at runtime. In the end, it depends on your specific implementation.
+Generics in Rust is quite powerful. We just scratched the surface here. In some other articles, we will explore more advanced Generics features of Rust. The best part about it is, that you don't need to worry about the runtime performance of it. However, having too many generics can lead to slow compile time and bloating of binary. [Trait objects](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism) offer the flexibility of faster compile time at the cost of runtime performance. But it's not a bad thing, in all other languages Generic types are checked at runtime. In the end, it depends on your specific implementation.
