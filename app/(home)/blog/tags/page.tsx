@@ -1,3 +1,4 @@
+import { siteConfig } from "@/lib/site";
 import { getAllTags } from "@/lib/tags";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -54,7 +55,7 @@ export function generateMetadata(): Metadata {
       url: "/blog/tags",
       images: [
         {
-          url: "/opengraph-image",
+          url: siteConfig.ogImage,
           width: 1200,
           height: 630,
           alt: "Rafi Hasan",
@@ -65,7 +66,7 @@ export function generateMetadata(): Metadata {
       card: "summary_large_image",
       title: "Tags",
       description: "Browse all blog tags.",
-      images: ["/opengraph-image"],
+      images: [siteConfig.ogImage],
     },
   };
 }

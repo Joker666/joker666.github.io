@@ -1,3 +1,4 @@
+import { siteConfig } from "@/lib/site";
 import { slugifyTag } from "@/lib/string-utils";
 import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
 import type { Metadata } from "next";
@@ -135,7 +136,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url,
       images: [
         {
-          url: "/opengraph-image",
+          url: siteConfig.ogImage,
           width: 1200,
           height: 630,
           alt: "Rafi Hasan",
@@ -146,7 +147,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: "summary_large_image",
       title,
       description,
-      images: ["/opengraph-image"],
+      images: [siteConfig.ogImage],
     },
   };
 }

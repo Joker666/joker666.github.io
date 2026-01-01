@@ -1,4 +1,4 @@
-import { blogPosts } from "@/lib/source";
+import { blogPosts, getPageImage } from "@/lib/source";
 import { slugifyTag } from "@/lib/string-utils";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -72,7 +72,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const page = blogPosts.getPage([params.slug]);
   if (!page) notFound();
   const url = page.url;
-  const ogImage = `${url}/opengraph-image`;
+  const ogImage = getPageImage(page).url;
   return {
     title: page.data.title,
     description: page.data.description,

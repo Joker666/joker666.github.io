@@ -10,11 +10,11 @@ export const blogPosts = loader({
 });
 
 export function getPageImage(page: InferPageType<typeof blogPosts>) {
-  const segments = [...page.slugs, "opengraph-image"];
+  const segments = [...page.slugs, "image.webp"];
 
   return {
     segments,
-    url: `/blog/${segments.join("/")}`,
+    url: `/og/blog/${segments.join("/")}`,
   };
 }
 

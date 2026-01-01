@@ -6,6 +6,7 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   output: "export",
+  serverExternalPackages: ["@takumi-rs/image-response"],
   images: {
     remotePatterns: [
       new URL("https://hackernoon.com/images/**"),

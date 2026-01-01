@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
+    "@takumi-rs/image-response": "^0.61.0",
     "fumadocs-core": "16.4.0",
     "fumadocs-mdx": "14.2.2",
     "fumadocs-ui": "16.4.0",
