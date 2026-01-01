@@ -2,6 +2,7 @@ import { blogPosts } from "@/lib/source";
 import { slugifyTag } from "@/lib/string-utils";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -66,13 +67,40 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   );
 }
 
-export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;
   const page = blogPosts.getPage([params.slug]);
   if (!page) notFound();
+  const url = page.url;
+  const ogImage = `${url}/opengraph-image`;
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "article",
+      title: page.data.title,
+      description: page.data.description,
+      url,
+      authors: [page.data.author],
+      publishedTime: new Date(page.data.date).toISOString(),
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: page.data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description: page.data.description,
+      images: [ogImage],
+    },
   };
 }
 

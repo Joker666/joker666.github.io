@@ -1,5 +1,6 @@
 import { slugifyTag } from "@/lib/string-utils";
 import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -112,15 +113,41 @@ export default async function TagPage({ params }: PageProps) {
   );
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { tag } = await params;
   const currentTag = getAllTags().find((item) => item.slug === tag);
   if (!currentTag) {
     return { title: "Tag not found" };
   }
+  const title = `Tag: ${currentTag.label}`;
+  const description = `Blog posts tagged "${currentTag.label}".`;
+  const url = `/blog/tags/${currentTag.slug}`;
   return {
-    title: `Tag: ${currentTag.label}`,
-    description: `Blog posts tagged "${currentTag.label}".`,
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Rafi Hasan",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/opengraph-image"],
+    },
   };
 }
 
