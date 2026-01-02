@@ -2,6 +2,7 @@ import SearchDialog from "@/components/search";
 import { siteConfig } from "@/lib/site";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { JetBrains_Mono } from "next/font/google";
 import "./global.css";
 
@@ -44,6 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={mono.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen bg-fd-background text-fd-foreground">
+        <Script src="https://cloud.umami.is/script.js" data-website-id="49dea05a-dc27-4331-9fbf-39a20165129a" />
         <RootProvider
           search={{
             SearchDialog,
