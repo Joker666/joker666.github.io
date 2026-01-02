@@ -50,7 +50,7 @@ export function PostList({ posts }: { posts: Post[] }) {
         <button
           type="button"
           onClick={handleLoadMore}
-          className="self-center cursor-pointer border-2 border-fd-foreground bg-fd-primary px-6 py-2 text-sm font-bold uppercase tracking-widest text-fd-primary-foreground transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
+          className="self-center cursor-pointer border-2 border-fd-foreground px-6 py-2 text-sm font-bold uppercase tracking-widest transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
         >
           Load More
         </button>
