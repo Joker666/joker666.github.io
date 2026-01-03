@@ -16,8 +16,8 @@ export function baseOptions(): BaseLayoutProps {
         url: "/projects",
       },
       {
-        text: "Contact",
-        url: "/contact",
+        text: "About",
+        url: "/about",
       },
     ],
     githubUrl: "https://github.com/Joker666",

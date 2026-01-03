@@ -11,12 +11,14 @@ interface Post {
   tags?: string[];
 }
 
+const POSTS_PER_PAGE = 8;
+
 export function PostList({ posts }: { posts: Post[] }) {
-  const [displayedPosts, setDisplayedPosts] = useState(posts.slice(0, 5));
+  const [displayedPosts, setDisplayedPosts] = useState(posts.slice(0, POSTS_PER_PAGE));
 
   const handleLoadMore = () => {
     const currentLength = displayedPosts.length;
-    const nextPosts = posts.slice(0, currentLength + 5);
+    const nextPosts = posts.slice(0, currentLength + POSTS_PER_PAGE);
     setDisplayedPosts(nextPosts);
   };
 
