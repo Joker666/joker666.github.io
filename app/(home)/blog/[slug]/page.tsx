@@ -28,13 +28,13 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
               {new Date(page.data.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-mono uppercase leading-tight">{page.data.title}</h1>
-          <p className="mt-6 text-base font-mono text-fd-muted-foreground leading-relaxed">{page.data.description}</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold uppercase leading-tight">{page.data.title}</h1>
+          <p className="mt-6 text-base text-fd-muted-foreground leading-relaxed">{page.data.description}</p>
         </div>
 
         <div
-          className="prose max-w-none font-mono prose-headings:font-bold prose-headings:uppercase prose-h1:text-2xl
-                    prose-h2:text-xl prose-p:text-sm prose-p:leading-relaxed prose-p:text-fd-foreground prose-a:text-fd-primary
+          className="prose max-w-none prose-headings:font-semibold prose-headings:uppercase prose-h1:text-2xl
+                    prose-h2:text-xl prose-p:leading-relaxed prose-p:text-fd-foreground prose-a:text-fd-primary
                     prose-blockquote:border-l-4 prose-blockquote:border-fd-foreground prose-blockquote:not-italic
                     prose-code:bg-fd-secondary prose-code:px-1 prose-code:text-fd-foreground prose-code:before:content-none
                     prose-code:after:content-none"
@@ -46,7 +46,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
         <div className="mt-16 pt-8 border-t-2 border-fd-foreground flex justify-between items-center font-mono text-sm">
           <div>
             <span className="text-fd-muted-foreground uppercase tracking-widest block mb-1">Author</span>
-            <span className="font-bold">{page.data.author}</span>
+            <span className="font-semibold">{page.data.author}</span>
           </div>
           {page.data.tags && (
             <div className="flex gap-2">

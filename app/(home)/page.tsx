@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <main className="container max-w-5xl mx-auto py-12 px-4">
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-bold">Writings</h2>
+        <h2 className="text-2xl font-semibold">Writings</h2>
         <PostList posts={posts} />
       </div>
     </main>

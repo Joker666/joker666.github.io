@@ -26,29 +26,29 @@ export default async function TagPage({ params }: PageProps) {
         </Link>
         <Link
           href="/blog/tags"
-          className="font-mono text-sm uppercase tracking-widest text-fd-muted-foreground hover:text-fd-foreground transition-colors"
+          className="text-sm uppercase tracking-widest text-fd-muted-foreground hover:text-fd-foreground transition-colors"
         >
           All tags
         </Link>
       </div>
 
       <header className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 mb-12">
-        <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground">Tag</span>
-        <h1 className="mt-4 text-3xl sm:text-4xl font-bold font-mono uppercase leading-tight">{currentTag.label}</h1>
-        <p className="mt-4 text-lg font-mono text-fd-muted-foreground">
+        <span className="text-xs uppercase tracking-widest text-fd-muted-foreground">Tag</span>
+        <h1 className="mt-4 text-3xl sm:text-4xl font-semibold uppercase leading-tight">{currentTag.label}</h1>
+        <p className="mt-4 text-lg text-fd-muted-foreground">
           {posts.length} post{posts.length === 1 ? "" : "s"}
         </p>
       </header>
 
       <section className="mb-12">
         {posts.length === 0 ? (
-          <p className="font-mono text-sm text-fd-muted-foreground">No posts with this tag yet.</p>
+          <p className="text-sm text-fd-muted-foreground">No posts with this tag yet.</p>
         ) : (
           <div className="flex flex-col gap-12">
             {posts.map((post) => (
               <article
                 key={post.url}
-                className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
+                className="group border-2 border-fd-foreground bg-fd-card p-6 sm:p-8 transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_var(--color-fd-foreground)]"
               >
                 <Link href={post.url} className="flex flex-col">
                   <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
@@ -59,13 +59,11 @@ export default async function TagPage({ params }: PageProps) {
                     })}
                   </span>
 
-                  <h2 className="text-3xl font-bold mb-6 font-mono group-hover:text-fd-primary transition-colors">
+                  <h2 className="text-2xl font-semibold mb-6 group-hover:text-fd-primary transition-colors">
                     {post.data.title}
                   </h2>
 
-                  <p className="text-lg leading-relaxed mb-8 font-mono text-fd-muted-foreground">
-                    {post.data.description}
-                  </p>
+                  <p className="text-base leading-relaxed mb-8 text-fd-muted-foreground">{post.data.description}</p>
                 </Link>
 
                 {post.data.tags && post.data.tags.length > 0 && (
@@ -74,7 +72,7 @@ export default async function TagPage({ params }: PageProps) {
                       <Link
                         key={tag}
                         href={`/blog/tags/${slugifyTag(tag)}`}
-                        className="text-sm font-mono underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
+                        className="text-sm underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
                       >
                         {tag}
                       </Link>
@@ -88,7 +86,7 @@ export default async function TagPage({ params }: PageProps) {
       </section>
 
       <section className="border-2 border-fd-foreground bg-fd-card p-8 sm:p-10">
-        <h2 className="text-2xl font-bold font-mono uppercase mb-6">All tags</h2>
+        <h2 className="text-2xl font-semibold uppercase mb-6">All tags</h2>
         <div className="flex flex-wrap gap-4">
           {allTags.map((tag) => {
             const isActive = tag.slug === currentTag.slug;
@@ -104,7 +102,7 @@ export default async function TagPage({ params }: PageProps) {
                 }
               >
                 {tag.label}
-                <span className="ml-2 text-xs normal-case text-fd-muted-foreground">({tag.count})</span>
+                <span className="ml-2 text-fd-muted-foreground">({tag.count})</span>
               </Link>
             );
           })}

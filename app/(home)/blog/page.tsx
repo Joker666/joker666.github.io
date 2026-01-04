@@ -43,7 +43,7 @@ export default function Home() {
         {posts.map((post) => (
           <article
             key={post.url}
-            className="group border-2 border-fd-foreground bg-fd-card p-8 sm:p-10 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
+            className="group border-2 border-fd-foreground bg-fd-card p-6 sm:p-8 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
           >
             <Link href={post.url} className="flex flex-col">
               <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
@@ -54,13 +54,11 @@ export default function Home() {
                 })}
               </span>
 
-              <h2 className="text-2xl font-bold mb-6 font-mono group-hover:text-fd-primary transition-colors">
+              <h2 className="text-2xl font-semibold mb-6 group-hover:text-fd-primary transition-colors">
                 {post.data.title}
               </h2>
 
-              <p className="text-base leading-relaxed mb-8 font-mono text-fd-muted-foreground">
-                {post.data.description}
-              </p>
+              <p className="text-base leading-relaxed mb-8 text-fd-muted-foreground">{post.data.description}</p>
             </Link>
 
             {post.data.tags && post.data.tags.length > 0 && (
@@ -69,7 +67,7 @@ export default function Home() {
                   <Link
                     key={tag}
                     href={`/blog/tags/${slugifyTag(tag)}`}
-                    className="text-sm font-mono underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
+                    className="text-sm underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
                   >
                     {tag}
                   </Link>

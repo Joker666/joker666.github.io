@@ -30,12 +30,12 @@ export default function ProjectsPage() {
             key={project.id}
             className="group border-2 border-muted bg-card p-8 flex flex-col gap-4 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
           >
-            <h3 className="text-2xl font-bold font-mono uppercase">{project.title}</h3>
-            <p className="text-muted-foreground font-mono leading-relaxed">{project.description}</p>
+            <h3 className="text-2xl font-semibold uppercase">{project.title}</h3>
+            <p className="text-muted-foreground leading-relaxed">{project.description}</p>
             {project.url !== "#" && (
               <Link
                 href={project.url}
-                className="text-fd-primary font-mono text-sm underline underline-offset-4 decoration-1 hover:decoration-2 mt-auto"
+                className="text-fd-primary text-sm underline underline-offset-4 decoration-1 hover:decoration-2 mt-auto"
               >
                 View Project →
               </Link>

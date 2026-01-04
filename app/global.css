@@ -3,6 +3,7 @@
 @import "fumadocs-ui/css/preset.css";
 
 @theme {
+  --font-sans: "Overpass", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 }
 
@@ -54,6 +55,14 @@
 }
 
 body {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+}
+
+code,
+pre,
+kbd,
+samp {
   font-family: var(--font-mono);
 }
 
@@ -66,4 +75,29 @@ pre {
   pre {
     padding: 0;
   }
+}
+
+/* Search dialog input tweaks - Overpass font */
+.search-dialog-header input {
+  transform: translateY(1.7px);
+}
+
+/* Search top bar input tweaks - Overpass font */
+[data-search-full] {
+  padding-top: 7.2px;
+  padding-bottom: 4.8px;
+}
+
+[data-search-full] svg {
+  transform: translateY(-1.2px);
+}
+
+[data-search-full] div {
+  transform: translateY(-1.2px);
+}
+
+/* Top bar mobile view chevron tweaks - Overpass font */
+#nd-nav [aria-label="Toggle Menu"] svg {
+  position: relative;
+  top: 1.6px;
 }
