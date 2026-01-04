@@ -7,7 +7,12 @@ export default function HomePage() {
     .map((post) => ({
       title: post.data.title,
       url: post.url,
-      date: post.data.date.toISOString(),
+      dateLabel: post.data.date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
       description: post.data.description,
       tags: post.data.tags,
     }));

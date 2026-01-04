@@ -6,7 +6,7 @@ import { useState } from "react";
 interface Post {
   title: string;
   url: string;
-  date: string;
+  dateLabel: string;
   description?: string;
   tags?: string[];
 }
@@ -35,13 +35,7 @@ export function PostList({ posts }: { posts: Post[] }) {
           >
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-medium group-hover:underline">{post.title}</h3>
-              <time className="text-sm font-mono text-muted-foreground whitespace-nowrap">
-                {new Date(post.date).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </time>
+              <time className="text-sm font-mono text-muted-foreground whitespace-nowrap">{post.dateLabel}</time>
             </div>
             {post.description && <p className="text-sm text-muted-foreground line-clamp-2">{post.description}</p>}
           </Link>
