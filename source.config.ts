@@ -32,7 +32,7 @@ export const blogs = defineCollections({
 const rehypeCodeOptions: RehypeCodeOptions = {
   themes: {
     light: "github-light",
-    dark: "vitesse-dark",
+    dark: "github-dark",
   },
 };
 
