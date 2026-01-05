@@ -32,22 +32,31 @@
 .dark {
   /* Brutalist dark theme overrides */
   --color-fd-background: #1a1a1a; /* Softer dark */
-  --color-fd-foreground: #f0f0f0; /* Brighter balanced off-white */
+  --color-fd-foreground: #c6c6c6; /* Softer text white */
   --color-fd-card: #1a1a1a;
-  --color-fd-card-foreground: #f0f0f0;
+  --color-fd-card-foreground: #c6c6c6;
   --color-fd-popover: #1a1a1a;
-  --color-fd-popover-foreground: #f0f0f0;
+  --color-fd-popover-foreground: #c6c6c6;
   --color-fd-primary: #f97316; /* Orange pop */
   --color-fd-primary-foreground: #ffffff;
   --color-fd-secondary: #2a2a2a;
-  --color-fd-secondary-foreground: #f0f0f0;
+  --color-fd-secondary-foreground: #c6c6c6;
   --color-fd-muted: #2a2a2a;
   --color-fd-muted-foreground: #a3a3a3;
   --color-fd-accent: #2a2a2a;
-  --color-fd-accent-foreground: #f0f0f0;
-  --color-fd-border: #f0f0f0;
-  --color-fd-input: #f0f0f0;
-  --color-fd-ring: #f0f0f0;
+  --color-fd-accent-foreground: #c6c6c6;
+  --color-fd-border: #c6c6c6;
+  --color-fd-input: #c6c6c6;
+  --color-fd-ring: #c6c6c6;
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: #f0f0f0;
 }
 
 * {
