@@ -20,6 +20,5 @@ export function baseOptions(): BaseLayoutProps {
         url: "/about",
       },
     ],
-    githubUrl: "https://github.com/Joker666",
   };
 }

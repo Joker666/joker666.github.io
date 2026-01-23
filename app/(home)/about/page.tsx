@@ -12,7 +12,7 @@ export default function AboutPage() {
         </div>
       </div>
       <div className="mt-10 flex flex-col gap-3">
-        <p>Feel free to reach out to me via email:</p>
+        <p>Feel free to reach out to me.</p>
         <a href="mailto:mr.k779@outlook.com" className="text-lg font-medium text-fd-primary hover:underline">
           mr.k779@outlook.com
         </a>
