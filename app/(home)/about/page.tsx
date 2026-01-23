@@ -17,11 +17,11 @@ export default function AboutPage() {
           <a href="mailto:mr.k779@outlook.com" className="text-fd-primary hover:underline">
             Email
           </a>
-          <span className="mx-2 text-gray-600">●</span>
+          <span className="mx-2 text-fd-muted-foreground">●</span>
           <a href="https://github.com/Joker666" className="text-fd-primary hover:underline">
             Github
           </a>
-          <span className="mx-2 text-gray-600">●</span>
+          <span className="mx-2 text-fd-muted-foreground">●</span>
           <a href="https://www.linkedin.com/in/hasanrafi/" className="text-fd-primary hover:underline">
             LinkedIn
           </a>
