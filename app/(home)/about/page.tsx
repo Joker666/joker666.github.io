@@ -13,9 +13,19 @@ export default function AboutPage() {
       </div>
       <div className="mt-10 flex flex-col gap-3">
         <p>Feel free to reach out to me.</p>
-        <a href="mailto:mr.k779@outlook.com" className="text-lg font-medium text-fd-primary hover:underline">
-          mr.k779@outlook.com
-        </a>
+        <div className="text-lg font-medium">
+          <a href="mailto:mr.k779@outlook.com" className="text-fd-primary hover:underline">
+            Email
+          </a>
+          <span className="mx-2 text-gray-600">●</span>
+          <a href="https://github.com/Joker666" className="text-fd-primary hover:underline">
+            Github
+          </a>
+          <span className="mx-2 text-gray-600">●</span>
+          <a href="https://www.linkedin.com/in/hasanrafi/" className="text-fd-primary hover:underline">
+            LinkedIn
+          </a>
+        </div>
       </div>
     </main>
   );
