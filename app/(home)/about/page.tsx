@@ -25,6 +25,13 @@ export default function AboutPage() {
           <a href="https://www.linkedin.com/in/hasanrafi/" className="text-fd-primary hover:underline">
             LinkedIn
           </a>
+          <span className="mx-2 text-fd-muted-foreground">●</span>
+          <a
+            href="https://scholar.google.com/citations?user=fFq6TTAAAAAJ&hl=en"
+            className="text-fd-primary hover:underline"
+          >
+            Google Scholar
+          </a>
         </div>
       </div>
     </main>
