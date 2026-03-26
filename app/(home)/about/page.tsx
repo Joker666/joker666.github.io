@@ -1,6 +1,6 @@
 export default function AboutPage() {
   return (
-    <main className="container max-w-5xl mx-auto py-12 px-4">
+    <main className="container max-w-4xl mx-auto py-12 px-4">
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-semibold">Hello,</h1>
         <div className="text-muted-foreground">

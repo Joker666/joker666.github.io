@@ -38,7 +38,7 @@ export default function Home() {
   );
 
   return (
-    <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12">
+    <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
       <div className="flex flex-col gap-12">
         {posts.map((post) => (
           <article

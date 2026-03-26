@@ -7,7 +7,7 @@ export default function TagsPage() {
   const tags = getAllTags();
 
   return (
-    <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12">
+    <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
       <div className="mb-8">
         <Link href="/blog" className="font-mono text-sm px-2 py-1 transition-colors">
           &lt;- BACK

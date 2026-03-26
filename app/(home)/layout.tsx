@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <HomeLayout {...options} className="[--fd-layout-width:var(--container-5xl)]">
+    <HomeLayout {...options} className="[--fd-layout-width:var(--container-4xl)]">
       <div className="flex flex-col min-h-[calc(100vh-var(--fd-nav-height,3.5rem))]">
         <div className="flex-1">{children}</div>
         <Footer />

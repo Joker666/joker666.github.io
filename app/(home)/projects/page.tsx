@@ -23,7 +23,7 @@ const projects = [
 
 export default function ProjectsPage() {
   return (
-    <main className="container max-w-5xl mx-auto py-12 px-4">
+    <main className="container max-w-4xl mx-auto py-12 px-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project) => (
           <div
