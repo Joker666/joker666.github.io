@@ -44,8 +44,8 @@ export default function AboutPage() {
             <p className="text-xs font-mono uppercase tracking-[0.3em] text-fd-muted-foreground">Reading Shelf</p>
             <h2 className="text-2xl font-semibold">Writing that shaped how I think</h2>
             <p className="max-w-2xl text-muted-foreground">
-              I keep a public list of essays, posts, and papers that influenced my taste in engineering, research,
-              and craft.
+              I keep a public list of essays, posts, and papers that influenced my taste in engineering, research, and
+              life.
             </p>
           </div>
           <Link href="/reading" className="text-fd-primary underline underline-offset-4 hover:no-underline">
@@ -73,8 +73,8 @@ export default function AboutPage() {
           </div>
         ) : (
           <p className="mt-8 max-w-2xl border-2 border-dashed border-fd-foreground px-5 py-4 text-muted-foreground">
-            This list is intentionally separate from my own blog. It is where I will collect the posts I return to
-            most often and the ideas I want this site to signal.
+            This list is intentionally separate from my own blog. It is where I will collect the posts I return to most
+            often and the ideas I want this site to signal.
           </p>
         )}
       </section>

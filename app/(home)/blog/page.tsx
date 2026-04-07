@@ -40,6 +40,15 @@ export default function Home() {
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
       <div className="flex flex-col gap-12">
+        <div>
+          <Link
+            href="/blog/tags"
+            className="text-sm uppercase tracking-widest text-fd-muted-foreground underline underline-offset-4 hover:text-fd-foreground"
+          >
+            Browse by tag
+          </Link>
+        </div>
+
         {posts.map((post) => (
           <article
             key={post.url}

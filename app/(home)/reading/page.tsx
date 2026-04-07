@@ -74,7 +74,7 @@ export default function ReadingPage() {
                         <Link
                           key={tag}
                           href={`/reading/tags/${slugifyTag(tag)}`}
-                          className="border border-fd-foreground px-2 py-1 text-xs font-mono uppercase tracking-[0.15em] transition-colors hover:bg-fd-foreground hover:text-fd-background"
+                          className="text-sm underline underline-offset-4 decoration-1 hover:decoration-2 hover:text-fd-primary"
                         >
                           {tag}
                         </Link>
