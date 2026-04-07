@@ -13,16 +13,16 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@takumi-rs/image-response": "^0.61.0",
-    "fumadocs-core": "16.4.0",
-    "fumadocs-mdx": "14.2.2",
-    "fumadocs-ui": "16.4.0",
+    "@takumi-rs/image-response": "^0.73.1",
+    "fumadocs-core": "16.7.10",
+    "fumadocs-mdx": "14.2.11",
+    "fumadocs-ui": "16.7.10",
     "gray-matter": "^4.0.3",
-    "lucide-react": "^0.561.0",
-    "next": "16.0.10",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "zod": "^4.2.1"
+    "lucide-react": "^1.7.0",
+    "next": "16.2.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
