@@ -1,6 +1,8 @@
 import { siteConfig } from "@/lib/site";
+import { slugifyTag } from "@/lib/string-utils";
 import { readingList } from "@/lib/reading";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Reading",
@@ -40,6 +42,14 @@ export default function ReadingPage() {
           This page is for writing that taught me something durable: sharper engineering taste, a better research
           instinct, or a more useful way to look at systems and people.
         </p>
+        <div>
+          <Link
+            href="/reading/tags"
+            className="text-sm uppercase tracking-widest text-fd-muted-foreground underline underline-offset-4 hover:text-fd-foreground"
+          >
+            Browse by tag
+          </Link>
+        </div>
       </div>
 
       {readingList.length > 0 ? (
@@ -61,12 +71,13 @@ export default function ReadingPage() {
                   {entry.tags && entry.tags.length > 0 && (
                     <div className="flex flex-wrap gap-3">
                       {entry.tags.map((tag) => (
-                        <span
+                        <Link
                           key={tag}
-                          className="border border-fd-foreground px-2 py-1 text-xs font-mono uppercase tracking-[0.15em]"
+                          href={`/reading/tags/${slugifyTag(tag)}`}
+                          className="border border-fd-foreground px-2 py-1 text-xs font-mono uppercase tracking-[0.15em] transition-colors hover:bg-fd-foreground hover:text-fd-background"
                         >
                           {tag}
-                        </span>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -105,6 +116,7 @@ export default function ReadingPage() {
             <div className="mt-4 flex flex-col gap-4 text-muted-foreground">
               <p>Add entries in `lib/reading.ts` as you collect favorites.</p>
               <p>Keep each note short and personal so the page reflects your taste, not just the outbound links.</p>
+              <p>Once you add tags, they automatically get their own archive pages.</p>
             </div>
           </section>
         </div>
