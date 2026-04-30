@@ -1,0 +1,312 @@
+---
+title: "Ruby on Rails pattern: Service Objects"
+description: Service objects are a way to encapsulate complex business logic in Ruby on Rails applications.
+author: Rafi Hasan
+date: 2019-03-05
+tags:
+  - ruby
+  - rails
+  - architecture
+---
+
+Ruby on Rails is an excellent framework for developing large scale applications. It is battle tested for more than a decade and still continues to grow. Many companies have built large scale applications with this like Github or Shopify. However, since it is a monolithic framework, it can grow rapidly and needs proper organization to keep things sane. There are a lot of talks about fat controllers and skinny models. We won't go in that direction. Instead, we will talk about the solution today.
+
+## Service Objects
+One such pattern to solve fat controllers in Rails is service objects. The name doesn't do justice to what it really is. It is basically plain ruby objects that can offload much of the workload from the controllers. So let's get started and see how we can work with it
+
+## Preparation
+We will build a simple API only Ruby on Rails application for this guide. Let's generate our app with
+
+```bash
+rails new rails-service \
+  --skip-action-text \
+  --skip-active-storage \
+  --skip-javascript \
+  --skip-spring -T \
+  --skip-turbolinks \
+  --skip-sprockets \
+  --skip-test \
+  --api
+```
+
+We see we skip some of the goodies Rails comes bundled with since we do not need it for this demo. We would not go to explain the migrations or models here, you can check them out in the [repo](https://github.com/Joker666/rails-service-demo). Instead, let's see the architecture and jump right into a fat controller.
+
+## Architecture
+Imagine, we are building a SaaS service where a user can register and subscribe to a certain product. So, we would be handling multiple procedures when the user signs up. So let's see what are they
+- Create user entry with user's data
+- Retrieve the product, he signed up for
+- Create a subscription with that product and add an expiry date when the subscription will expire
+- Assign a dedicated support person for the user
+- We would also update our metrics table with the new revenue that we got from the user. This is necessary for time series aggregation for the investors
+- We would also send him a welcome email about his new subscription
+
+So, a lot happens when a user signs up. Let's see how it looks like in a traditional Rails controller
+
+```ruby
+# app/controllers/v1/user_controller.rb
+
+module V1
+  class UserController < ApplicationController
+    def create
+      begin
+        ActiveRecord::Base.transaction do 
+          # Create User
+          prev_user = User.find_by email: params[:email]
+          raise StandardError, 'User already exists' if prev_user.present?
+
+          user = User.create(name: params[:name], email: params[:email], pass: params[:pass])
+
+          # Create Subscription
+          product = Product.find_by name: params[:product_name]
+          raise StandardError, "Product doesn't exist" unless product.present?
+
+          sub = Subscription.create(product_id: product[:id], user_id: user[:id], expires_at: Time.now + 30.day)
+
+          # Assign support person
+          support = Support.find_by name: 'Jessica'
+          raise StandardError, "Couldn't assign a support person"  unless support.present?
+
+          user.support_id = support[:id]
+          user.save
+
+          # Update Metrics
+          Metric.create(user_count: 1, revenue: product.price)
+
+          # Send welcome email
+          UserMailer.with(user: user).welcome_email.deliver_later
+          render json: { user: user, subscription: sub }
+        end
+      rescue StandardError => e
+        render json: { error: e }
+      end
+    end
+  end
+end
+```
+
+Here, we are creating a user, then creating a subscription for that user by retrieving the product, assigning a dedicated support person, updating metrics, and sending welcome email. We are definitely doing a lot here. This also violates single responsibility principle of SOLID design pattern. What if we need the same behavior of updating metrics in another controller? We would be duplicating that block of code. Let's fix this
+
+## Service Objects
+Service objects are Plain Old Ruby Objects (PORO) that are designed to execute one single action in your domain logic and do it well. It follows the single responsibility principle strongly. We should divide all the tasks in the controller into these service objects.
+
+To host these objects inside our Rails application, we would create a `services` directory. Let's create our first service.
+
+```ruby
+# app/services/create_user_service.rb
+
+class CreateUserService
+  attr_reader :name, :email, :pass
+
+  def initialize(name, email, pass)
+    @name = name
+    @email = email
+    @pass = pass
+  end
+
+  def call
+    prev_user = User.find_by email: @email
+    raise StandardError, 'User already exists' if prev_user.present?
+
+    User.create(name: @name, email: @email, pass: @pass)
+  end
+end
+
+```
+
+This is a simple Ruby class where we send it a few parameters when initializing and then look for the previous user, if not found we create a new user. That's it. Now let's call it from controller. We would use out `v2` namespace controller for this
+
+```ruby
+# app/controllers/v2/user_controller.rb
+
+module V2
+  class UserController < ApplicationController
+    def create
+      begin
+        ActiveRecord::Base.transaction do
+          # Create User
+          user = CreateUserService.new(params[:name], params[:email], params[:pass]).call
+          render json: { user: user }
+        end
+      rescue StandardError => e
+        render json: { error: e }
+      end
+    end
+  end
+end
+```
+
+Nice and simple. All the logic of user creation is abstracted away from the controller and we get a nice clean service that we call to handle it. The signature of invoking the service still looks a bit non-intuitive. Let's improve that.
+
+```ruby
+# app/services/application_service.rb
+
+class ApplicationService
+  def self.call(*args, &block)
+    new(*args, &block).call
+  end
+end
+```
+
+We are creating a base class `ApplicationService` that our service objects will inherit from. This class method creates a new instance of the class with the arguments that are passed into it and calls the `call` method on the instance. Let's see the usage to clear the confusion.
+
+Let's inherit from the class first.
+```ruby
+# app/services/create_user_service.rb
+
+class CreateUserService < ApplicationService
+
+...
+```
+Nothing else would change from `CreateUserService` class. Let's see how we can invoke `CreateUserService` service now.
+
+```ruby
+# app/controllers/v2/user_controller.rb
+
+user = CreateUserService.call(params[:name], params[:email], params[:pass])
+```
+
+We have shortened our service call since we don't need to call `new` on it anymore. Looks much cleaner. Now that we have an understanding of how service objects can help us organize our code, let's quickly refactor our controller into other services.
+
+```ruby
+# app/services/get_product_service.rb
+
+class GetProductService < ApplicationService
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def call
+    product = Product.find_by name: @name
+    raise StandardError, "Product doesn't exist" unless product.present?
+
+    product
+  end
+end
+
+
+# app/services/create_subscription_service.rb
+
+class CreateSubscriptionService < ApplicationService
+  attr_reader :product_id, :user_id
+
+  def initialize(product_id, user_id)
+    @product_id = product_id
+    @user_id = user_id
+  end
+
+  def call
+    Subscription.create(product_id: @product_id, user_id: @user_id, expires_at: Time.now + 30.day)
+  end
+end
+
+
+# app/services/assign_support_service.rb
+
+class AssignSupportService < ApplicationService
+  attr_reader :user, :support_name
+
+  def initialize(user, support_name)
+    @user = user
+    @support_name = support_name
+  end
+
+  def call
+    support = Support.find_by name: @support_name
+    raise StandardError, "Couldn't assign a support person" unless support.present?
+
+    @user.support_id = support[:id]
+    @user.save
+  end
+end
+
+
+# app/services/update_metrics_service.rb
+
+class UpdateMetricsService < ApplicationService
+  attr_reader :product
+
+  def initialize(product)
+    @product = product
+  end
+
+  def call
+    Metric.create(user_count: 1, revenue: @product.price)
+  end
+end
+
+
+# app/services/welcome_email_service.rb
+
+class WelcomeEmailService < ApplicationService
+  attr_reader :user
+
+  def initialize(user)
+    @user = user
+  end
+
+  def call
+    UserMailer.with(user: @user).welcome_email.deliver_later
+  end
+end
+```
+
+We have created five more services, each handling one unit of work. Let's refactor our controller to reflect the changes
+
+```ruby
+# app/controllers/v2/user_controller.rb
+
+module V2
+  class UserController < ApplicationController
+    def create
+      begin
+        ActiveRecord::Base.transaction do
+          # Create User
+          user = CreateUserService.call(params[:name], params[:email], params[:pass])
+          # Get Product
+          product = GetProductService.call(params[:product_name])
+          # Create Subscription
+          sub = CreateSubscriptionService.call(product[:id], user[:id])
+          # Assign support person
+          AssignSupportService.call(user, 'Jessica')
+          # Update Metrics
+          UpdateMetricsService.call(product)
+          # Send welcome email
+          WelcomeEmailService.call(user)
+          render json: { user: user, subscription: sub }
+        end
+      rescue StandardError => e
+        render json: { error: e }
+      end
+    end
+  end
+end
+```
+
+This looks much cleaner. We have refactored out the fat controller into a more manageable one.
+
+## Some Tips
+Like every other pattern, we need to also keep our service objects in check and follow some practices so that even if these services grow in numbers, we can continue working at the same pace
+
+### Group Similar Service Objects
+When we would have a lot more services, we need to group these objects for sanity. For example, we can group everything related to user handling in `user` group and everything related to subscription management in `subscription` group.
+
+```
+services
+├── application_service.rb
+└── subscription_manager
+      ├── create_subscription_service.rb
+      └── expire_subscription_service.rb
+```
+
+### Follow One Naming Convention
+There are many ways you could name your services, like `UserCreator`, `SubscriptionManager` or plain commands like `CreateUser`, `ManageSubscriotion` as such. I like calling appending `service` at the tail so that I know for sure it is a service and avoid naming collision with let's say migration classes.
+
+### Single Responsibility Principle
+Make sure to follow this with service objects, it should always be doing one thing and one thing only. When it does multiple things, better to break them down into other services
+
+## Conclusion
+Service objects are an essential pattern to keep our business logic outside controllers. This would reduce a lot of complexity from the codebase. There are some gems that take inspiration from this approach. One of these gems are [Interactor](https://github.com/collectiveidea/interactor) gem. We will explore how this would help us in a later article. Til then, stay tuned
+
+**Project Link: [Github](https://github.com/Joker666/rails-service-demo)**
