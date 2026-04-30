@@ -39,7 +39,7 @@ export default function Home() {
 
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-8">
         <div>
           <Link
             href="/blog/tags"
@@ -52,10 +52,10 @@ export default function Home() {
         {posts.map((post) => (
           <article
             key={post.url}
-            className="group border-2 border-fd-foreground bg-fd-card p-6 sm:p-8 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
+            className="group border-2 border-fd-foreground bg-fd-card p-5 sm:p-6 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
           >
             <Link href={post.url} className="flex flex-col">
-              <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
+              <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-3">
                 {new Date(post.data.date).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -63,15 +63,17 @@ export default function Home() {
                 })}
               </span>
 
-              <h2 className="text-2xl font-semibold mb-6 group-hover:text-fd-primary transition-colors">
+              <h2 className="text-xl font-semibold mb-3 group-hover:text-fd-primary transition-colors">
                 {post.data.title}
               </h2>
 
-              <p className="text-base leading-relaxed mb-8 text-fd-muted-foreground">{post.data.description}</p>
+              <p className="text-sm leading-relaxed mb-5 text-fd-muted-foreground line-clamp-3">
+                {post.data.description}
+              </p>
             </Link>
 
             {post.data.tags && post.data.tags.length > 0 && (
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3">
                 {post.data.tags.map((tag) => (
                   <Link
                     key={tag}
