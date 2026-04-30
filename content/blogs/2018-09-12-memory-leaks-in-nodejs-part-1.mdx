@@ -153,3 +153,21 @@ const server = http.createServer((req, res) => {
 server.listen(3000);
 console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
 ```
+
+Now if we run our load testing along with Clinic, we see:
+
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*yE4yHWZTGl14GeMsIqKsxA.png" alt="Memory Leak Closure 4" />
+
+No leaking of closures! Nice. We have to keep an eye on closures, as they create their own scope and retain references to outer scope variables.
+
+### Conclusion
+We have explored two major types of memory leaks in Node and how to detect them with the help of Clinic.js and Chrome's Node Debugger. In the next article, we will explore the other two types.
+The project description has resources on how to run the app and load test. It also includes the solution.
+
+### Resources
+
+- https://blog.meteor.com/an-interesting-kind-of-javascript-memory-leak-8b47d2e7f156
+- https://www.dynatrace.com/news/blog/understanding-garbage-collection-and-hunting-memory-leaks-in-node-js/
+- https://blog.bitsrc.io/memory-leaks-in-nodejs-54ac7bbd4173
+- https://nodesource.com/blog/memory-leaks-demystified
+- https://marmelab.com/blog/2018/04/03/how-to-track-and-fix-memory-leak-with-nodejs.html
