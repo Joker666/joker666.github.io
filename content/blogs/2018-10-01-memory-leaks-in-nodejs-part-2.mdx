@@ -58,3 +58,32 @@ Memory is increasing fast. Let's go through what is happening in that script. We
 <img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ULn3BHTr2uNoWXE_71wvxQ.png" alt="Memory Leak Cache 2" />
 
 We can see that all the buffer objects are in memory and in the `computeTerm` cache. The reason the cache is leaking memory is that we are not clearing the cache periodically. The solution is to free memory after a timeout. Let's do that.
+
+```javascript
+const http = require("http");
+
+function computeTerm(term) {
+    setTimeout(() => {
+        delete computeTerm[term];
+    }, 1000);
+    return computeTerm[term] || (computeTerm[term] = compute());
+
+    function compute() {
+        return Buffer.alloc(1e3);
+    }
+}
+const server = http.createServer((req, res) => {
+    res.end(computeTerm(Math.random()));
+});
+
+server.listen(3000);
+console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
+```
+
+We are clearing the cache after one second, i.e., all the cache objects stay in memory for one second and we can access them, but after that, they get cleared. We are using one second since our program will only run for 30 seconds, so storing more would not let us show that the solution works. This isn't the ideal solution, but it can show how to go about tacking the leak. Let's load-test again and check the result in a Clinic report.
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*H-r12FIOefEr9xOZsEnjaQ.png" alt="Memory Leak Cache 2" />
+
+We can see that memory increases but not when we free the cache. Nice and dandy! We need to make sure we free the cache after a certain time so that it doesn't take up space in memory.
+
+We can improve on this solution by using a more complete caching mechanism like LRU cache. But we won't go there today. A more proper robust solution that doesn't store caches in the machine's memory is to use dedicated caching servers like Redis or Memcached. We will explore this in a later article.
