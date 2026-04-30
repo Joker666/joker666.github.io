@@ -3,6 +3,7 @@ import { PostList } from "./components/post-list";
 
 export default function HomePage() {
   const posts = [...blogPosts.getPages()]
+    .filter((post) => !post.data.draft)
     .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
     .map((post) => ({
       title: post.data.title,

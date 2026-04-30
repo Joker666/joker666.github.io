@@ -33,9 +33,9 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const posts = [...blogPosts.getPages()].sort(
-    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-  );
+  const posts = [...blogPosts.getPages()]
+    .filter((post) => !post.data.draft)
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">

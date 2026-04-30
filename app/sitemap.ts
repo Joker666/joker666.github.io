@@ -18,7 +18,7 @@ function toAbsoluteUrl(path: string) {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = [...blogPosts.getPages()];
+  const posts = [...blogPosts.getPages()].filter((post) => !post.data.draft);
   const latestPostDate = posts.length
     ? posts.map((post) => new Date(post.data.date)).sort((a, b) => b.getTime() - a.getTime())[0]
     : undefined;

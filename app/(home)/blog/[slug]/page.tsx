@@ -10,7 +10,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   const params = await props.params;
   const page = blogPosts.getPage([params.slug]);
 
-  if (!page) notFound();
+  if (!page || (page.data.draft && process.env.NODE_ENV !== "development")) notFound();
   const Mdx = page.data.body;
 
   return (
@@ -70,7 +70,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;
   const page = blogPosts.getPage([params.slug]);
-  if (!page) notFound();
+  if (!page || (page.data.draft && process.env.NODE_ENV !== "development")) notFound();
   const url = page.url;
   const ogImage = getPageImage(page).url;
   return {
@@ -105,7 +105,10 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return blogPosts.getPages().map((page) => ({
-    slug: page.slugs[0],
-  }));
+  return blogPosts
+    .getPages()
+    .filter((page) => !page.data.draft || process.env.NODE_ENV === "development")
+    .map((page) => ({
+      slug: page.slugs[0],
+    }));
 }
