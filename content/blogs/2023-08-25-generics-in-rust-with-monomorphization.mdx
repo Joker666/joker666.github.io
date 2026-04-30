@@ -9,9 +9,9 @@ tags:
   - optimization
 ---
 
-Generics in Rust is not like in any other mainstream programming language except for C++ and uses something called `Monomorphization` for compile-time generics. This approach is fantastic since it is [zero cost](2023-08-06-zero-cost-abstraction-rust) but if we are not careful it can lead to code bloat. We discussed Rust's runtime polymorphism in a [different article](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism).
+Generics in Rust work differently than in most mainstream programming languages (with the exception of C++), relying on a concept called `Monomorphization` for compile-time generics. This approach is fantastic since it is [zero cost](2023-08-06-zero-cost-abstraction-rust), but if we are not careful, it can lead to code bloat. We discussed Rust's runtime polymorphism in a [different article](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism).
 
-So what is generics? In simple words, it means parameterized types. The idea is to allow types to be parameters to structs, functions, traits, methods, etc. Let's consider a function that swaps elements in an array:
+So, what are generics? In simple words, they mean parameterized types. The idea is to allow types to be parameters to structs, functions, traits, methods, etc. Let's consider a function that swaps elements in an array:
 
 ```rust
 // Non-generic function to swap elements in an integer array
@@ -90,7 +90,7 @@ fn main() {
 // After swapping: ["cherry", "banana", "apple"]
 ```
 
-We have headfirst dived into the generics implementation but let's discuss it now. In the code above, the function `swap_elements` is defined with a generic type parameter `T`. This parameter allows the function to work with arrays containing elements of any type. Now having this abstraction, one might wonder what is the performance hit for this. The good news is, it's zero. Rust achieves this zero-cost abstraction through a process called `Monomorphization`.
+We dove headfirst into the generics implementation, but let's break it down now. In the code above, the function `swap_elements` is defined with a generic type parameter `T`. This parameter allows the function to work with arrays containing elements of any type. Now having this abstraction, one might wonder what the performance hit for this is. The good news is, it's zero. Rust achieves this zero-cost abstraction through a process called `Monomorphization`.
 
 ## Monomorphization
 
@@ -102,9 +102,7 @@ For our example, when the Rust compiler encounters the generic function `swap_el
 // i32
 fn swap_elements_i32(array: &mut [i32], index1: usize, index2: usize) {
     if index1 < array.len() && index2 < array.len() {
-        let temp = array[index1];
-        array[index1] = array[index2];
-        array[index2] = temp;
+        array.swap(index1, index2);
     }
 }
 
@@ -132,7 +130,7 @@ fn main() {
 }
 ```
 
-One thing to note is that we've used only one generic type to define `Point<T>`. That means `x` and `y` are both have to be the same type.
+One thing to note is that we've used only one generic type to define `Point<T>`. That means `x` and `y` both have to be the same type.
 
 ```rust
 struct Point<T> {
@@ -165,6 +163,12 @@ fn main() {
 When you want to add an implementation for the generic `struct`, you declare the type parameter after the `impl`:
 
 ```rust
+#[derive(Debug)]
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
 impl<T> Point<T> {
     fn swap(&mut self) {
         std::mem::swap(&mut self.x, &mut self.y);
@@ -173,16 +177,16 @@ impl<T> Point<T> {
 
 fn main() {
     let mut int_origin = Point { x: 0, y: 1 };
-    println!("Original int_array: {:?}", int_origin);
+    println!("Original Point: {:?}", int_origin);
     int_origin.swap();
-    println!("Swapped int_array: {:?}", int_origin);
+    println!("Swapped Point: {:?}", int_origin);
 }
 
-// Original int_array: Point { x: 0, y: 1 }
-// Swapped int_array: Point { x: 1, y: 0 }
+// Original Point: Point { x: 0, y: 1 }
+// Swapped Point: Point { x: 1, y: 0 }
 ```
 
-Why multiple `<T>`? First, we declare the type parameter (`T`) after the `impl` keyword (`impl<T>`), and then we use other `T`s to refer to that first `T`: to specify the struct type we are implementing (`Point<T>`).
+Why define `<T>` twice? First, we declare the type parameter (`T`) after the `impl` keyword (`impl<T>`), and then we use the other `T` to refer to that first `T`: to specify the struct type we are implementing (`Point<T>`).
 
 ## Generic enum
 
@@ -213,4 +217,4 @@ fn main() {
 
 ## Takeaway
 
-Generics in Rust is quite powerful. We just scratched the surface here. In some other articles, we will explore more advanced Generics features of Rust. The best part about it is, that you don't need to worry about the runtime performance of it. However, having too many generics can lead to slow compile time and bloating of binary. [Trait objects](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism) offer the flexibility of faster compile time at the cost of runtime performance. But it's not a bad thing, in all other languages Generic types are checked at runtime. In the end, it depends on your specific implementation.
+Generics in Rust are quite powerful. We just scratched the surface here. In some other articles, we will explore more advanced Generics features of Rust. The best part about it is that you don't need to worry about its runtime performance. However, having too many generics can lead to slow compile times and bloating of the binary. [Trait objects](2023-08-15-what-is-dyn-in-rust-and-how-it-powers-polymorphism) offer the flexibility of faster compile times at the cost of runtime performance. But it's not a bad thing; in many other managed languages, generic types incur runtime overhead. In the end, it depends on your specific implementation.
