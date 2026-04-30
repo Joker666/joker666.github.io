@@ -15,6 +15,7 @@ export default function HomePage() {
       }),
       description: post.data.description,
       tags: post.data.tags,
+      draft: post.data.draft,
     }));
 
   return (

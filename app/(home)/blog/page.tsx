@@ -61,8 +61,13 @@ export default function Home() {
                 })}
               </span>
 
-              <h2 className="text-xl font-semibold mb-3 group-hover:text-fd-primary transition-colors">
+              <h2 className="text-xl font-semibold mb-3 group-hover:text-fd-primary transition-colors flex items-center gap-3">
                 {post.data.title}
+                {post.data.draft && (
+                  <span className="rounded bg-fd-secondary px-2 py-0.5 text-xs font-mono uppercase tracking-widest text-fd-primary border border-fd-primary/20">
+                    Draft
+                  </span>
+                )}
               </h2>
 
               <p className="text-sm leading-relaxed mb-5 text-fd-muted-foreground line-clamp-3">

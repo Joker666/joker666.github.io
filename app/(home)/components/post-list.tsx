@@ -9,6 +9,7 @@ interface Post {
   dateLabel: string;
   description?: string;
   tags?: string[];
+  draft?: boolean;
 }
 
 const POSTS_PER_PAGE = 8;
@@ -34,7 +35,14 @@ export function PostList({ posts }: { posts: Post[] }) {
             className="group flex flex-col gap-1 rounded-lg border-2 border-muted bg-card p-4 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
           >
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-medium group-hover:underline">{post.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium group-hover:underline">{post.title}</h3>
+                {post.draft && (
+                  <span className="rounded bg-fd-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fd-primary">
+                    Draft
+                  </span>
+                )}
+              </div>
               <time className="text-sm text-fd-muted-foreground whitespace-nowrap">{post.dateLabel}</time>
             </div>
             {post.description && <p className="text-sm text-fd-muted-foreground line-clamp-2">{post.description}</p>}
