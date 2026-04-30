@@ -41,8 +41,8 @@ const http = require("http");
 
 const requestLogs = [];
 const server = http.createServer((req, res) => {
-  requestLogs.push({ url: req.url, array: new Array(10000).join("*") });
-  res.end(JSON.stringify(requestLogs));
+    requestLogs.push({ url: req.url, array: new Array(10000).join("*") });
+    res.end(JSON.stringify(requestLogs));
 });
 
 server.listen(3000);
@@ -71,9 +71,9 @@ It is the global variable `requestLogs` that is causing the leak. `Snapshot 2` i
 const http = require("http");
 
 const server = http.createServer((req, res) => {
-  const requestLogs = [];
-  requestLogs.push({ url: req.url, array: new Array(10000).join("*") });
-  res.end(JSON.stringify(requestLogs));
+    const requestLogs = [];
+    requestLogs.push({ url: req.url, array: new Array(10000).join("*") });
+    res.end(JSON.stringify(requestLogs));
 });
 
 server.listen(3000);
@@ -105,9 +105,9 @@ var replaceThing = function () {
 };
 
 const server = http.createServer((req, res) => {
-  replaceThing();
-  res.writeHead(200);
-  res.end("Hello World");
+    replaceThing();
+    res.writeHead(200);
+    res.end("Hello World");
 });
 
 server.listen(3000);
@@ -147,9 +147,9 @@ var replaceThing = function () {
 };
 
 const server = http.createServer((req, res) => {
-  replaceThing();
-  res.writeHead(200);
-  res.end("Hello World");
+    replaceThing();
+    res.writeHead(200);
+    res.end("Hello World");
 });
 
 server.listen(3000);

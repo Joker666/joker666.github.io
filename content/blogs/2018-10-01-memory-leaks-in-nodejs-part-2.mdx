@@ -9,7 +9,7 @@ tags:
   - leaks
 ---
 
-We are in the golden age of software. We have tools for everything. We have the tools to make tools. We build core systems into high-level products. But one thing is common at all levels: the infamous memory leak. It is not always a bug in code; sometimes not understanding the behavior of runtime can cause it as well.
+We are in the golden age of software. We have tools for everything. We have the tools to make tools. We build core systems into high-level products. But one problem is common at all levels: the infamous memory leak. It is not always a bug in code; sometimes not understanding the behavior of runtime can cause it as well.
 
 The runtime in question here is Node.js. There are a few types of memory leaks that are very common. I have written about two of them in [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1). In Part 2, we are going to explore the other two types.
 
@@ -53,7 +53,7 @@ For how this load testing works, please refer to [Part 1](2018-09-12-memory-leak
 
 <img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*w1OQ5ukF7Lg8qpHYi3Yo2g.png" alt="Memory Leak Cache 1" />
 
-Memory is increasing fast. Let's go through what is happening in that script. We know that functions are objects in JavaScript, and we leverage that to store cached values here. We store a 1KB buffer object in cache and use random numbers as keys for the caches. Let's take a heap dump to check what is leaking. (The heap dump process was explained in [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1)).
+Memory is increasing fast. Let's go through what is happening in that script. We know that functions are objects in JavaScript, and we leverage that to store cached values directly on the function. We store 1KB buffer objects in the cache and use random numbers as keys. Let's take a heap dump to check what is leaking. (The heap dump process was explained in [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1)).
 
 <img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ULn3BHTr2uNoWXE_71wvxQ.png" alt="Memory Leak Cache 2" />
 
@@ -80,11 +80,11 @@ server.listen(3000);
 console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
 ```
 
-We are clearing the cache after one second, i.e., all the cache objects stay in memory for one second and we can access them, but after that, they get cleared. We are using one second since our program will only run for 30 seconds, so storing more would not let us show that the solution works. This isn't the ideal solution, but it can show how to go about tacking the leak. Let's load-test again and check the result in a Clinic report.
+We clear the cache key after one second. This means the cached object stays in memory for a maximum of one second before it gets cleared. We are using one second since our program will only run for 30 seconds, so storing more would not let us show that the solution works. This isn't the ideal solution, but it can show how to go about tackling the leak. Let's load-test again and check the result in a Clinic report.
 
 <img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*H-r12FIOefEr9xOZsEnjaQ.png" alt="Memory Leak Cache 2" />
 
-We can see that memory increases but not when we free the cache. Nice and dandy! We need to make sure we free the cache after a certain time so that it doesn't take up space in memory.
+We can see that memory increases but not when we free the cache. Fine and dandy! We need to make sure we free the cache after a certain time so that it doesn't take up space in memory.
 
 We can improve on this solution by using a more complete caching mechanism like LRU cache. But we won't go there today. A more proper robust solution that doesn't store caches in the machine's memory is to use dedicated caching servers like Redis or Memcached. We will explore this in a later article.
 
@@ -125,17 +125,19 @@ We see a steady increase in memory. But if promises are being resolved after a c
 
 <img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zyuLjRrk4MPdQ5bq7yBoGQ.png" alt="Memory Leak Promises" />
 
-And we can clearly see in the snapshot that promises are in the memory. The program stopped, but the promises that never got resolved stayed in memory. The solution is to limit the time a promise can run and time-out after that. Also, in production, we should keep track of these promises and their tasks so that those can be reinitiated. But here let's see how we can solve this.
+And we can clearly see in the snapshot that promises are in the memory. The program stopped, but the promises that never got resolved stayed in memory.
+
+A common misconception is that `Promise.race` can solve this by "timing out" the promise. Let's look at why that doesn't actually free memory:
 
 ```javascript
 const http = require("http");
 
-async function task (ms) {
+async function task(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function timeout(timer) {
@@ -156,11 +158,46 @@ server.listen(3000);
 console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
 ```
 
-We are using `Promise.race`, a function that resolves if any of the promises within an array gets resolved, and it rejects the unresolved ones. We can create a timeout promise which would be the maximum time a promise is allowed to run. Here it's 500ms, and then it would return. Let's see if this solves our memory issue.
+We are using `Promise.race`, a function that resolves if any of the promises within an array gets resolved. We created a timeout promise of 500ms. But if we run this, we will see memory still leaking!
 
-<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*TjTLUj-OWTBSug5gExWn5g.png" alt="Memory Leak Promises" />
+Why? Because `Promise.race` **does not magically cancel the losing promises**. The `setTimeout` inside our `task` will still run in the background until it finishes naturally up to 20 seconds later, preventing V8 from garbage-collecting the closure. 
 
-We can see that memory is getting allocated, but since there is a timeout, it's getting freed after a certain duration. It is always good to have a timeout function for long-running tasks and to handle promise rejections.
+To truly prevent memory leaks from long-running operations in Node.js, you must explicitly abort them. Let's fix our code to properly clear the timeout and free the memory:
+
+```javascript
+const http = require("http");
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const server = http.createServer((req, res) => {
+    const ms = getRndInteger(100, 20000);
+    
+    // We store a reference to the timer
+    const timer = setTimeout(() => {
+        // Task completed successfully
+    }, ms);
+
+    // After 500ms, we explicitly cancel the background task
+    // which immediately frees the memory closure!
+    setTimeout(() => {
+        clearTimeout(timer);
+    }, 500);
+
+    res.writeHead(200);
+    res.end("Hello World");
+});
+
+server.listen(3000);
+console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
+```
+
+By using `clearTimeout`, we explicitly tell Node to stop the background operation, allowing the garbage collector to reclaim the memory.
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*TjTLUj-OWTBSug5gExWn5g.png" alt="Memory Leak Promises Fixed" />
+
+We can see that memory is getting allocated, but since we are clearing the timeout, it's getting freed. It is always necessary to explicitly clean up resources for long-running tasks.
 
 ## Conclusion
 
