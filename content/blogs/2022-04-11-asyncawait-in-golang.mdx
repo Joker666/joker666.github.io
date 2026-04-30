@@ -1,0 +1,171 @@
+---
+title: "Async/Await in Golang"
+description: How to implement async/await in Golang.
+author: Rafi Hasan
+date: 2022-04-11
+tags:
+  - golang
+  - concurrency
+  - async
+  - await
+---
+
+**Project Link: [Github](https://github.com/Joker666/AsyncGoDemo)**
+
+Golang is a concurrent programming language. It has powerful features like Goroutines and Channels that can handle asynchronous tasks very well. Also, goroutines are not OS threads, and that's why you can spin up as many goroutines as you want without much overhead, it's stack size starts at 2KB only. So why async/await? Async/Await is a nice language feature that provides a simpler interface to asynchronous programming.
+
+### How Does it Work?
+
+Started with F# and then C#, now in Python and Javascript, async/await is an extremely popular feature of a language. It simplifies the asynchronous method execution structure and, it reads like synchronous code. So much easier to follow for developers. Let's see a simple example in C# how async/await works
+
+```csharp
+static async Task Main(string[] args)
+{
+    Console.WriteLine("Let's start ...");
+    var done = DoneAsync();
+    Console.WriteLine("Done is running ...");
+    Console.WriteLine(await done);
+}
+
+static async Task<int> DoneAsync()
+{
+    Console.WriteLine("Warming up ...");
+    await Task.Delay(3000);
+    Console.WriteLine("Done ...");
+    return 1;
+}
+```
+
+We have the `Main` function that would be executed when the program is run. We have `DoneAsync` which is an async function. We stop the execution of the code with `Delay` function for 3 seconds. `Delay` is an async function itself, so we call it with `await`.
+
+> `await` only blocks the code execution within the `async` function
+
+In the main function, we do not call `DoneAsync` with `await`. But the execution starts for `DoneAsync`. Only when we `await` it, we get the result back. The execution flow looks like this:
+
+```bash
+Let's start ...
+Warming up ...
+Done is running ...
+Done ...
+1
+```
+
+This looks incredibly simple for asynchronous execution. Let's see how we can do it with Golang using Goroutines and Channels
+
+```go
+func DoneAsync() chan int {
+	r := make(chan int)
+	fmt.Println("Warming up ...")
+	go func() {
+		time.Sleep(3 * time.Second)
+		r <- 1
+		fmt.Println("Done ...")
+	}()
+	return r
+}
+
+func main() {
+	fmt.Println("Let's start ...")
+	val := DoneAsync()
+	fmt.Println("Done is running ...")
+	fmt.Println(<-val)
+}
+```
+
+Here, `DoneAsync` runs asynchronously and returns a channel. It writes a value to the channel once it's done executing the async task. In main function, we invoke `DoneAsync` and keep doing our operations and then we read the value from the returned channel. It is a blocking call that waits till the value is written to the channel and after it gets the value it writes to the console.
+
+```bash
+Let's start ...
+Warming up ...
+Done is running ...
+Done ...
+1
+```
+
+We see, we achieve the same outcome as the C# program, but it doesn't look as elegant as async/await. While this is actually good, we are able to do a lot more granular things with this approach much easily, we can also implement async/await keywords in Golang with a simple struct and interface. Let's try that.
+
+### Implementing Async/Await
+
+The full code is available in the project link. To implement async/await in Golang, we will start with a package directory named async. The project structure looks like this:
+
+```
+.
+├── async
+│   └── async.go
+├── main.go
+└── README.md
+```
+
+In the async file, we write the simplest future interface that can handle async tasks.
+
+```go
+package async
+
+import "context"
+
+// Future interface has the method signature for await
+type Future interface {
+	Await() interface{}
+}
+
+type future struct {
+	await func(ctx context.Context) interface{}
+}
+
+func (f future) Await() interface{} {
+	return f.await(context.Background())
+}
+
+// Exec executes the async function
+func Exec(f func() interface{}) Future {
+	var result interface{}
+	c := make(chan struct{})
+	go func() {
+		defer close(c)
+		result = f()
+	}()
+	return future{
+		await: func(ctx context.Context) interface{} {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-c:
+				return result
+			}
+		},
+	}
+}
+```
+
+Not a lot is happening here, we add a Future interface that has the Await method signature. Next, we add a future struct that holds one value, a function signature of the await function. Now futute struct implements Future interface's Await method by invoking its own await function.
+
+The Exec function executes the passed function asynchronously in goroutine. And we return the await function. It waits for the channel to close or context to read from. Based on whichever happens first, it either returns the error or the result which is an interface.
+
+Now armed with this new async package, let's see how we can change our current go code
+
+```go
+func DoneAsync() int {
+	fmt.Println("Warming up ...")
+	time.Sleep(3 * time.Second)
+	fmt.Println("Done ...")
+	return 1
+}
+
+func main() {
+	fmt.Println("Let's start ...")
+	future := async.Exec(func() interface{} {
+		return DoneAsync()
+	})
+	fmt.Println("Done is running ...")
+	val := future.Await()
+	fmt.Println(val)
+}
+```
+
+At the first glance, it looks much cleaner, we are not explicitly working with goroutine or channels here. Our DoneAsync function has been changed to a completely synchronous nature. In the main function, we use the async package's Exec method to handle DoneAsync. Which starts the execution of DoneAsync. The control flow is returned back to main function which can execute other pieces of code. Finally, we make blocking call to Await and read back data.
+
+Now the code looks much simpler and easier to read. We can modify our async package to incorporate a lot of other types of asynchronous tasks in Golang, but we would just stick to simple implementation for now in this tutorial.
+
+### Conclusion
+
+We have gone through what async/await it and implemented a simple version of that in Golang. I would encourage you to look into async/await a lot more and see how it can ease the readability of the codebase much better.
