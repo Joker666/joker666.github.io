@@ -9,10 +9,10 @@ tags:
   - architecture
 ---
 
-Ruby on Rails is an excellent framework for developing large scale applications. It is battle tested for more than a decade and still continues to grow. Many companies have built large scale applications with this like Github or Shopify. However, since it is a monolithic framework, it can grow rapidly and needs proper organization to keep things sane. There are a lot of talks about fat controllers and skinny models. We won't go in that direction. Instead, we will talk about the solution today.
+Ruby on Rails is an excellent framework for developing large-scale applications. It has been battle-tested for more than a decade and continues to grow. Many companies have built large-scale applications with it, like GitHub or Shopify. However, since it is a monolithic framework, it can grow rapidly and needs proper organization to keep things sane. There is a lot of talk about fat controllers and skinny models. We won't go in that direction. Instead, we will talk about the solution today.
 
 ## Service Objects
-One such pattern to solve fat controllers in Rails is service objects. The name doesn't do justice to what it really is. It is basically plain ruby objects that can offload much of the workload from the controllers. So let's get started and see how we can work with it
+One such pattern to solve fat controllers in Rails is service objects. The name doesn't do justice to what they really are. They are basically plain Ruby objects that can offload much of the workload from the controllers. So let's get started and see how we can work with them.
 
 ## Preparation
 We will build a simple API only Ruby on Rails application for this guide. Let's generate our app with
@@ -32,9 +32,9 @@ rails new rails-service \
 We see we skip some of the goodies Rails comes bundled with since we do not need it for this demo. We would not go to explain the migrations or models here, you can check them out in the [repo](https://github.com/Joker666/rails-service-demo). Instead, let's see the architecture and jump right into a fat controller.
 
 ## Architecture
-Imagine, we are building a SaaS service where a user can register and subscribe to a certain product. So, we would be handling multiple procedures when the user signs up. So let's see what are they
+Imagine we are building a SaaS service where a user can register and subscribe to a certain product. So, we would be handling multiple procedures when the user signs up. Let's see what they are:
 - Create user entry with user's data
-- Retrieve the product, he signed up for
+- Retrieve the product he signed up for
 - Create a subscription with that product and add an expiry date when the subscription will expire
 - Assign a dedicated support person for the user
 - We would also update our metrics table with the new revenue that we got from the user. This is necessary for time series aggregation for the investors
@@ -54,30 +54,30 @@ module V1
           prev_user = User.find_by email: params[:email]
           raise StandardError, 'User already exists' if prev_user.present?
 
-          user = User.create(name: params[:name], email: params[:email], pass: params[:pass])
+          user = User.create!(name: params[:name], email: params[:email], pass: params[:pass])
 
           # Create Subscription
           product = Product.find_by name: params[:product_name]
           raise StandardError, "Product doesn't exist" unless product.present?
 
-          sub = Subscription.create(product_id: product[:id], user_id: user[:id], expires_at: Time.now + 30.day)
+          sub = Subscription.create!(product_id: product[:id], user_id: user[:id], expires_at: Time.current + 30.days)
 
           # Assign support person
           support = Support.find_by name: 'Jessica'
           raise StandardError, "Couldn't assign a support person"  unless support.present?
 
           user.support_id = support[:id]
-          user.save
+          user.save!
 
           # Update Metrics
-          Metric.create(user_count: 1, revenue: product.price)
+          Metric.create!(user_count: 1, revenue: product.price)
 
           # Send welcome email
           UserMailer.with(user: user).welcome_email.deliver_later
           render json: { user: user, subscription: sub }
         end
       rescue StandardError => e
-        render json: { error: e }
+        render json: { error: e.message }
       end
     end
   end
@@ -107,13 +107,13 @@ class CreateUserService
     prev_user = User.find_by email: @email
     raise StandardError, 'User already exists' if prev_user.present?
 
-    User.create(name: @name, email: @email, pass: @pass)
+    User.create!(name: @name, email: @email, pass: @pass)
   end
 end
 
 ```
 
-This is a simple Ruby class where we send it a few parameters when initializing and then look for the previous user, if not found we create a new user. That's it. Now let's call it from controller. We would use out `v2` namespace controller for this
+This is a simple Ruby class where we send it a few parameters when initializing and then look for the previous user; if not found, we create a new user. That's it. Now let's call it from the controller. We will use our `v2` namespace controller for this:
 
 ```ruby
 # app/controllers/v2/user_controller.rb
@@ -128,7 +128,7 @@ module V2
           render json: { user: user }
         end
       rescue StandardError => e
-        render json: { error: e }
+        render json: { error: e.message }
       end
     end
   end
@@ -197,7 +197,7 @@ class CreateSubscriptionService < ApplicationService
   end
 
   def call
-    Subscription.create(product_id: @product_id, user_id: @user_id, expires_at: Time.now + 30.day)
+    Subscription.create!(product_id: @product_id, user_id: @user_id, expires_at: Time.current + 30.days)
   end
 end
 
@@ -217,7 +217,7 @@ class AssignSupportService < ApplicationService
     raise StandardError, "Couldn't assign a support person" unless support.present?
 
     @user.support_id = support[:id]
-    @user.save
+    @user.save!
   end
 end
 
@@ -232,7 +232,7 @@ class UpdateMetricsService < ApplicationService
   end
 
   def call
-    Metric.create(user_count: 1, revenue: @product.price)
+    Metric.create!(user_count: 1, revenue: @product.price)
   end
 end
 
@@ -277,7 +277,7 @@ module V2
           render json: { user: user, subscription: sub }
         end
       rescue StandardError => e
-        render json: { error: e }
+        render json: { error: e.message }
       end
     end
   end
@@ -301,12 +301,12 @@ services
 ```
 
 ### Follow One Naming Convention
-There are many ways you could name your services, like `UserCreator`, `SubscriptionManager` or plain commands like `CreateUser`, `ManageSubscriotion` as such. I like calling appending `service` at the tail so that I know for sure it is a service and avoid naming collision with let's say migration classes.
+There are many ways you could name your services, like `UserCreator`, `SubscriptionManager` or plain commands like `CreateUser`, `ManageSubscription` as such. I like appending `Service` to the end of the class name so that I know for sure it is a service and avoid naming collisions with, let's say, migration classes.
 
 ### Single Responsibility Principle
-Make sure to follow this with service objects, it should always be doing one thing and one thing only. When it does multiple things, better to break them down into other services
+Make sure to follow this with service objects; it should always be doing one thing and one thing only. When it does multiple things, it's better to break them down into other services.
 
 ## Conclusion
-Service objects are an essential pattern to keep our business logic outside controllers. This would reduce a lot of complexity from the codebase. There are some gems that take inspiration from this approach. One of these gems are [Interactor](https://github.com/collectiveidea/interactor) gem. We will explore how this would help us in a later article. Til then, stay tuned
+Service objects are an essential pattern to keep our business logic outside controllers. This reduces a lot of complexity in the codebase. There are some gems that take inspiration from this approach. One of these is the [Interactor](https://github.com/collectiveidea/interactor) gem. We will explore how this would help us in a later article. Till then, stay tuned!
 
 **Project Link: [Github](https://github.com/Joker666/rails-service-demo)**
