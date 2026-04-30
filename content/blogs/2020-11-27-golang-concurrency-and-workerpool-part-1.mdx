@@ -11,15 +11,15 @@ tags:
 
 **Project Link: [Github](https://github.com/Joker666/goworkerpool)**
 
-In modern programming languages concurrency has become an unequivocal need. Almost all programming languages today have some method of concurrency. Some have really powerful constructs, that can offload works to different threads in the OS, e.g., Java, some mimic this behavior in the same thread, e.g., Ruby.
+In modern programming languages, concurrency has become an unequivocal need. Almost all programming languages today have some method of concurrency. Some have really powerful constructs that can offload work to different threads in the OS, e.g., Java, some mimic this behavior in the same thread, e.g., Ruby.
 
-Golang has a very powerful concurrency model called CSP (communicating sequential processes), which breaks a problem into smaller sequential processes and then schedules several instances of these processes called Goroutines. The communication between these processes happens by passing immutable messages via Channels.
+Golang's concurrency model is heavily inspired by CSP (Communicating Sequential Processes), which breaks a problem into smaller sequential processes and then schedules several instances of these processes called Goroutines. The communication between these processes happens by passing immutable messages via Channels.
 
 Here we will explore, how we can take advantage of concurrency in golang and how we can limit its usage with worker pools. In the second part, we will explore how to build a robust solution for concurrency around this concept.
 
 ## A Simple Case
 
-Let's imagine we have an external API call which takes about 100ms to get done. If we have 1000 of these calls, and we call these synchronously, it would take about **100s** to complete
+Let's imagine we have an external API call that takes about 100ms to complete. If we have 1000 of these calls, and we call these synchronously, it would take about **100s** to complete
 
 ```go
 //// model/data.go
@@ -43,8 +43,8 @@ import (
 
 func Work(allData []model.SimpleData) {
     start := time.Now()
-    for i, _ := range allData {
-    	Process(allData[i])
+    for _, data := range allData {
+    	Process(data)
     }
     elapsed := time.Since(start)
     fmt.Printf("Took ===============> %s\n", elapsed)
@@ -100,20 +100,18 @@ func NotPooledWork(allData []model.SimpleData) {
 
     dataCh := make(chan model.SimpleData, 100)
 
-    wg.Add(1)
     go func() {
-    	defer wg.Done()
-    	for data := range dataCh {
-            wg.Add(1)
-            go func(data model.SimpleData) {
+        for data := range dataCh {
+            go func(d model.SimpleData) {
                 defer wg.Done()
-                basic.Process(data)
+                basic.Process(d)
             }(data)
         }
     }()
 
-    for i, _ := range allData {
-        dataCh <- allData[i]
+    for _, data := range allData {
+        wg.Add(1)
+        dataCh <- data
     }
 
     close(dataCh)
@@ -137,7 +135,7 @@ Here, we create a buffered channel of 100 and add all the data passed to `NoPool
 
 ## The Problem
 
-Unless we have all the resources on earth, we have limited allocations we can do for a given period of time. The minimal size of a goroutine object is 2K, but it can reach up to 1GB. The above solution runs all the tasks concurrently and let's say for a million of these tasks, it can quickly run out of memory and CPU of the machine. Either we have to upgrade our machine or find a different solution.
+Unless we have all the resources on earth, we are limited in the amount of memory and CPU we can allocate at a given time. While the initial stack size of a goroutine is only 2KB, spawning millions of them will quickly consume gigabytes of memory and crash your application. The above solution runs all the tasks concurrently and let's say for a million of these tasks, it can quickly run out of memory and CPU of the machine. Either we have to upgrade our machine or find a different solution.
 
 Computer scientists have thought about this problem long before and came up with a brilliant solution called Thread Pool or Worker Pool. The idea is to have a limited pool of workers to process the tasks. Once a worker is done processing one task, it goes for handling the next task. So tasks keep waiting to be processed. This reduces the burst on CPU and memory and rather distributes the tasks over time.
 
@@ -166,8 +164,8 @@ func PooledWork(allData []model.SimpleData) {
         }()
     }
 
-    for i, _ := range allData {
-        dataCh <- allData[i]
+    for _, data := range allData {
+        dataCh <- data
     }
 
     close(dataCh)
@@ -219,28 +217,21 @@ func PooledWorkError(allData []model.SimpleData) {
         }()
     }
 
-    for i, _ := range allData {
-        dataCh <- allData[i]
+    for _, data := range allData {
+        dataCh <- data
     }
 
     close(dataCh)
 
-    wg.Add(1)
     go func() {
-        defer wg.Done()
-        for {
-            select {
-            case err := <-errors:
-                fmt.Println("finished with error:", err.Error())
-            case <-time.After(time.Second * 1):
-                fmt.Println("Timeout: errors finished")
-                return
-            }
-        }
+        wg.Wait()
+        close(errors)
     }()
 
-    defer close(errors)
-    wg.Wait()
+    for err := range errors {
+        fmt.Println("finished with error:", err.Error())
+    }
+
     elapsed := time.Since(start)
     fmt.Printf("Took ===============> %s\n", elapsed)
 }
