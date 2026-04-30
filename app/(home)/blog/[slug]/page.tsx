@@ -22,6 +22,14 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
       </div>
 
       <article className="border-0 sm:border-2 dark:sm:border border-fd-foreground bg-fd-card px-1 py-8 sm:p-12">
+        {page.data.draft && (
+          <div className="mb-8 border-2 border-dashed border-fd-primary bg-fd-secondary p-4 text-center">
+            <p className="font-mono text-sm font-semibold uppercase tracking-widest text-fd-primary">Draft Mode</p>
+            <p className="mt-1 text-sm text-fd-muted-foreground">
+              This post is currently unpublished and only visible during local development.
+            </p>
+          </div>
+        )}
         <div className="mb-12 border-b-2 border-fd-foreground pb-8">
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
             <span>
