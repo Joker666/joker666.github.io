@@ -57,13 +57,13 @@ clinic doctor --on-port 'autocannon -w 300 -c 100 -d 20 localhost:3000' -- node 
 
 We are doing two things at once: load testing the server with `autocannon` and catching trace data to analyze with `Clinic`. After the script runs for 20 seconds, a browser window should open up with something similar to this:
 
-![Memory Leak Global 1](https://cdn-images-1.medium.com/v2/resize:fit:1600/1*oecZ0b1kQ7tTw11dr_hcyw.png)
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*oecZ0b1kQ7tTw11dr_hcyw.png" alt="Memory Leak Global 1" />
 
 What we see is a steady increase of memory and delay in the event loop to serve requests. This is not only adding to the heap usage but also hampering the performance of the requests. Analyzing the code simply reveals that we are adding to the `requestLogs` global variable with each request and we never free it up. So it keeps growing and leaking.
 
 We can trace the leak with Chrome's Node Inspector by taking a heap dump when the application runs for the first time, taking another heap dump after 30 seconds of load testing, and then comparing the objects allocated between these two. I won't go into detail on how to take a heap dump. You can learn the technique [by reading](https://marmelab.com/blog/2018/04/03/how-to-track-and-fix-memory-leak-with-nodejs.html) these [two articles](https://nodesource.com/blog/memory-leaks-demystified). But when we do follow this process, we see:
 
-![Memory Leak Global 2](https://cdn-images-1.medium.com/v2/resize:fit:1600/1*kECnjRZwBIBuado-7mbSUw.png)
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*kECnjRZwBIBuado-7mbSUw.png" alt="Memory Leak Global 2" />
 
 It is the global variable `requestLogs` that is causing the leak. `Snapshot 2` is significantly higher in memory usage than `Snapshot 1`. Let's fix that:
 
@@ -82,7 +82,7 @@ console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
 
 This is one solution. If you do need to persist this data, you could add external storage like databases to store the logs. And if we run the Clinic load testing again, we see everything is normal now:
 
-![Memory Leak Global 3](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*X9BkudqM0k4zCg8-XGVDxQ.png)
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*X9BkudqM0k4zCg8-XGVDxQ.png" alt="Memory Leak Global 3" />
 
 ### Closures
 Closures are common in JavaScript, and they can cause memory leaks that are elusive in nature. Read the meteor's blog about how they tracked down a closure base memory leak. We explore the situation here:
@@ -105,9 +105,9 @@ var replaceThing = function () {
 };
 
 const server = http.createServer((req, res) => {
-    replaceThing();
-    res.writeHead(200);
-    res.end("Hello World");
+  replaceThing();
+  res.writeHead(200);
+  res.end("Hello World");
 });
 
 server.listen(3000);
@@ -116,13 +116,13 @@ console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
 
 If we load test this code with `autocannon` and `Clinic`, we see:
 
-![Memory Leak Closure 1](https://cdn-images-1.medium.com/v2/resize:fit:1600/1*QNZxIBAYclVs3GZ9TEP1SA.png)
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*QNZxIBAYclVs3GZ9TEP1SA.png" alt="Memory Leak Closure 1" />
 
 The memory is increasing fast, and if we wonder what is wrong with the script, it is clear that `theThing` is overwritten with every API call. Let's take heap dumps and see the result:
 
-![Memory Leak Closure 2](https://cdn-images-1.medium.com/v2/resize:fit:1600/1*N7L2R168iFF83Y3S8bHQVQ.png)
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*N7L2R168iFF83Y3S8bHQVQ.png" alt="Memory Leak Closure 2" />
 
-![Memory Leak Closure 3](https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ccpPtwZrPClKKdHSge9WeQ.png)
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ccpPtwZrPClKKdHSge9WeQ.png" alt="Memory Leak Closure 3" />
 
 When we compare two heap dumps, we see that `someMethod` is kept in memory for all its invocations and it is holding onto `longStr`, which is adding to the rapid increase in memory. In the code above, the `someMethod` closure is creating enclosing scope that is holding onto unused variable even though it is never invoked. This prevents the garbage collector from freeing `originalThing`. The solution is simply nullifying the `originalThing` at the end. We are freeing the object so that the closure scope is not retained anymore:
 
