@@ -1,0 +1,60 @@
+---
+title: "Memory Leaks in Node.js: Part 2"
+description: Memory leaks in Node.js. In this second part, we will discuss caching and unhandled promises.
+author: Rafi Hasan
+date: 2018-10-01
+tags:
+  - nodejs
+  - memory
+  - leaks
+---
+
+We are in the golden age of software. We have tools for everything. We have the tools to make tools. We build core systems into high-level products. But one thing is common at all levels: the infamous memory leak. It is not always a bug in code; sometimes not understanding the behavior of runtime can cause it as well.
+
+The runtime in question here is Node.js. There are a few types of memory leaks that are very common. I have written about two of them in [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1). In Part 2, we are going to explore the other two types.
+
+### The 4 Types of Memory Leaks:
+
+- Global resources
+- Closures
+- Caching
+- Promises
+
+We will focus on caching and promises today.
+
+### Caching
+
+Caching is the most common type of memory leak in Node. I personally do not like on-disk caching; I always prefer a dedicated solution. But since this one has caused some headaches for a lot of developers out there, let's go through a simple example to see how caching can cause memory leaks.
+
+```javascript
+const http = require("http");
+
+function computeTerm(term) {
+    return computeTerm[term] || (computeTerm[term] = compute());
+    function compute() {
+        return Buffer.alloc(1e3);
+    }
+}
+const server = http.createServer((req, res) => {
+    res.end(computeTerm(Math.random()));
+});
+
+server.listen(3000);
+console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
+```
+
+Now, let's run the following:
+
+```bash
+clinic doctor --on-port 'autocannon -w 300 -c 100 -d 30 localhost:3000' -- node server.js
+```
+
+For how this load testing works, please refer to [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1), but basically, we are using `autocannon` for load testing and `Clinic.js` for memory graph analysis. Let's see what we get.
+
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*w1OQ5ukF7Lg8qpHYi3Yo2g.png" alt="Memory Leak Cache 1" />
+
+Memory is increasing fast. Let's go through what is happening in that script. We know that functions are objects in JavaScript, and we leverage that to store cached values here. We store a 1KB buffer object in cache and use random numbers as keys for the caches. Let's take a heap dump to check what is leaking. (The heap dump process was explained in [Part 1](2018-09-12-memory-leaks-in-nodejs-part-1)).
+
+<img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ULn3BHTr2uNoWXE_71wvxQ.png" alt="Memory Leak Cache 2" />
+
+We can see that all the buffer objects are in memory and in the `computeTerm` cache. The reason the cache is leaking memory is that we are not clearing the cache periodically. The solution is to free memory after a timeout. Let's do that.
