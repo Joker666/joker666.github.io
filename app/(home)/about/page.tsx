@@ -9,9 +9,9 @@ export default function AboutPage() {
         <h1 className="text-3xl font-semibold">Hello,</h1>
         <div className="text-muted-foreground">
           <p>
-            I&apos;m <span className="font-semibold text-foreground">Rafi</span>, a senior software engineer with over
-            ten years of experience, currently working at Slumber Studios. These days, I&apos;m hacking some side
-            projects, exploring photography, and pursuing a master's degree in machine learning.
+            I&apos;m <span className="font-semibold text-foreground">Rafi</span> (preferred name), a senior software
+            engineer with over ten years of experience, currently working at Slumber Studios. These days, I&apos;m
+            hacking some side projects, exploring photography, and pursuing a master's degree in machine learning.
           </p>
         </div>
       </div>
