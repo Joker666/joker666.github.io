@@ -87,3 +87,87 @@ We are clearing the cache after one second, i.e., all the cache objects stay in 
 We can see that memory increases but not when we free the cache. Nice and dandy! We need to make sure we free the cache after a certain time so that it doesn't take up space in memory.
 
 We can improve on this solution by using a more complete caching mechanism like LRU cache. But we won't go there today. A more proper robust solution that doesn't store caches in the machine's memory is to use dedicated caching servers like Redis or Memcached. We will explore this in a later article.
+
+## Promises
+
+Promises help with futures. If there is a function that runs in the future, a promise gives us a handle to it, so that when it's over, we can do something with the response or execute other parts of the program. One thing is important when handling promises:
+
+> Promises get stored in memory and they do not clear until they are either handled or rejected
+
+Let's see a simple scenario where promises might take a longer time to resolve, and stay in memory.
+
+```javascript
+const http = require("http");
+
+async function task (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+const server = http.createServer((req, res) => {
+    task(getRndInteger(100, 20000));
+    res.writeHead(200);
+    res.end("Hello World");
+});
+
+server.listen(3000);
+console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
+```
+
+Here we have a task promise that gets resolved after a certain waiting period. We send random numbers from 100ms to 20s to the task function that it would take to resolve the promise. For each request, we create a promise that gets resolved within 100ms to 20s. Let's load-test this.
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*2aKSvCzDQcNtO1pD9oWozQ.png" alt="Memory Leak Promises" />
+
+We see a steady increase in memory. But if promises are being resolved after a certain time period, why is the memory increasing? Because promises are staying in memory. We cannot keep running forever, waiting for the promises to resolve. What if they never resolve? Let's see the heap dump to confirm this is the case.
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zyuLjRrk4MPdQ5bq7yBoGQ.png" alt="Memory Leak Promises" />
+
+And we can clearly see in the snapshot that promises are in the memory. The program stopped, but the promises that never got resolved stayed in memory. The solution is to limit the time a promise can run and time-out after that. Also, in production, we should keep track of these promises and their tasks so that those can be reinitiated. But here let's see how we can solve this.
+
+```javascript
+const http = require("http");
+
+async function task (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+function timeout(timer) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, timer)
+    });
+}
+
+const server = http.createServer((req, res) => {
+    Promise.race([task(getRndInteger(100, 20000)), timeout(500)]);
+    res.writeHead(200);
+    res.end("Hello World");
+});
+
+server.listen(3000);
+console.log("Server listening to port 3000. Press Ctrl+C to stop it.");
+```
+
+We are using `Promise.race`, a function that resolves if any of the promises within an array gets resolved, and it rejects the unresolved ones. We can create a timeout promise which would be the maximum time a promise is allowed to run. Here it's 500ms, and then it would return. Let's see if this solves our memory issue.
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*TjTLUj-OWTBSug5gExWn5g.png" alt="Memory Leak Promises" />
+
+We can see that memory is getting allocated, but since there is a timeout, it's getting freed after a certain duration. It is always good to have a timeout function for long-running tasks and to handle promise rejections.
+
+## Conclusion
+
+We have learned about how caching and promises can leak memory. Over the course of two tutorials, we learned about the four most common types of memory leaks in Node. The examples were of course short and only show the part that's required to demonstrate leaking scenarios. In the real world, the leaks are buried among hundreds of lines of code. But having a solid understanding can help us track down those nasty leaks without a lot of head-scratching.
+
+**Project Link:** [Github](https://github.com/Joker666/nodejs-memory-leak)
+
+## Resources
+- https://www.alxolr.com/articles/understanding-memory-leaks-in-node-js-part-1#promises
+- https://www.alxolr.com/articles/understanding-memory-leaks-in-node-js-part-2#cached-objects
