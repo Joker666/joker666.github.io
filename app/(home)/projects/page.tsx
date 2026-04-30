@@ -19,6 +19,12 @@ const projects = [
     description: "A fast and secure image proxy built on libvips. Drop-in compatible with imgproxy URLs.",
     url: "https://imgforger.github.io/",
   },
+  {
+    id: "today",
+    title: "Today",
+    description: "The minimal to-do app that clears your list every morning.",
+    url: "https://apps.apple.com/us/app/today-a-daily-to-do-list/id6759506994",
+  },
 ];
 
 export default function ProjectsPage() {
