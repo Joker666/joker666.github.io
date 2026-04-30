@@ -9,9 +9,9 @@ tags:
   - leaks
 ---
 
-It is very common for software to introduce bugs. How we manage them is the real issue. One of the most common bugs in the production environment is memory leaks, and Node.js is notorious for being prone to this. So if you are a software developer who is building Node applications in production, understanding how memory leaks can happen and how to tackle them is an uncanny skill.
+It is very common for software to introduce bugs. How we manage them is the real issue. One of the most common bugs in production environments is memory leaks, and Node.js is notorious for being prone to this. So if you are a software developer who is building Node applications in production, understanding how memory leaks can happen and how to tackle them is an invaluable skill.
 
-A Node application is a long-running process that is bootstrapped once until the process is killed or the server restarts. It handles all incoming requests and consumes resources until these are garbage collected by V8. Leaks are the kind of resources that keep their reference in memory and do not get garbage collected. I won't go into detail about how V8's garbage collection works, but feel free to check out these articles on the topic.
+A Node application is a long-running process that is bootstrapped once until the process is killed or the server restarts. It handles all incoming requests and consumes resources until they are garbage collected by V8. Memory leaks occur when resources retain their references in memory and cannot be garbage collected. I won't go into detail about how V8's garbage collection works, but feel free to check out these articles on the topic.
 
 Instead, I will focus on the four types of leaks that are very common and how to avoid them.
 
@@ -61,7 +61,7 @@ We are doing two things at once: load testing the server with `autocannon` and c
 
 What we see is a steady increase of memory and delay in the event loop to serve requests. This is not only adding to the heap usage but also hampering the performance of the requests. Analyzing the code simply reveals that we are adding to the `requestLogs` global variable with each request and we never free it up. So it keeps growing and leaking.
 
-We can trace the leak with Chrome's Node Inspector by taking a heap dump when the application runs for the first time, taking another heap dump after 30 seconds of load testing, and then comparing the objects allocated between these two. I won't go into detail on how to take a heap dump. You can learn the technique [by reading](https://marmelab.com/blog/2018/04/03/how-to-track-and-fix-memory-leak-with-nodejs.html) these [two articles](https://nodesource.com/blog/memory-leaks-demystified). But when we do follow this process, we see:
+We can trace the leak with Chrome's Node Inspector by taking a heap dump when the application runs for the first time, taking another heap dump after 30 seconds of load testing, and then comparing the objects allocated between these two. I won't go into detail on how to take a heap dump, but you can learn the technique from [these two articles](https://nodesource.com/blog/memory-leaks-demystified). When we follow this process, we see:
 
 <img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*kECnjRZwBIBuado-7mbSUw.png" alt="Memory Leak Global 2" />
 
@@ -85,7 +85,7 @@ This is one solution. If you do need to persist this data, you could add externa
 <img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/1*X9BkudqM0k4zCg8-XGVDxQ.png" alt="Memory Leak Global 3" />
 
 ### Closures
-Closures are common in JavaScript, and they can cause memory leaks that are elusive in nature. Read the meteor's blog about how they tracked down a closure base memory leak. We explore the situation here:
+Closures are common in JavaScript, and they can cause memory leaks that are elusive in nature. Read the Meteor blog post about how they tracked down a closure-based memory leak. We explore the situation here:
 
 ```javascript
 const http = require("http");
@@ -99,7 +99,7 @@ var replaceThing = function () {
     theThing = {
         longStr: new Array(10000).join("*"),
         someMethod: function () {
-            console.log(someMessage);
+            console.log("hello");
         },
     };
 };
@@ -124,7 +124,9 @@ The memory is increasing fast, and if we wonder what is wrong with the script, i
 
 <img src="https://cdn-images-1.medium.com/v2/resize:fit:1600/1*ccpPtwZrPClKKdHSge9WeQ.png" alt="Memory Leak Closure 3" />
 
-When we compare two heap dumps, we see that `someMethod` is kept in memory for all its invocations and it is holding onto `longStr`, which is adding to the rapid increase in memory. In the code above, the `someMethod` closure is creating enclosing scope that is holding onto unused variable even though it is never invoked. This prevents the garbage collector from freeing `originalThing`. The solution is simply nullifying the `originalThing` at the end. We are freeing the object so that the closure scope is not retained anymore:
+When we compare two heap dumps, we see that `someMethod` is kept in memory for all its invocations and it is holding onto `longStr`, which is adding to the rapid increase in memory. In the code above, the `someMethod` closure is creating an enclosing scope that holds onto an unused variable even though it is never invoked. This prevents the garbage collector from freeing `originalThing`. 
+
+The solution is simply nullifying `originalThing` at the end of the function. By freeing the object, the closure scope is no longer retained:
 
 ```javascript
 const http = require("http");
@@ -138,7 +140,7 @@ var replaceThing = function () {
   theThing = {
     longStr: new Array(10000).join("*"),
     someMethod: function () {
-      console.log(someMessage);
+      console.log("hello");
     },
   };
   originalThing = null;
