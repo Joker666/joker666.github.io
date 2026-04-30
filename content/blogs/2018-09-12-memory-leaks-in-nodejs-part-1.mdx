@@ -21,7 +21,7 @@ Instead, I will focus on the four types of leaks that are very common and how to
 - Caching
 - Promises
 
-For Part 1, we will be exploring the first two types: global resources and closures. In Part 2, we will see how caching and unhandled promises can cause leaks as well.
+For Part 1, we will be exploring the first two types: global resources and closures. In [Part 2](2018-10-01-memory-leaks-in-nodejs-part-2), we will see how caching and unhandled promises can cause leaks as well.
 
 ### Preparation
 We will need the excellent Clinic.js and autocannon to debug these leaks. You can use any other load testing tool you want. Almost all of them will produce the same results. Clinic.js is an awesome tool developed by NearForm. This will help us do an initial diagnosis of performance issues like memory leaks and even loop delays. So, let's install these tools first:
