@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/site";
-import { blogPosts } from "@/lib/source";
+import { getPosts } from "@/lib/source";
 import { slugifyTag } from "@/lib/string-utils";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -33,9 +33,7 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const posts = [...blogPosts.getPages()]
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+  const posts = [...getPosts()].sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">

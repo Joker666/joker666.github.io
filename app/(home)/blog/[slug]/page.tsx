@@ -1,4 +1,4 @@
-import { blogPosts, getPageImage } from "@/lib/source";
+import { blogPosts, getPageImage, getPosts } from "@/lib/source";
 import { slugifyTag } from "@/lib/string-utils";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -105,10 +105,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return blogPosts
-    .getPages()
-    .filter((page) => !page.data.draft || process.env.NODE_ENV === "development")
-    .map((page) => ({
-      slug: page.slugs[0],
-    }));
+  return getPosts().map((page) => ({
+    slug: page.slugs[0],
+  }));
 }

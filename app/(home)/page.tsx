@@ -1,9 +1,8 @@
-import { blogPosts } from "@/lib/source";
+import { getPosts } from "@/lib/source";
 import { PostList } from "./components/post-list";
 
 export default function HomePage() {
-  const posts = [...blogPosts.getPages()]
-    .filter((post) => !post.data.draft)
+  const posts = [...getPosts()]
     .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
     .map((post) => ({
       title: post.data.title,

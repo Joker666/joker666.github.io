@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/site";
-import { blogPosts } from "@/lib/source";
+import { getPosts } from "@/lib/source";
 import { getAllTags } from "@/lib/tags";
 
 export const dynamic = "force-static";
@@ -18,7 +18,7 @@ function toAbsoluteUrl(path: string) {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = [...blogPosts.getPages()].filter((post) => !post.data.draft);
+  const posts = [...getPosts()];
   const latestPostDate = posts.length
     ? posts.map((post) => new Date(post.data.date)).sort((a, b) => b.getTime() - a.getTime())[0]
     : undefined;

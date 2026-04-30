@@ -1,9 +1,9 @@
-import { blogPosts } from "@/lib/source";
+import { getPosts } from "@/lib/source";
 
 export const revalidate = false;
 
 export async function GET() {
-  const scan = blogPosts.getPages().map(async (page) => {
+  const scan = getPosts().map(async (page) => {
     const processed = await page.data.getText("processed");
     return `# ${page.data.title}\n\n${processed}`;
   });

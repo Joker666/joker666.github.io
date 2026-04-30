@@ -9,6 +9,13 @@ export const blogPosts = loader({
   plugins: [lucideIconsPlugin()],
 });
 
+export function getPosts() {
+  return blogPosts.getPages().filter((post) => {
+    if (process.env.NODE_ENV === "development") return true;
+    return !post.data.draft;
+  });
+}
+
 export function getPageImage(page: InferPageType<typeof blogPosts>) {
   const segments = [...page.slugs, "image.webp"];
 
