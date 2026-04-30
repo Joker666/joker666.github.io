@@ -13,6 +13,10 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   if (!page || (page.data.draft && process.env.NODE_ENV !== "development")) notFound();
   const Mdx = page.data.body;
 
+  const text = await page.data.getText("processed");
+  const wordCount = text.split(/\s+/).length;
+  const readingTime = Math.max(1, Math.ceil(wordCount / 150)); // Assuming 150 words per minute reading speed
+
   return (
     <main className="w-full max-w-4xl mx-auto px-4 py-12">
       <div className="mb-8">
@@ -32,9 +36,17 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
         )}
         <div className="mb-12 border-b-2 border-fd-foreground pb-8">
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
-            <span>
-              {new Date(page.data.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-            </span>
+            <div className="flex items-center gap-4">
+              <span>
+                {new Date(page.data.date).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+              <span>•</span>
+              <span>{readingTime} min read</span>
+            </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold uppercase leading-tight">{page.data.title}</h1>
           <p className="mt-6 text-base text-fd-muted-foreground leading-relaxed">{page.data.description}</p>
