@@ -13,9 +13,9 @@ tags:
 
 [Concurrency in Golang and WorkerPool: [Part 1](2020-11-27-golang-concurrency-and-workerpool-part-1)\]
 
-Goroutines and channels are powerful language structs that make golang a powerful concurrent language. In the first part of the article, we explored, how we can build a workerpool to optimize the performance of the concurrency structs of golang namely limiting the resource utilization. But it was a simple example to demonstrate how we can go about it.
+Goroutines and channels are powerful language constructs that make golang a powerful concurrent language. In the first part of the article, we explored, how we can build a workerpool to optimize the performance of the concurrency constructs of golang namely limiting the resource utilization. But it was a simple example to demonstrate how we can go about it.
 
-Here, we will build a robust solution according to the learning from the first part so that we can use this solution in any application. There are some solutions on the internet with complex architecture using dispatchers and all. In reality, we do not need it, we can do everything using one shared channel. Let's see how we can build that here
+Here, we will build a robust solution according to the learning from the first part so that we can use this solution in any application. There are solutions on the internet that use complex architectures with dedicated dispatchers. In reality, we don't need that; we can achieve the same result using a single shared channel. Let's see how we can build that here
 
 ## Architecture
 
@@ -59,7 +59,7 @@ func process(workerID int, task *Task) {
 }
 ```
 
-`Task` is a simple stuct that holds everything needed to process a task. We pass it the `Data` and the function `f` that is supposed to be executed. And `process` function executes the task. The function `f` takes the Data as a parameter for processing. And we also store the error that is returned. Let's see how `Worker` processes these tasks.
+`Task` is a simple struct that holds everything needed to process a task. We pass it the `Data` and the function `f` that is supposed to be executed. And `process` function executes the task. The function `f` takes the Data as a parameter for processing. And we also store the error that is returned. Let's see how `Worker` processes these tasks.
 
 ```go
 // workerpool/worker.go
@@ -103,7 +103,7 @@ We have a nice little struct `Worker` here. It takes a worker ID and a channel w
 
 ## Worker Pool
 
-We have implemented the `Task` and `Worker` to handle tasks but there's a missing piece here. Who's gonna spawn up these workers and send them tasks. The answer: Worker Pool
+We have implemented the `Task` and `Worker` to handle tasks but there's a missing piece here. Who's going to spawn up these workers and send them tasks? The answer: the Worker Pool
 
 ```go
 // workerpoo/pool.go
@@ -143,8 +143,8 @@ func (p *Pool) Run() {
         worker.Start(&p.wg)
     }
 
-    for i := range p.Tasks {
-        p.collector <- p.Tasks[i]
+    for _, task := range p.Tasks {
+        p.collector <- task
     }
     close(p.collector)
 
@@ -250,7 +250,7 @@ func (wr *Worker) Stop() {
 }
 ```
 
-We add a `quit` channel to `Worker` struct and two new methods. `StartBackgorund` would start an infinite for loop with `select` to read from `taskChan` and process the task. If it reads from `quit` channel it, returns from the function. `Stop` method writes to the `quit` channel.
+We add a `quit` channel to `Worker` struct and two new methods. `StartBackground` would start an infinite for loop with `select` to read from `taskChan` and process the task. If it reads from the `quit` channel, it returns from the function. `Stop` method writes to the `quit` channel.
 
 Armed with these two new methods let's add some new things to `Pool`.
 
@@ -287,8 +287,8 @@ func (p *Pool) RunBackground() {
         go worker.StartBackground()
     }
 
-    for i := range p.Tasks {
-        p.collector <- p.Tasks[i]
+    for _, task := range p.Tasks {
+        p.collector <- task
     }
 
     p.runBackground = make(chan bool)
@@ -297,8 +297,8 @@ func (p *Pool) RunBackground() {
 
 // Stop stops background workers
 func (p *Pool) Stop() {
-    for i := range p.Workers {
-        p.Workers[i].Stop()
+    for _, worker := range p.Workers {
+        worker.Stop()
     }
     p.runBackground <- true
 }
@@ -306,7 +306,7 @@ func (p *Pool) Stop() {
 
 The `Pool` struct now holds the workers and has a `runBackground` channel that can help it to stay alive. We have 3 new methods, `AddTask` can add to `collector` channel anytime now.
 
-The `RunBackground` method spawns a goroutine that runs infinitely to keep the Pool alive along with `runBackground` channel. This is a technique to run the execution forever to read from an empty channel. We spin up the workers in goroutines. Stop method, stops the workers, it writes to `runBackground` to finish the `RunBackground` method. Let's see how it works now.
+The `RunBackground` method spawns a goroutine that runs infinitely to keep the Pool alive along with `runBackground` channel. This is a technique to run the execution forever to read from an empty channel. We spin up the workers in goroutines. The `Stop` method stops the workers; it writes to `runBackground` to finish the `RunBackground` method. Note that in `Worker.Stop()`, we spin up a goroutine to write to the `quit` channel so that `Stop()` doesn't block waiting for the worker to finish its current task. Let's see how it works now.
 
 If we had a real world scenario, this would be running alongside a HTTP server and consuming tasks. We would replicate similar behavior with an infinite loop and it would stop if it matches a certain condition
 
