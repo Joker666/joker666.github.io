@@ -131,7 +131,7 @@ func NewPool(tasks []*Task, concurrency int) *Pool {
     return &Pool{
         Tasks:       tasks,
         concurrency: concurrency,
-        collector:   make(chan *Task, 1000),
+        collector:   make(chan *Task),
     }
 }
 
@@ -152,9 +152,9 @@ func (p *Pool) Run() {
 }
 ```
 
-The worker pool holds all the tasks that it needs to process and takes a concurrency number as input to spawn that many numbers of goroutines to complete the tasks concurrently. It has a buffered channel `collector` which is shared among all the workers.
+The worker pool holds all the tasks that it needs to process and takes a concurrency number as input to spawn that many numbers of goroutines to complete the tasks concurrently. It has an unbuffered channel `collector` which is shared among all the workers. Because it is unbuffered, adding a task to the `collector` channel will block until a worker is ready to pick it up. In a more robust implementation, you could pass a third parameter to `NewPool` to define a custom buffer size, acting as a queue for pending tasks.
 
-So, when we run this worker pool, we spawn the desired number of workers that take the shared channel `collector`. Next, we range over the tasks and write it to the `collector` channel. We synchronize everything with waitgoup. Now that we have a nice solution, let's test it out
+So, when we run this worker pool, we spawn the desired number of workers that take the shared channel `collector`. Next, we range over the tasks and write them to the `collector` channel. We synchronize everything with waitgoup. Now that we have a nice solution, let's test it out
 
 ```go
 // main.go
@@ -201,6 +201,14 @@ Took ===============> 2.0056295s
 It takes us two seconds to process 100 tasks, if we increase the concurrency to 10, we would see that it would take just about one second to process all the tasks.
 
 We have built a robust solution for worker pool that can handle concurrency, store errors to task, send them data to process. This package is generic and not coupled to a specific implementation. We can use this to tackle large problems as well
+
+## Backpressure
+
+You might wonder: if an unbuffered channel forces the main thread to wait, aren't we processing tasks one at a time? 
+
+No! The *handoff* happens one at a time, but the *processing* is concurrent. If we have 5 workers, the main thread hands out 5 tasks sequentially, and all 5 workers process them simultaneously. 
+
+When the 6th task arrives, the main thread blocks because all workers are busy and there is no buffer. This intentional wait introduces **Backpressure**. It naturally prevents memory exhaustion. If we used a massive buffer, the main thread might quickly load millions of tasks into memory and crash the app. Unbuffered channels force the system to ingest data only as fast as it can process it!
 
 ## Extending Further: Handling Tasks In Background
 
