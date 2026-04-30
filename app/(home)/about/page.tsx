@@ -2,7 +2,21 @@ import Link from "next/link";
 
 import { featuredReading } from "@/lib/reading";
 
+const numberToWords: Record<number, string> = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+  6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+  11: "eleven", 12: "twelve", 13: "thirteen", 14: "fourteen",
+  15: "fifteen", 16: "sixteen", 17: "seventeen", 18: "eighteen",
+  19: "nineteen", 20: "twenty"
+};
+
 export default function AboutPage() {
+  const startDate = new Date(2014, 10); // November 2014 (0-indexed month)
+  const currentDate = new Date();
+  let yearsOfExperience = currentDate.getFullYear() - startDate.getFullYear();
+  if (currentDate.getMonth() < 10) yearsOfExperience--;
+  const yearsText = numberToWords[yearsOfExperience] || yearsOfExperience.toString();
+
   return (
     <main className="container max-w-4xl mx-auto py-12 px-4">
       <div className="flex flex-col gap-4">
@@ -11,7 +25,7 @@ export default function AboutPage() {
           <p>
             My real name is <span className="font-semibold text-foreground">MD Ahad Hasan</span>, but I go by my
             preferred name, <span className="font-semibold text-foreground">Rafi Hasan</span>. I am a senior software
-            engineer with over ten years of experience, currently working at Slumber Studios. These days, I&apos;m
+            engineer with over {yearsText} years of experience, currently working at Slumber Studios. These days, I&apos;m
             hacking some side projects, exploring photography, and pursuing a master's degree in machine learning.
           </p>
         </div>
