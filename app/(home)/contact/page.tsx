@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Get in touch with Rafi Hasan via email.",
+};
+
 export default function ContactPage() {
   return (
     <main className="container max-w-4xl mx-auto py-12 px-4">

@@ -1,4 +1,10 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "A selection of projects I've worked on, including Cogman, Journey+, Imgforge, and Today.",
+};
 
 const projects = [
   {

@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { featuredReading } from "@/lib/reading";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "MD Ahad Hasan (Rafi Hasan) is a senior engineer with over ten years of experience, currently working at Slumber Studios.",
+};
 
 const numberToWords: Record<number, string> = {
   1: "one",
@@ -39,10 +46,10 @@ export default function AboutPage() {
         <div className="text-muted-foreground">
           <p>
             My real name is <span className="font-semibold text-foreground">MD Ahad Hasan</span>, but I go by my
-            preferred name, <span className="font-semibold text-foreground">Rafi Hasan</span>. I am a senior
-            engineer with over <span className="font-semibold text-foreground">{yearsText} years </span>of experience,
-            currently working at Slumber Studios. These days, I&apos;m hacking some side projects, exploring
-            photography, and pursuing a master's degree in machine learning.
+            preferred name, <span className="font-semibold text-foreground">Rafi Hasan</span>. I am a senior engineer
+            with over <span className="font-semibold text-foreground">{yearsText} years </span>of experience, currently
+            working at Slumber Studios. These days, I&apos;m hacking some side projects, exploring photography, and
+            pursuing a master's degree in machine learning.
           </p>
         </div>
       </div>
