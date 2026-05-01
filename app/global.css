@@ -80,6 +80,10 @@ pre {
     padding: 1rem;
 }
 
+.prose a {
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 640px) {
     pre {
         padding: 0;
