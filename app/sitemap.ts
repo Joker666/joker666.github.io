@@ -55,6 +55,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
     {
+      url: toAbsoluteUrl("/research"),
+      changeFrequency: "yearly",
+      priority: 0.5,
+    },
+    {
       url: toAbsoluteUrl("/contact"),
       changeFrequency: "yearly",
       priority: 0.4,

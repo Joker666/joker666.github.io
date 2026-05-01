@@ -39,7 +39,7 @@ export default function AboutPage() {
         <div className="text-muted-foreground">
           <p>
             My real name is <span className="font-semibold text-foreground">MD Ahad Hasan</span>, but I go by my
-            preferred name, <span className="font-semibold text-foreground">Rafi Hasan</span>. I am a senior software
+            preferred name, <span className="font-semibold text-foreground">Rafi Hasan</span>. I am a senior
             engineer with over <span className="font-semibold text-foreground">{yearsText} years </span>of experience,
             currently working at Slumber Studios. These days, I&apos;m hacking some side projects, exploring
             photography, and pursuing a master's degree in machine learning.

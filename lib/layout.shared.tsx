@@ -20,6 +20,10 @@ export function baseOptions(): BaseLayoutProps {
         url: "/projects",
       },
       {
+        text: "Research",
+        url: "/research",
+      },
+      {
         text: "About",
         url: "/about",
       },
