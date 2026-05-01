@@ -85,9 +85,7 @@ export default function ProxyTaskEmbeddingViz() {
   ];
 
   const getPanelClass = (panelStep: Step) =>
-    `[grid-area:1/1] transition-opacity duration-200 ease-out ${
-      step === panelStep ? "opacity-100" : "pointer-events-none opacity-0"
-    }`;
+    `[grid-area:1/1] ${step === panelStep ? "opacity-100" : "pointer-events-none opacity-0"}`;
 
   return (
     <div className="my-8 border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
