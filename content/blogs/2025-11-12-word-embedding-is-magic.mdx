@@ -22,7 +22,7 @@ If we can somehow represent words as vectors then we can projects them in a 3D s
 
 ### The Fake Task
 
-Now the fake task given to the network is "Given this word, what is the probability that [Word X] is located nearby?" If the model sees "coffee" and "starbucks" together often, it tries to minimize the error in predicting one from the other. The **magic** happens in the hidden layer. To succeed at the "fake" task, the model is forced to learn compressed, mathematical representations of words.
+Now the fake task given to the network is "Given this word X, what is the probability that word Y is located nearby?" If the model sees "coffee" and "starbucks" together often, it tries to minimize the error in predicting one from the other. The **magic** happens in the hidden layer. To succeed at the "fake" task, the model is forced to learn compressed, mathematical representations of words.
 
 To solve the prediction, the data must pass through a narrow hidden layer (e.g., 300 neurons). Because the layer is narrow, the model is forced to compress the words identity into a dense vector of numbers. If "intelligent" and "smart" appear in similar contexts, the network realizes it can "save space" and increase accuracy by giving them similar internal scores. These internal scores are the weights of the hidden layer and these weights are the embeddings. During training, the model adjusts this matrix to improve its ability to predict nearby words.
 
