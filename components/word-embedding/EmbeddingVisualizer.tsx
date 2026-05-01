@@ -34,7 +34,7 @@ const EmbeddingVisualizer = () => {
               <button
                 key={word}
                 onClick={() => setSelectedIndex(i)}
-                className={`flex items-center gap-3 border px-3 py-1 transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 border px-3 py-1 transition-colors ${
                   selectedIndex === i
                     ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
                     : "border-transparent text-fd-muted-foreground hover:border-fd-foreground hover:bg-fd-secondary hover:text-fd-foreground"

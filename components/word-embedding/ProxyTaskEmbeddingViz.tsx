@@ -100,7 +100,7 @@ export default function ProxyTaskEmbeddingViz() {
               setExampleIndex(index);
               setStep("task");
             }}
-            className={`border-2 px-3 py-1 text-sm font-semibold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
+            className={`cursor-pointer border-2 px-3 py-1 text-sm font-semibold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
               exampleIndex === index
                 ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
                 : "border-fd-foreground bg-fd-background text-fd-foreground hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
@@ -131,7 +131,7 @@ export default function ProxyTaskEmbeddingViz() {
             type="button"
             aria-pressed={step === card.id}
             onClick={() => setStep(card.id)}
-            className={`border-2 p-4 text-left transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
+            className={`cursor-pointer border-2 p-4 text-left transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
               step === card.id
                 ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
                 : "border-fd-foreground bg-fd-card hover:bg-fd-secondary hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
@@ -256,21 +256,23 @@ export default function ProxyTaskEmbeddingViz() {
                   One-hot input
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="mt-4 grid gap-2">
                   {example.sentence.map((word) => {
                     const isCenter = word === example.center;
 
                     return (
                       <div
                         key={word}
-                        className={`border-2 p-2 text-center ${
+                        className={`grid grid-cols-[minmax(0,1fr)_2.5rem] items-center border-2 ${
                           isCenter
                             ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
                             : "border-fd-foreground bg-fd-secondary text-fd-muted-foreground"
                         }`}
                       >
-                        <div className="text-[10px] uppercase tracking-widest">{word}</div>
-                        <div className="mt-2 text-lg font-bold">{isCenter ? "1" : "0"}</div>
+                        <div className="truncate px-3 py-2 text-[10px] uppercase tracking-widest">{word}</div>
+                        <div className="border-l-2 border-current px-2 py-2 text-center text-lg font-bold">
+                          {isCenter ? "1" : "0"}
+                        </div>
                       </div>
                     );
                   })}
