@@ -1,8 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { EmbeddingWord } from "./toy-embeddings";
+import { getToyEmbedding } from "./toy-embeddings";
 
-const examples = [
+const examples: Array<{
+  sentence: string[];
+  center: EmbeddingWord;
+  context: string[];
+  prediction: Record<string, number>;
+}> = [
   {
     sentence: ["machine", "learning", "algorithms", "use", "data"],
     center: "learning",
@@ -14,7 +21,6 @@ const examples = [
       model: 0.08,
       weather: 0.04,
     },
-    embedding: [0.41, -0.22, 0.88],
   },
   {
     sentence: ["neural", "network", "model", "learns", "patterns"],
@@ -27,7 +33,6 @@ const examples = [
       training: 0.11,
       banana: 0.06,
     },
-    embedding: [0.29, 0.58, 0.51],
   },
   {
     sentence: ["training", "data", "improves", "the", "model"],
@@ -40,7 +45,6 @@ const examples = [
       learning: 0.1,
       ocean: 0.06,
     },
-    embedding: [0.08, 0.64, 0.46],
   },
 ];
 
@@ -69,6 +73,7 @@ export default function ProxyTaskEmbeddingViz() {
   const [step, setStep] = useState<Step>("task");
 
   const example = examples[exampleIndex];
+  const embedding = getToyEmbedding(example.center);
 
   const predictedWords = useMemo(() => Object.entries(example.prediction).sort((a, b) => b[1] - a[1]), [example]);
 
@@ -76,7 +81,7 @@ export default function ProxyTaskEmbeddingViz() {
     { label: "center word", value: example.center },
     { label: "predict context", value: example.context.join(" + ") },
     { label: "error updates", value: `W1[${example.center}]` },
-    { label: "keep vector", value: `[${example.embedding.map((value) => value.toFixed(2)).join(", ")}]` },
+    { label: "keep vector", value: `[${embedding.map((value) => value.toFixed(2)).join(", ")}]` },
   ];
 
   return (
@@ -300,7 +305,7 @@ export default function ProxyTaskEmbeddingViz() {
                   Embedding kept
                 </div>
                 <div className="mt-4 bg-fd-secondary p-3 font-mono text-sm font-semibold text-fd-primary">
-                  [{example.embedding.map((v) => v.toFixed(2)).join(", ")}]
+                  [{embedding.map((v) => v.toFixed(2)).join(", ")}]
                 </div>
                 <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
                   This vector is the artifact reused after training.

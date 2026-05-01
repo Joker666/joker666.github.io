@@ -1,20 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { embeddingVocabulary, getToyEmbedding } from "./toy-embeddings";
 
 const EmbeddingVisualizer = () => {
   const [selectedIndex, setSelectedIndex] = useState(1);
 
-  const vocabulary = ["machine", "learning", "model", "data", "algorithm"];
-
-  // Simulated 5x3 hidden layer weight matrix (W1)
-  const weightMatrix = [
-    [0.42, -0.11, 0.89],
-    [-0.76, 0.55, 0.23],
-    [0.12, 0.94, -0.34],
-    [-0.55, -0.88, 0.11],
-    [0.99, -0.22, 0.45],
-  ];
+  const vocabulary = embeddingVocabulary;
+  const weightMatrix = vocabulary.map((word) => getToyEmbedding(word));
 
   return (
     <div className="my-8 border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
