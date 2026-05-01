@@ -117,7 +117,7 @@ export default function ProxyTaskEmbeddingViz() {
             <div className="text-[10px] font-semibold uppercase tracking-widest text-fd-muted-foreground">
               {index + 1}. {item.label}
             </div>
-            <div className={`mt-2 text-sm font-semibold ${index === 2 ? "text-fd-primary" : "text-fd-foreground"}`}>
+            <div className={`mt-2 text-[12px] font-semibold ${index === 2 ? "text-fd-primary" : "text-fd-foreground"}`}>
               {item.value}
             </div>
           </div>
@@ -138,7 +138,9 @@ export default function ProxyTaskEmbeddingViz() {
             }`}
           >
             <div className="text-sm font-semibold uppercase">{card.title}</div>
-            <div className={`mt-2 text-xs leading-5 ${step === card.id ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}>
+            <div
+              className={`mt-2 text-xs leading-5 ${step === card.id ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
+            >
               {card.detail}
             </div>
           </button>
@@ -167,7 +169,9 @@ export default function ProxyTaskEmbeddingViz() {
                     }`}
                   >
                     <div className="font-semibold">{word}</div>
-                    <div className={`mt-1 text-[10px] uppercase tracking-widest ${isCenter ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}>
+                    <div
+                      className={`mt-1 text-[10px] uppercase tracking-widest ${isCenter ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
+                    >
                       {isCenter ? "center" : isContext ? "context" : "other"}
                     </div>
                   </div>
@@ -206,7 +210,9 @@ export default function ProxyTaskEmbeddingViz() {
                 return (
                   <div key={word} className="grid gap-2">
                     <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className={isActualContext ? "font-semibold text-fd-foreground" : "text-fd-muted-foreground"}>
+                      <span
+                        className={isActualContext ? "font-semibold text-fd-foreground" : "text-fd-muted-foreground"}
+                      >
                         {word}
                         {isActualContext ? (
                           <span className="ml-2 border border-fd-primary px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-fd-primary">
@@ -214,7 +220,9 @@ export default function ProxyTaskEmbeddingViz() {
                           </span>
                         ) : null}
                       </span>
-                      <span className="font-mono text-xs text-fd-muted-foreground">{(probability * 100).toFixed(0)}%</span>
+                      <span className="font-mono text-xs text-fd-muted-foreground">
+                        {(probability * 100).toFixed(0)}%
+                      </span>
                     </div>
 
                     <div className="h-3 border border-fd-foreground bg-fd-secondary">
@@ -244,7 +252,9 @@ export default function ProxyTaskEmbeddingViz() {
 
             <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
               <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">One-hot input</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                  One-hot input
+                </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
                   {example.sentence.map((word) => {
@@ -270,7 +280,9 @@ export default function ProxyTaskEmbeddingViz() {
               <div className="hidden font-bold text-fd-primary md:block">x</div>
 
               <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">Updated W1 row</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                  Updated W1 row
+                </div>
                 <div className="mt-4 border-2 border-fd-primary bg-fd-background p-3 font-mono text-sm font-semibold text-fd-primary">
                   W1[{example.center}]
                 </div>
@@ -282,7 +294,9 @@ export default function ProxyTaskEmbeddingViz() {
               <div className="hidden font-bold text-fd-primary md:block">=</div>
 
               <div className="border-2 border-fd-primary bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">Embedding kept</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                  Embedding kept
+                </div>
                 <div className="mt-4 bg-fd-secondary p-3 font-mono text-sm font-semibold text-fd-primary">
                   [{example.embedding.map((v) => v.toFixed(2)).join(", ")}]
                 </div>
