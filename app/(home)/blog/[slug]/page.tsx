@@ -1,7 +1,7 @@
 import { blogPosts, getPageImage, getPosts } from "@/lib/source";
 import { slugifyTag } from "@/lib/string-utils";
+import { getMDXComponents } from "@/mdx-components";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
-import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -60,7 +60,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
                     prose-code:after:content-none"
         >
           <InlineTOC items={page.data.toc} />
-          <Mdx components={defaultMdxComponents} />
+          <Mdx components={getMDXComponents()} />
         </div>
 
         <div className="mt-16 pt-8 border-t-2 border-fd-foreground flex justify-between items-center font-mono text-sm">
