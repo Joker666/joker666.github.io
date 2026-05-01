@@ -84,6 +84,11 @@ export default function ProxyTaskEmbeddingViz() {
     { label: "keep vector", value: `[${embedding.map((value) => value.toFixed(2)).join(", ")}]` },
   ];
 
+  const getPanelClass = (panelStep: Step) =>
+    `[grid-area:1/1] transition-opacity duration-200 ease-out ${
+      step === panelStep ? "opacity-100" : "pointer-events-none opacity-0"
+    }`;
+
   return (
     <div className="my-8 border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
       <div className="border-b-2 border-fd-foreground pb-4">
@@ -152,172 +157,164 @@ export default function ProxyTaskEmbeddingViz() {
         ))}
       </div>
 
-      <div className="mt-8 border-2 border-fd-foreground bg-fd-background p-4 sm:p-5">
-        {step === "task" && (
-          <div>
-            <h4 className="text-sm font-semibold uppercase">The proxy task</h4>
+      <div className="mt-8 grid border-2 border-fd-foreground bg-fd-background p-4 sm:p-5">
+        <div aria-hidden={step !== "task"} className={getPanelClass("task")}>
+          <h4 className="text-sm font-semibold uppercase">The proxy task</h4>
 
-            <div className="mt-5 flex flex-wrap items-stretch justify-center gap-2">
-              {example.sentence.map((word) => {
-                const isCenter = word === example.center;
-                const isContext = example.context.includes(word);
+          <div className="mt-5 flex flex-wrap items-stretch justify-center gap-2">
+            {example.sentence.map((word) => {
+              const isCenter = word === example.center;
+              const isContext = example.context.includes(word);
 
-                return (
+              return (
+                <div
+                  key={word}
+                  className={`border-2 px-4 py-3 text-center text-sm transition ${
+                    isCenter
+                      ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
+                      : isContext
+                        ? "border-fd-foreground bg-fd-secondary text-fd-foreground"
+                        : "border-fd-muted bg-fd-card text-fd-muted-foreground"
+                  }`}
+                >
+                  <div className="font-semibold">{word}</div>
                   <div
-                    key={word}
-                    className={`border-2 px-4 py-3 text-center text-sm transition ${
-                      isCenter
-                        ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
-                        : isContext
-                          ? "border-fd-foreground bg-fd-secondary text-fd-foreground"
-                          : "border-fd-muted bg-fd-card text-fd-muted-foreground"
-                    }`}
+                    className={`mt-1 text-[10px] uppercase tracking-widest ${isCenter ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
                   >
-                    <div className="font-semibold">{word}</div>
+                    {isCenter ? "center" : isContext ? "context" : "other"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 grid gap-3 text-center md:grid-cols-[1fr_auto_1fr] md:items-center">
+            <div className="border-2 border-fd-foreground bg-fd-card px-4 py-3">
+              center word: <strong>{example.center}</strong>
+            </div>
+            <div className="font-bold text-fd-primary">-&gt;</div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {example.context.map((word) => (
+                <div key={word} className="border-2 border-fd-foreground bg-fd-secondary px-4 py-3 text-sm">
+                  predict: <strong>{word}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-6 border-l-4 border-fd-primary bg-fd-card p-4 font-sans text-sm leading-6 text-fd-muted-foreground">
+            The task is a training signal. It forces the model to organize words by the company they keep.
+          </p>
+        </div>
+
+        <div aria-hidden={step !== "prediction"} className={getPanelClass("prediction")}>
+          <h4 className="text-sm font-semibold uppercase">Prediction creates useful pressure</h4>
+
+          <div className="mt-5 grid gap-3">
+            {predictedWords.map(([word, probability]) => {
+              const isActualContext = example.context.includes(word);
+
+              return (
+                <div key={word} className="grid gap-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className={isActualContext ? "font-semibold text-fd-foreground" : "text-fd-muted-foreground"}>
+                      {word}
+                      {isActualContext ? (
+                        <span className="ml-2 border border-fd-primary px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-fd-primary">
+                          actual context
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="font-mono text-xs text-fd-muted-foreground">
+                      {(probability * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div className="h-3 border border-fd-foreground bg-fd-secondary">
                     <div
-                      className={`mt-1 text-[10px] uppercase tracking-widest ${isCenter ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
+                      className={`h-full transition-all ${isActualContext ? "bg-fd-primary" : "bg-fd-foreground"}`}
+                      style={{ width: `${probability * 100}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 grid gap-3 border-2 border-fd-foreground bg-fd-card p-4 text-sm leading-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
+            <span>Prediction misses become error</span>
+            <span className="font-bold text-fd-primary">-&gt;</span>
+            <span>
+              Error updates <strong className="text-fd-primary">W1[{example.center}]</strong>
+            </span>
+          </div>
+        </div>
+
+        <div aria-hidden={step !== "embedding"} className={getPanelClass("embedding")}>
+          <h4 className="text-sm font-semibold uppercase">The useful result is hidden in W1</h4>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
+            <div className="border-2 border-fd-foreground bg-fd-card p-4">
+              <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                One-hot input
+              </div>
+
+              <div className="mt-4 grid gap-2">
+                {example.sentence.map((word) => {
+                  const isCenter = word === example.center;
+
+                  return (
+                    <div
+                      key={word}
+                      className={`grid grid-cols-[minmax(0,1fr)_2.5rem] items-center border-2 ${
+                        isCenter
+                          ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
+                          : "border-fd-foreground bg-fd-secondary text-fd-muted-foreground"
+                      }`}
                     >
-                      {isCenter ? "center" : isContext ? "context" : "other"}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-3 text-center md:grid-cols-[1fr_auto_1fr] md:items-center">
-              <div className="border-2 border-fd-foreground bg-fd-card px-4 py-3">
-                center word: <strong>{example.center}</strong>
-              </div>
-              <div className="font-bold text-fd-primary">-&gt;</div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {example.context.map((word) => (
-                  <div key={word} className="border-2 border-fd-foreground bg-fd-secondary px-4 py-3 text-sm">
-                    predict: <strong>{word}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <p className="mt-6 border-l-4 border-fd-primary bg-fd-card p-4 font-sans text-sm leading-6 text-fd-muted-foreground">
-              The task is a training signal. It forces the model to organize words by the company they keep.
-            </p>
-          </div>
-        )}
-
-        {step === "prediction" && (
-          <div>
-            <h4 className="text-sm font-semibold uppercase">Prediction creates useful pressure</h4>
-
-            <div className="mt-5 grid gap-3">
-              {predictedWords.map(([word, probability]) => {
-                const isActualContext = example.context.includes(word);
-
-                return (
-                  <div key={word} className="grid gap-2">
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span
-                        className={isActualContext ? "font-semibold text-fd-foreground" : "text-fd-muted-foreground"}
-                      >
-                        {word}
-                        {isActualContext ? (
-                          <span className="ml-2 border border-fd-primary px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-fd-primary">
-                            actual context
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="font-mono text-xs text-fd-muted-foreground">
-                        {(probability * 100).toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="h-3 border border-fd-foreground bg-fd-secondary">
-                      <div
-                        className={`h-full transition-all ${isActualContext ? "bg-fd-primary" : "bg-fd-foreground"}`}
-                        style={{ width: `${probability * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-3 border-2 border-fd-foreground bg-fd-card p-4 text-sm leading-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
-              <span>Prediction misses become error.</span>
-              <span className="font-bold text-fd-primary">-&gt;</span>
-              <span>
-                Error updates <strong className="text-fd-primary">W1[{example.center}]</strong>.
-              </span>
-            </div>
-          </div>
-        )}
-
-        {step === "embedding" && (
-          <div>
-            <h4 className="text-sm font-semibold uppercase">The useful result is hidden in W1</h4>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
-              <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                  One-hot input
-                </div>
-
-                <div className="mt-4 grid gap-2">
-                  {example.sentence.map((word) => {
-                    const isCenter = word === example.center;
-
-                    return (
-                      <div
-                        key={word}
-                        className={`grid grid-cols-[minmax(0,1fr)_2.5rem] items-center border-2 ${
-                          isCenter
-                            ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
-                            : "border-fd-foreground bg-fd-secondary text-fd-muted-foreground"
-                        }`}
-                      >
-                        <div className="truncate px-3 py-2 text-[10px] uppercase tracking-widest">{word}</div>
-                        <div className="border-l-2 border-current px-2 py-2 text-center text-lg font-bold">
-                          {isCenter ? "1" : "0"}
-                        </div>
+                      <div className="truncate px-3 py-2 text-[10px] uppercase tracking-widest">{word}</div>
+                      <div className="border-l-2 border-current px-2 py-2 text-center text-lg font-bold">
+                        {isCenter ? "1" : "0"}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="hidden font-bold text-fd-primary md:block">x</div>
-
-              <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                  Updated W1 row
-                </div>
-                <div className="mt-4 border-2 border-fd-primary bg-fd-background p-3 font-mono text-sm font-semibold text-fd-primary">
-                  W1[{example.center}]
-                </div>
-                <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
-                  Training changed this row while solving the prediction task.
-                </p>
-              </div>
-
-              <div className="hidden font-bold text-fd-primary md:block">=</div>
-
-              <div className="border-2 border-fd-primary bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                  Embedding kept
-                </div>
-                <div className="mt-4 bg-fd-secondary p-3 font-mono text-sm font-semibold text-fd-primary">
-                  [{embedding.map((v) => v.toFixed(2)).join(", ")}]
-                </div>
-                <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
-                  This vector is the artifact reused after training.
-                </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="mt-6 border-2 border-fd-foreground bg-fd-secondary p-4 font-sans text-sm leading-6">
-              The proxy task is not the final product. It is the pressure that shapes the embedding.
+            <div className="hidden font-bold text-fd-primary md:block">x</div>
+
+            <div className="border-2 border-fd-foreground bg-fd-card p-4">
+              <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                Updated W1 row
+              </div>
+              <div className="mt-4 border-2 border-fd-primary bg-fd-background p-3 font-mono text-sm font-semibold text-fd-primary">
+                W1[{example.center}]
+              </div>
+              <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
+                Training changed this row while solving the prediction task.
+              </p>
+            </div>
+
+            <div className="hidden font-bold text-fd-primary md:block">=</div>
+
+            <div className="border-2 border-fd-primary bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
+              <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                Embedding kept
+              </div>
+              <div className="mt-4 bg-fd-secondary p-3 font-mono text-sm font-semibold text-fd-primary">
+                [{embedding.map((v) => v.toFixed(2)).join(", ")}]
+              </div>
+              <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
+                This vector is the artifact reused after training.
+              </p>
             </div>
           </div>
-        )}
+
+          <div className="mt-6 border-2 border-fd-foreground bg-fd-secondary p-4 font-sans text-sm leading-6">
+            The proxy task is not the final product. It is the pressure that shapes the embedding.
+          </div>
+        </div>
       </div>
     </div>
   );
