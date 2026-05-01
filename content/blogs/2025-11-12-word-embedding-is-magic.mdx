@@ -7,10 +7,38 @@ draft: true
 tags: ["machine-learning", "natural-language-processing", "word-embedding"]
 ---
 
-When I first learned about word embedding models, something fell off. How can a computer understand language? It turns out, it can't. But it can approximate it. We train a model to predict nearby words. Given "credit" the model tries to predict "card". But here's the thing, nobody actually cares about this prediction task. We want the model to understand language and essentially the relationship between these two words. I've used word embedding models without fully understanding how it works. And to scratch this itch, I found one of the most profound inventions, at least to my eyes. It is like magic.
+I've used word embedding models without fully understanding how it works. And to scratch this itch, I found one of the most profound inventions, at least to my eyes. It is like magic. How can a computer understand language? I keep seeing this `king - man + woman = queen` example everywhere. But how does a computer get to discern this?
+
+It turns out, it can't. But it can approximate it. We train a model to predict nearby words. Given "credit" the model tries to predict "card". But here's the thing, nobody actually cares about this prediction task. We want the model to understand language and essentially the relationship between these two words. So that end of the day it can do this `king - man + woman = queen`.
 
 > We train the model on a task we intend to fail at (or at least, a task we don't plan to use)
 
+I'm not going to go in-depth about about `word2vec` actually works. There are [fantastic resources](#resources) around this. I am just going to talk about the interesting idea that made this possible.
+
+### The Idea
+If we can somehow represent words as vectors then we can projects them in a 3D space then we can find ways to optimize distance between two similar words. So it starts with this, how do we represent words as vectors. A one-hot encoded vector is a "dumb" array of zeros and a single one. We can represent words as a one hot encoded vector. Because the input is one-hot, this operation simply selects a row from that matrix. That row is the word's embedding. 
+
 <EmbeddingVisualizer />
 
+### The Fake Task
+
+Now the fake task given to the network is "Given this word, what is the probability that [Word X] is located nearby?" If the model sees "coffee" and "starbucks" together often, it tries to minimize the error in predicting one from the other. The **magic** happens in the hidden layer. To succeed at the "fake" task, the model is forced to learn compressed, mathematical representations of words.
+
+To solve the prediction, the data must pass through a narrow hidden layer (e.g., 300 neurons). Because the layer is narrow, the model is forced to compress the words identity into a dense vector of numbers. If "intelligent" and "smart" appear in similar contexts, the network realizes it can "save space" and increase accuracy by giving them similar internal scores. These internal scores are the weights of the hidden layer and these weights are the embeddings. During training, the model adjusts this matrix to improve its ability to predict nearby words.
+
+### The Trick
+
+Finally here's the trick. The prediction task is not the goal. It's a constraint. It forces the model to learn structure and relationship. We don't actually care about the network's ability to predict nearby words. Once the training is over, we typically delete the output layer entirely. We only keep the **Weight Matrix**, which has become a lookup table of embeddings. This has become the brain that now understands language.
+
 <ProxyTaskEmbeddingViz />
+
+### Conclusion
+It is a form of Self-Supervised Learning. We don't need humans to label data. The "fake task" uses the natural structure of language as its own label. It allows the model to "accidentally" learn human semantics like the famous relationship `king - man + woman = queen`.
+
+As someone working with sequence models and time-series, I've started to see the same pattern everywhere. The loss function is rarely the end goal. It's a tool to shape the representation. This similar trick appears elsewhere in ML as well like `Autoencoders`.
+
+### Resources
+
+- https://www.cs.cmu.edu/~dst/WordEmbeddingDemo/tutorial.html
+- https://jaketae.github.io/study/word2vec/
+- https://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/
