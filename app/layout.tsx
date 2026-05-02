@@ -4,6 +4,7 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { JetBrains_Mono, Overpass } from "next/font/google";
+import "katex/dist/katex.css";
 import "./global.css";
 
 const sans = Overpass({

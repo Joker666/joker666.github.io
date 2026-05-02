@@ -1,5 +1,7 @@
 import { RehypeCodeOptions } from "fumadocs-core/mdx-plugins";
 import { defineConfig, defineCollections, frontmatterSchema } from "fumadocs-mdx/config";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 import { z } from "zod";
 
 export const blogs = defineCollections({
@@ -38,6 +40,8 @@ const rehypeCodeOptions: RehypeCodeOptions = {
 
 export default defineConfig({
   mdxOptions: {
+    remarkPlugins: [remarkMath],
+    rehypePlugins: (plugins) => [rehypeKatex, ...plugins],
     rehypeCodeOptions: rehypeCodeOptions,
   },
 });
