@@ -39,7 +39,7 @@ Which means the real question is never "can a neural network solve this?" The re
 - How do you represent a graph structure?
 - How do you represent a timeseries?
 
-The history of deep learning is largely a history of people finding clever differentiable representations. CNNs for spatial locality, Transformers for sequence attention, GNNs for graphs. The backprop engine is just waiting. The representation is the invention.
+The history of deep learning is largely a history of people finding clever differentiable representations. CNNs for spatial locality, Transformers for sequence attention, GNNs for graphs.
 
 ### The Essence
 
@@ -47,6 +47,6 @@ The backprop algorithm is not the invention. Leibniz knew the chain rule in 1675
 
 ResNets did not change backprop. They changed the computation graph. Transformers did not change backprop. They changed how tokens attend to each other before the gradient flows. AlphaFold did not change backprop. It found a way to encode protein geometry such that evolutionary fitness became a differentiable target.
 
-Every major breakthrough in deep learning, when you strip it down, is someone finding a better coordinate system for a problem, a differentiable encoding, a better representation. A way to lay it flat so the gradient can move across it.
+Every major breakthrough in deep learning, when you strip it down, is someone finding a better coordinate system for a problem, a differentiable encoding, a better representation.
 
 The **Universal Approximation Theorem** provides the theoretical backing. Any continuous function, once you have encoded your problem correctly, can be approximated by a neural network of sufficient capacity. The network is not the intelligence. It is the clay. You, the designer, are the one who decides what shape the clay should take.
