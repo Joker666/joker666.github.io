@@ -11,7 +11,7 @@ interface Post {
 
 export function PostList({ posts }: { posts: Post[] }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {posts.map((post) => (
         <Link
           key={post.url}
