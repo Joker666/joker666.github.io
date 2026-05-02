@@ -9,27 +9,27 @@ tags:
   - backpropagation
 ---
 
-I recently started my masters and part of it, I have to work as a TA. And I am working with students for the Neural Networks course. I see the students go through the same types of questions and issues that I went through. There's so many ceremonies to train a model, the network, layers, backpropagation, activation functions, optmizers, architectures etc. And all of these are foreign concept for a Computer Science student compared to the previous programming or coputer architecture courses they have taken. How can I simplify the essence of neural network to them? How to think of it from the first principles?
+I recently started my masters degree, and as part of it, I work as a Teaching Assistant. Currently, I am working with students in the Neural Networks course. I see the students go through the same types of questions and issues that I went through. There are so many ceremonies involved in training a model. We have the network, layers, backpropagation, activation functions, optimizers, architectures, and more. All of these are foreign concepts to a Computer Science student compared to the programming or computer architecture courses they have previously taken. How can I simplify the essence of neural networks for them? How do we think about it from first principles?
 
 ### The Idea
 
-And I am going to try real hard to do that here. There is one idea underneath all of machine learning. Not matrices. Not activation functions. Not attention heads. Those are tools. The idea is this:
+I am going to try very hard to do that here. There is one idea underneath all of machine learning. Not matrices. Not activation functions. Not attention heads. Those are tools. The idea is this.
 
 > If you can represent your problem in a differentiable way, a machine can learn it*
 
-Everything else is engineering built on top of that. Also the representation must be optimizable, that's why the asterisk.
+Everything else is engineering built on top of that. (Also the representation must be optimizable, hence the asterisk.)
 
 ### The Primitive
 
-Fundamentally, learning means minimizing a cost function $$J$$ with respect to parameters $$\theta$$. If the mapping $$f(x; \theta)$$ is differentiable, we can use the chain rule to find:
+Fundamentally, learning means minimizing a cost function $$J$$ with respect to parameters $$\theta$$. If the mapping $$f(x; \theta)$$ is differentiable, we can use the chain rule to find
 
 ```math
 \frac{\partial J}{\partial \theta} = \frac{\partial J}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial \theta}
 ```
 
-As long as that gradient exists and is non-zero, the "learning" (stepping in the direction of $$-\nabla_{\theta} J$$) can happen. This is just the chain rule of calculus. Backpropagation is just this chain rule, applied repeatedly. You make a prediction, measure how wrong it is, and compute how much each parameter contributed to that wrongness. Then you nudge each parameter slightly in the direction that reduces the error. Repeat a million times.
+As long as that gradient exists and is non zero, learning (stepping in the direction of $$-\nabla_{\theta} J$$) can happen. Backpropagation is simply the repeated application of this chain rule. You make a prediction, measure how wrong it is, and compute how much each parameter contributed to that error. Then you nudge each parameter slightly in the direction that reduces the error. Repeat a million times.
 
-The algorithm doesn't know it's looking at a face, a sentence, or a heartbeat. It knows one thing, here is a number, make it smaller.
+> The algorithm doesn't know it's looking at a face, a sentence, or a heartbeat. It knows one thing. Here is a number, make it smaller
 
 Which means the real question is never "can a neural network solve this?" The real question is, can you represent your problem so that there is a differentiable path from input to error? If yes, the gradient will find its way. The backprop engine just sits there, waiting for you to give it something to flow through. That means it's learnable. So
 
@@ -42,10 +42,11 @@ Which means the real question is never "can a neural network solve this?" The re
 The history of deep learning is largely a history of people finding clever differentiable representations. CNNs for spatial locality, Transformers for sequence attention, GNNs for graphs. The backprop engine is just waiting. The representation is the invention.
 
 ### The Essence
+
 The backprop algorithm is not the invention. Leibniz knew the chain rule in 1675. The invention is always the representation, the decision of how to lay your problem onto a differentiable surface in the first place.
 
-ResNets didn't change backprop. They changed the computation graph. Transformers didn't change backprop. They changed how tokens attend to each other before the gradient flows. AlphaFold didn't change backprop. It found a way to encode protein geometry such that evolutionary fitness became a differentiable target.
+ResNets did not change backprop. They changed the computation graph. Transformers did not change backprop. They changed how tokens attend to each other before the gradient flows. AlphaFold did not change backprop. It found a way to encode protein geometry such that evolutionary fitness became a differentiable target.
 
 Every major breakthrough in deep learning, when you strip it down, is someone finding a better coordinate system for a problem, a differentiable encoding, a better representation. A way to lay it flat so the gradient can move across it.
 
-The **Universal Approximation Theorem** provides the theoretical backing, any continuous function, once you've encoded your problem correctly, can be approximated by a neural network of sufficient capacity. The network is not the intelligence. It is the clay. You, the designer, are the one who decides what shape the clay should be able to take.
+The **Universal Approximation Theorem** provides the theoretical backing. Any continuous function, once you have encoded your problem correctly, can be approximated by a neural network of sufficient capacity. The network is not the intelligence. It is the clay. You, the designer, are the one who decides what shape the clay should take.
