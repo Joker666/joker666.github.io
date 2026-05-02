@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 
 interface Post {
   title: string;
@@ -12,53 +9,30 @@ interface Post {
   draft?: boolean;
 }
 
-const POSTS_PER_PAGE = 8;
-
 export function PostList({ posts }: { posts: Post[] }) {
-  const [displayedPosts, setDisplayedPosts] = useState(posts.slice(0, POSTS_PER_PAGE));
-
-  const handleLoadMore = () => {
-    const currentLength = displayedPosts.length;
-    const nextPosts = posts.slice(0, currentLength + POSTS_PER_PAGE);
-    setDisplayedPosts(nextPosts);
-  };
-
-  const hasMore = displayedPosts.length < posts.length;
-
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        {displayedPosts.map((post) => (
-          <Link
-            key={post.url}
-            href={post.url}
-            className="group flex flex-col gap-1 rounded-lg border-2 border-muted bg-card p-4 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] hover:border-fd-foreground"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium group-hover:underline">{post.title}</h3>
-                {post.draft && (
-                  <span className="rounded bg-fd-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fd-primary">
-                    Draft
-                  </span>
-                )}
-              </div>
-              <time className="text-sm text-fd-muted-foreground whitespace-nowrap">{post.dateLabel}</time>
-            </div>
-            {post.description && <p className="text-sm text-fd-muted-foreground line-clamp-2">{post.description}</p>}
-          </Link>
-        ))}
-      </div>
-
-      {hasMore && (
-        <button
-          type="button"
-          onClick={handleLoadMore}
-          className="self-center cursor-pointer border-2 border-fd-foreground px-6 py-2 text-sm font-semibold uppercase tracking-widest transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
+    <div className="flex flex-col gap-2">
+      {posts.map((post) => (
+        <Link
+          key={post.url}
+          href={post.url}
+          className="group flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 py-2 transition-opacity hover:opacity-70"
         >
-          Load More
-        </button>
-      )}
+          <div className="flex items-center gap-3">
+            <h3 className="text-[1.05rem] font-medium underline-offset-4 group-hover:underline">
+              {post.title}
+            </h3>
+            {post.draft && (
+              <span className="text-xs uppercase tracking-widest text-fd-muted-foreground">
+                [Draft]
+              </span>
+            )}
+          </div>
+          <time className="text-sm text-fd-muted-foreground shrink-0 tabular-nums">
+            {post.dateLabel}
+          </time>
+        </Link>
+      ))}
     </div>
   );
 }
