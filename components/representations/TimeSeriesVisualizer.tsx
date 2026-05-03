@@ -44,25 +44,28 @@ const TimeSeriesVisualizer = () => {
   };
 
   return (
-    <div className="my-8 border border-fd-border bg-fd-card p-4 sm:p-6 rounded-xl shadow-md overflow-hidden">
-      <div className="mb-6 flex justify-between items-start flex-wrap gap-4">
+    <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b-2 border-fd-foreground pb-4">
         <div>
-          <h3 className="mt-0 mb-1 text-lg font-bold text-fd-foreground">RNN Temporal Context</h3>
-          <p className="text-sm text-fd-muted-foreground m-0 max-w-lg">
+          <p className="text-xs font-semibold uppercase tracking-widest text-fd-primary">Sequence model intuition</p>
+          <h3 className="mt-2 mb-2 text-xl font-semibold uppercase text-fd-foreground">RNN Temporal Context</h3>
+          <p className="m-0 max-w-2xl font-sans text-sm leading-6 text-fd-muted-foreground">
             Step through time to see how the hidden state (memory) updates by combining the current input with the past context.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button 
+            type="button"
             onClick={handleReset}
-            className="px-3 py-1.5 text-sm rounded bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-secondary/80 transition-colors"
+            className="cursor-pointer border-2 border-fd-foreground bg-fd-background px-3 py-1 text-sm font-semibold text-fd-foreground transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
           >
             Reset
           </button>
           <button 
+            type="button"
             onClick={handleNext}
             disabled={step >= sequence.length}
-            className="px-3 py-1.5 text-sm rounded bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none"
           >
             Step Forward
           </button>
@@ -70,10 +73,10 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* Sequence Overview */}
-      <div className="mb-8">
+      <div className="mb-8 border-2 border-fd-foreground bg-fd-background p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
-          <div className="text-xs uppercase tracking-widest text-fd-muted-foreground font-semibold">Input Sequence (Time Series)</div>
-          <div className="shrink-0 text-xs font-bold text-fd-primary">
+          <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">Input Sequence (Time Series)</div>
+          <div className="shrink-0 border-2 border-fd-primary bg-fd-card px-2 py-1 text-xs font-bold text-fd-primary">
             t={Math.min(step, sequence.length - 1)}
           </div>
         </div>
@@ -103,16 +106,16 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* RNN Cell Visualization */}
-      <div className={`bg-fd-muted/30 rounded-lg p-6 border border-fd-border/50 relative flex items-center justify-center overflow-hidden ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
+      <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
         {!isComplete ? (
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             
             {/* Previous State */}
             <div className="flex flex-col items-center gap-2 w-32">
               <div className="text-xs uppercase tracking-wider text-fd-muted-foreground font-semibold text-center">Previous State<br/>$h_{`{t-1}`}$</div>
-              <div className="flex flex-col gap-1 w-full bg-fd-background border border-fd-border p-2 rounded shadow-sm">
+              <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
                 {previousState.map((v, i) => (
-                  <div key={i} className="h-4 bg-fd-secondary w-full rounded overflow-hidden">
+                  <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
                     <div 
                       className="h-full bg-indigo-400 transition-all duration-500" 
                       style={{ width: `${(v + 1) * 50}%` }} 
@@ -128,7 +131,7 @@ const TimeSeriesVisualizer = () => {
             {/* Current Input */}
             <div className="flex flex-col items-center gap-2 w-24">
               <div className="text-xs uppercase tracking-wider text-fd-muted-foreground font-semibold text-center">Current Input<br/>$x_t$</div>
-              <div className="w-16 h-16 rounded-full border-2 border-fd-primary flex items-center justify-center bg-fd-primary/10 text-fd-primary font-mono font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+              <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentInput?.toFixed(1)}
               </div>
             </div>
@@ -139,9 +142,9 @@ const TimeSeriesVisualizer = () => {
             {/* Next State */}
             <div className="flex flex-col items-center gap-2 w-32">
               <div className="text-xs uppercase tracking-wider text-fd-primary font-semibold text-center">New State<br/>$h_t$</div>
-              <div className="flex flex-col gap-1 w-full bg-fd-primary/5 border-2 border-fd-primary/50 p-2 rounded shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+              <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentState.map((v, i) => (
-                  <div key={i} className="h-4 bg-fd-secondary w-full rounded overflow-hidden">
+                  <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
                     <div 
                       className="h-full bg-indigo-500 transition-all duration-500" 
                       style={{ width: `${(v + 1) * 50}%` }} 
@@ -154,15 +157,21 @@ const TimeSeriesVisualizer = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-fd-muted-foreground">
-            <p className="font-semibold text-fd-foreground mb-2">Sequence Complete</p>
-            <p className="text-sm text-center max-w-sm">The final hidden state now contains a compressed temporal representation of the entire waveform.</p>
-            <button onClick={handleReset} className="mt-4 px-4 py-2 rounded bg-fd-primary text-fd-primary-foreground text-sm">Restart</button>
+            <p className="mb-2 font-semibold uppercase text-fd-foreground">Sequence Complete</p>
+            <p className="max-w-sm text-center font-sans text-sm leading-6">The final hidden state now contains a compressed temporal representation of the entire waveform.</p>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="mt-4 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-4 py-2 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+            >
+              Restart
+            </button>
           </div>
         )}
       </div>
       
       {!isComplete && (
-        <div className="mt-4 h-20 md:h-12 text-xs text-fd-muted-foreground text-center">
+        <div className="mt-4 h-20 border-l-4 border-fd-primary bg-fd-background p-3 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
           Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
         </div>
       )}
