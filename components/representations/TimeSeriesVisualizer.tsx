@@ -123,31 +123,33 @@ const TimeSeriesVisualizer = () => {
       {/* RNN Cell Visualization */}
       <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
         {!isComplete ? (
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+          <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-8">
 
-            {/* Previous State */}
-            <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br />$h_{`{t-1}`}$</div>
-              <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
-                {previousState.map((v, i) => (
-                  <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-                    <div
-                      className="h-full bg-fd-foreground transition-all duration-500"
-                      style={{ width: `${(v + 1) * 50}%` }}
-                    />
-                  </div>
-                ))}
+            <div className="flex w-full items-center justify-center gap-4 sm:gap-6 md:w-auto md:gap-8">
+              {/* Previous State */}
+              <div className="flex flex-col items-center gap-2 w-32">
+                <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br />$h_{`{t-1}`}$</div>
+                <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
+                  {previousState.map((v, i) => (
+                    <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
+                      <div
+                        className="h-full bg-fd-foreground transition-all duration-500"
+                        style={{ width: `${(v + 1) * 50}%` }}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Plus / Combine */}
-            <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
+              {/* Plus / Combine */}
+              <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
 
-            {/* Current Input */}
-            <div className="flex flex-col items-center gap-2 w-24">
-              <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br />$x_t$</div>
-              <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                {currentInput?.toFixed(1)}
+              {/* Current Input */}
+              <div className="flex flex-col items-center gap-2 w-24">
+                <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br />$x_t$</div>
+                <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
+                  {currentInput?.toFixed(1)}
+                </div>
               </div>
             </div>
 
