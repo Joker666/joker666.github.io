@@ -42,16 +42,16 @@ Which means the real question is never "can a neural network solve this?" The re
 The history of deep learning is largely a history of people finding clever differentiable representations. CNNs for spatial locality, Transformers for sequence attention, GNNs for graphs.
 
 ### Three Problems, One Idea
-Let's see three different kinds of problems and how can we solve them.
+Let's look at three different kinds of problems and how we can solve them.
 
 #### Images
-Images are a pixel grid is just a matrix of numbers, already a representation. But a raw pixel matrix doesn't have any semantics. CNNs imposes a representation. The representation forces the network to learn local patterns first (edges, textures), then compose them into shapes, then into objects through convolution. Finally it can decide if it's hotdog or not from an image. CNN is a carefully designed representation of what "looking at an image" should mean computationally.
+An image as a pixel grid is just a matrix of numbers, which is already a representation. But a raw pixel matrix doesn't inherently contain semantics. CNNs impose a structured representation. This representation forces the network to learn local patterns first (edges, textures), then compose them into shapes, and then into objects through convolutions. Finally, it can decide if the image is a hotdog or not. A CNN is a carefully designed representation of what "looking at an image" should mean computationally.
 
 #### Time Series
-An ECG waveform is a sequence of floats, a squiggle. A dangerous arrhythmia is not a random squiggle. It's a specific pattern within that sequence. But this raw floats cannot give a network anymore meaning than some other numbers. It has no idea that a spike 10 timesteps ago can be related to what's happening right now. RNNs and LSTMS solve this by making a representation that creates temporal context. It can encode when something happened, not just what the value was. Once the waveform is represented in a richer space, "normal rhythm" and "atrial fibrillation" are separated by distance. A loss function can distinguish between "normal" and "dangerous". The differentiation was always possible. The representation is what made it meaningful.
+An ECG waveform is a sequence of floats, a squiggle. A dangerous arrhythmia is not a random squiggle; it's a specific pattern within that sequence. But these raw floats cannot give a network any more meaning than arbitrary numbers. A simple network has no idea that a spike 10 timesteps ago might be related to what's happening right now. RNNs and LSTMs solve this by maintaining a hidden state that creates temporal context. They can encode when something happened, not just what the value was. Once the waveform is represented in a richer, temporal space, "normal rhythm" and "atrial fibrillation" become separated by distance. A loss function can then distinguish between "normal" and "dangerous". The differentiation was always possible, but the representation is what made it meaningful.
 
 #### Language
-Words are discrete. There's no derivative of "king". How do you encode language to a model? But if "King" can be mapped to high-dimensional vector space, you can take a derivative of it and suddenly the model can distinguish King from Queen. Then the question "what is king minus man plus woman?" becomes geometry. The result is a representation space where `king - man + woman ≈ queen` falls out naturally. Not because anyone told the model about it, but because a good representation makes structure visible.
+Words are discrete. There's no derivative of "king". How do you encode language for a model? If the word "king" can be mapped to a continuous high-dimensional vector space, you can take gradients with respect to its representation. Suddenly, the model can learn to distinguish "king" from "queen". Then, the question "what is king minus man plus woman?" becomes geometry. The result is a representation space where `king - man + woman ≈ queen` falls out naturally. Not because anyone explicitly told the model about it, but because a good representation makes semantic structure visible.
 
 ### The Essence
 
