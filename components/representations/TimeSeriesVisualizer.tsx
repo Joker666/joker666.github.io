@@ -130,7 +130,7 @@ const TimeSeriesVisualizer = () => {
 
             {/* Current Input */}
             <div className="flex flex-col items-center gap-2 w-24">
-              <div className="text-xs uppercase tracking-wider text-fd-muted-foreground font-semibold text-center">Current Input<br/>$x_t$</div>
+              <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br/>$x_t$</div>
               <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentInput?.toFixed(1)}
               </div>
@@ -171,8 +171,10 @@ const TimeSeriesVisualizer = () => {
       </div>
       
       {!isComplete && (
-        <div className="mt-4 h-20 border-l-4 border-fd-primary bg-fd-background p-3 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
-          Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
+        <div className="mt-4 flex h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
+          <span>
+            Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
+          </span>
         </div>
       )}
     </div>
