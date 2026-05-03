@@ -47,6 +47,9 @@ Let's see three different kinds of problems and how can we solve them.
 #### Time Series
 An ECG waveform is a sequence of floats, a squiggle. A dangerous arrhythmia is not a random squiggle. It's a specific pattern within that sequence. But this raw floats cannot give a network anymore meaning than some other numbers. It has no idea that a spike 10 timesteps ago can be related to what's happening right now. RNNs and LSTMS solve this by making a representation that creates temporal context. It can encode when something happened, not just what the value was. Once the waveform is represented in a richer space, "normal rhythm" and "atrial fibrillation" are separated by distance. A loss function can distinguish between "normal" and "dangerous". The differentiation was always possible. The representation is what made it meaningful.
 
+#### Language
+Words are discrete. There's no derivative of "king". How do you encode language to a model? But if "King" can be mapped to high-dimensional vector space, you can take a derivative of it and suddenly the model can distinguish King from Queen. Then the question "what is king minus man plus woman?" becomes geometry. The result is a representation space where `king - man + woman ≈ queen` falls out naturally. Not because anyone told the model about it, but because a good representation makes structure visible.
+
 ### The Essence
 
 The backprop algorithm is not the invention. Leibniz knew the chain rule in 1675. The invention is always the representation, the decision of how to lay your problem onto a differentiable surface in the first place.
