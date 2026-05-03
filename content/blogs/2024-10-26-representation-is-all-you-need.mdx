@@ -41,6 +41,12 @@ Which means the real question is never "can a neural network solve this?" The re
 
 The history of deep learning is largely a history of people finding clever differentiable representations. CNNs for spatial locality, Transformers for sequence attention, GNNs for graphs.
 
+### Three Problems, One Idea
+Let's see three different kinds of problems and how can we solve them.
+
+#### Time Series
+An ECG waveform is a sequence of floats. A dangerous arrhythmia is a specific pattern within that sequence. But this raw floats cannot give a network anymore meaning than some other numbers. It has no idea that a spike 10 timesteps ago can be related to what's happening right now. RNNs and LSTMS solve this by making a representation that creates temporal context. It can encode when something happened, not just what the value was. Once the waveform is represented in a richer space, the loss function can distinguish between "normal" and "dangerous". The differentiation was always possible. The representation is what made it meaningful.
+
 ### The Essence
 
 The backprop algorithm is not the invention. Leibniz knew the chain rule in 1675. The invention is always the representation, the decision of how to lay your problem onto a differentiable surface in the first place.
