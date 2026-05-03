@@ -101,7 +101,7 @@ const TimeSeriesVisualizer = () => {
               );
             })}
           </div>
-          <div className="absolute inset-x-0 bottom-0 flex gap-1 pt-1" style={{ height: `${negativeChartPercent}%` }}>
+          <div className="absolute inset-x-0 bottom-0 flex gap-1 pt-[1px]" style={{ height: `${negativeChartPercent}%` }}>
             {sequence.map((val, i) => {
               const isPast = i < step;
               const isCurrent = i === step;
