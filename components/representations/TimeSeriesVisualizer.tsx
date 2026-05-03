@@ -21,13 +21,13 @@ const computeNextState = (x: number, prevState: number[]) => {
 
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
-  
+
   // Calculate states up to current step
   const states = [[0.0, 0.0, 0.0]]; // Initial state
   for (let i = 0; i < step; i++) {
     states.push(computeNextState(sequence[i], states[i]));
   }
-  
+
   const currentState = states[step];
   const previousState = step > 0 ? states[step - 1] : [0.0, 0.0, 0.0];
   const currentInput = sequence[step] !== undefined ? sequence[step] : null;
@@ -54,14 +54,14 @@ const TimeSeriesVisualizer = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button 
+          <button
             type="button"
             onClick={handleReset}
             className="cursor-pointer border-2 border-fd-foreground bg-fd-background px-3 py-1 text-sm font-semibold text-fd-foreground transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
           >
             Reset
           </button>
-          <button 
+          <button
             type="button"
             onClick={handleNext}
             disabled={step >= sequence.length}
@@ -85,23 +85,38 @@ const TimeSeriesVisualizer = () => {
           style={{ "--zero-line": `${positiveChartPercent}%` } as React.CSSProperties}
         >
           <div className="absolute inset-x-0 top-[var(--zero-line)] border-b border-fd-border" />
-          {sequence.map((val, i) => {
-            const isPast = i < step;
-            const isCurrent = i === step;
-            const isNegative = val < 0;
-            const height = isNegative
-              ? `${(Math.abs(val) / maxNegativeMagnitude) * negativeChartPercent}%`
-              : `${(val / maxPositiveValue) * positiveChartPercent}%`;
-            
-            return (
-              <div key={i} className="flex-1 h-full relative group">
-                <div 
-                  className={`absolute w-full transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'} ${isNegative ? 'top-[var(--zero-line)]' : 'bottom-[calc(100%-var(--zero-line))]'}`} 
-                  style={{ height, opacity: isNegative ? 0.8 : 1 }}
-                />
-              </div>
-            );
-          })}
+          <div className="absolute inset-x-0 top-0 flex gap-1" style={{ height: `${positiveChartPercent}%` }}>
+            {sequence.map((val, i) => {
+              const isPast = i < step;
+              const isCurrent = i === step;
+              const height = val > 0 ? `${(val / maxPositiveValue) * 100}%` : "0%";
+
+              return (
+                <div key={i} className="relative h-full flex-1">
+                  <div
+                    className={`absolute bottom-0 w-full transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'}`}
+                    style={{ height }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="absolute inset-x-0 bottom-0 flex gap-1 pt-1" style={{ height: `${negativeChartPercent}%` }}>
+            {sequence.map((val, i) => {
+              const isPast = i < step;
+              const isCurrent = i === step;
+              const height = val < 0 ? `${(Math.abs(val) / maxNegativeMagnitude) * 100}%` : "0%";
+
+              return (
+                <div key={i} className="relative h-full flex-1">
+                  <div
+                    className={`absolute top-0 w-full opacity-80 transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'}`}
+                    style={{ height }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -109,16 +124,16 @@ const TimeSeriesVisualizer = () => {
       <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
         {!isComplete ? (
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-            
+
             {/* Previous State */}
             <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br/>$h_{`{t-1}`}$</div>
+              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br />$h_{`{t-1}`}$</div>
               <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
                 {previousState.map((v, i) => (
                   <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-                    <div 
-                      className="h-full bg-indigo-400 transition-all duration-500" 
-                      style={{ width: `${(v + 1) * 50}%` }} 
+                    <div
+                      className="h-full bg-fd-foreground transition-all duration-500"
+                      style={{ width: `${(v + 1) * 50}%` }}
                     />
                   </div>
                 ))}
@@ -126,28 +141,28 @@ const TimeSeriesVisualizer = () => {
             </div>
 
             {/* Plus / Combine */}
-            <div className="text-xl font-bold text-fd-muted-foreground md:mt-5">+</div>
+            <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
 
             {/* Current Input */}
             <div className="flex flex-col items-center gap-2 w-24">
-              <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br/>$x_t$</div>
+              <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br />$x_t$</div>
               <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentInput?.toFixed(1)}
               </div>
             </div>
 
             {/* Arrow */}
-            <div className="text-2xl font-bold text-fd-muted-foreground md:mt-5">→</div>
+            <div className="text-2xl font-bold text-fd-muted-foreground md:mt-10">→</div>
 
             {/* Next State */}
             <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">New State<br/>$h_t$</div>
+              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">New State<br />$h_t$</div>
               <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentState.map((v, i) => (
                   <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-                    <div 
-                      className="h-full bg-indigo-500 transition-all duration-500" 
-                      style={{ width: `${(v + 1) * 50}%` }} 
+                    <div
+                      className="h-full bg-fd-primary transition-all duration-500"
+                      style={{ width: `${(v + 1) * 50}%` }}
                     />
                   </div>
                 ))}
@@ -169,7 +184,7 @@ const TimeSeriesVisualizer = () => {
           </div>
         )}
       </div>
-      
+
       {!isComplete && (
         <div className="mt-4 flex h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
           <span>
