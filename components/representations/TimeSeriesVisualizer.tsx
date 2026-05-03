@@ -4,6 +4,10 @@ import { useState } from "react";
 
 // Simulated ECG-like sequence
 const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
+const maxPositiveValue = Math.max(...sequence, 0);
+const maxNegativeMagnitude = Math.max(...sequence.map((value) => Math.max(Math.abs(Math.min(value, 0)), 0)));
+const positiveChartPercent = 65;
+const negativeChartPercent = 35;
 
 // A dummy function to simulate "hidden state" update
 // We'll just generate some "features" based on the input and previous state to look cool.
@@ -27,6 +31,7 @@ const TimeSeriesVisualizer = () => {
   const currentState = states[step];
   const previousState = step > 0 ? states[step - 1] : [0.0, 0.0, 0.0];
   const currentInput = sequence[step] !== undefined ? sequence[step] : null;
+  const isComplete = step >= sequence.length;
 
   const handleNext = () => {
     if (step < sequence.length) {
@@ -66,22 +71,31 @@ const TimeSeriesVisualizer = () => {
 
       {/* Sequence Overview */}
       <div className="mb-8">
-        <div className="text-xs uppercase tracking-widest text-fd-muted-foreground mb-2 font-semibold">Input Sequence (Time Series)</div>
-        <div className="flex items-end h-24 gap-1 border-b border-fd-border pb-1">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div className="text-xs uppercase tracking-widest text-fd-muted-foreground font-semibold">Input Sequence (Time Series)</div>
+          <div className="shrink-0 text-xs font-bold text-fd-primary">
+            t={Math.min(step, sequence.length - 1)}
+          </div>
+        </div>
+        <div
+          className="relative flex h-28 gap-1 overflow-hidden"
+          style={{ "--zero-line": `${positiveChartPercent}%` } as React.CSSProperties}
+        >
+          <div className="absolute inset-x-0 top-[var(--zero-line)] border-b border-fd-border" />
           {sequence.map((val, i) => {
             const isPast = i < step;
             const isCurrent = i === step;
-            const height = `${Math.abs(val) * 100}%`;
             const isNegative = val < 0;
+            const height = isNegative
+              ? `${(Math.abs(val) / maxNegativeMagnitude) * negativeChartPercent}%`
+              : `${(val / maxPositiveValue) * positiveChartPercent}%`;
             
             return (
-              <div key={i} className="flex-1 flex flex-col justify-end h-full relative group">
+              <div key={i} className="flex-1 h-full relative group">
                 <div 
-                  className={`w-full transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'} ${isNegative ? 'mb-[-100%]' : ''}`} 
+                  className={`absolute w-full transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'} ${isNegative ? 'top-[var(--zero-line)]' : 'bottom-[calc(100%-var(--zero-line))]'}`} 
                   style={{ height, opacity: isNegative ? 0.8 : 1 }}
                 />
-                {/* Zero line indicator */}
-                {isCurrent && <div className="absolute -bottom-6 w-full text-center text-xs text-fd-primary font-bold">t={i}</div>}
               </div>
             );
           })}
@@ -89,8 +103,8 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* RNN Cell Visualization */}
-      <div className="bg-fd-muted/30 rounded-lg p-6 border border-fd-border/50 relative">
-        {step < sequence.length ? (
+      <div className={`bg-fd-muted/30 rounded-lg p-6 border border-fd-border/50 relative flex items-center justify-center overflow-hidden ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
+        {!isComplete ? (
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             
             {/* Previous State */}
@@ -147,9 +161,11 @@ const TimeSeriesVisualizer = () => {
         )}
       </div>
       
-      <div className="mt-4 text-xs text-fd-muted-foreground text-center">
-        Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
-      </div>
+      {!isComplete && (
+        <div className="mt-4 h-20 md:h-12 text-xs text-fd-muted-foreground text-center">
+          Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
+        </div>
+      )}
     </div>
   );
 };
