@@ -2,10 +2,12 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import EmbeddingVisualizer from "@/components/word-embedding/EmbeddingVisualizer";
 import ProxyTaskEmbeddingViz from "@/components/word-embedding/ProxyTaskEmbeddingViz";
+import TimeSeriesVisualizer from "@/components/representations/TimeSeriesVisualizer";
 
 const customMdxComponents: MDXComponents = {
   EmbeddingVisualizer,
   ProxyTaskEmbeddingViz,
+  TimeSeriesVisualizer,
 };
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {

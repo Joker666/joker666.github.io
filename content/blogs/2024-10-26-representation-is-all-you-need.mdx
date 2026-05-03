@@ -50,6 +50,8 @@ An image as a pixel grid is just a matrix of numbers, which is already a represe
 #### Time Series
 An ECG waveform is a sequence of floats, a squiggle. A dangerous arrhythmia is not a random squiggle; it's a specific pattern within that sequence. But these raw floats cannot give a network any more meaning than arbitrary numbers. A simple network has no idea that a spike 10 timesteps ago might be related to what's happening right now. RNNs and LSTMs solve this by maintaining a hidden state that creates temporal context. They can encode when something happened, not just what the value was. Once the waveform is represented in a richer, temporal space, "normal rhythm" and "atrial fibrillation" become separated by distance. A loss function can then distinguish between "normal" and "dangerous". The differentiation was always possible, but the representation is what made it meaningful.
 
+<TimeSeriesVisualizer />
+
 #### Language
 Words are discrete. There's no derivative of "king". How do you encode language for a model? If the word "king" can be mapped to a continuous high-dimensional vector space, you can take gradients with respect to its representation. Suddenly, the model can learn to distinguish "king" from "queen". Then, the question "what is king minus man plus woman?" becomes geometry. The result is a representation space where `king - man + woman ≈ queen` falls out naturally. Not because anyone explicitly told the model about it, but because a good representation makes semantic structure visible.
 
