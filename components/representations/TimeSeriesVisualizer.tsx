@@ -112,7 +112,7 @@ const TimeSeriesVisualizer = () => {
             
             {/* Previous State */}
             <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-xs uppercase tracking-wider text-fd-muted-foreground font-semibold text-center">Previous State<br/>$h_{`{t-1}`}$</div>
+              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br/>$h_{`{t-1}`}$</div>
               <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
                 {previousState.map((v, i) => (
                   <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
@@ -126,7 +126,7 @@ const TimeSeriesVisualizer = () => {
             </div>
 
             {/* Plus / Combine */}
-            <div className="text-fd-muted-foreground font-bold text-xl">+</div>
+            <div className="text-xl font-bold text-fd-muted-foreground md:mt-5">+</div>
 
             {/* Current Input */}
             <div className="flex flex-col items-center gap-2 w-24">
@@ -137,11 +137,11 @@ const TimeSeriesVisualizer = () => {
             </div>
 
             {/* Arrow */}
-            <div className="text-fd-muted-foreground font-bold text-2xl">→</div>
+            <div className="text-2xl font-bold text-fd-muted-foreground md:mt-5">→</div>
 
             {/* Next State */}
             <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-xs uppercase tracking-wider text-fd-primary font-semibold text-center">New State<br/>$h_t$</div>
+              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">New State<br/>$h_t$</div>
               <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentState.map((v, i) => (
                   <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
