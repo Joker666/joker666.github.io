@@ -121,7 +121,7 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* RNN Cell Visualization */}
-      <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[40rem] md:h-[17rem]' : 'h-[34rem] md:h-[13rem]'}`}>
+      <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[31rem] md:h-[17rem]' : 'h-[25rem] md:h-[13rem]'}`}>
         {!isComplete ? (
           <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-8">
 
