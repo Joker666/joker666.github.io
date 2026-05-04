@@ -79,11 +79,11 @@ const TimeSeriesVisualizer = () => {
             Step through time to see how the hidden state (memory) updates by combining the current input with the past context.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <button
             type="button"
             onClick={handleReset}
-            className="cursor-pointer border-2 border-fd-foreground bg-fd-background px-3 py-1 text-sm font-semibold text-fd-foreground transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
+            className="flex-1 cursor-pointer border-2 border-fd-foreground bg-fd-background px-3 py-1 text-sm font-semibold text-fd-foreground transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] sm:flex-none"
           >
             Reset
           </button>
@@ -91,7 +91,7 @@ const TimeSeriesVisualizer = () => {
             type="button"
             onClick={handleNext}
             disabled={step >= sequence.length}
-            className="cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none"
+            className="flex-1 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none sm:flex-none"
           >
             Step Forward
           </button>
