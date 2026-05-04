@@ -22,10 +22,7 @@ const computeNextState = (x: number, prevState: number[]) => {
 const StateBar = ({ value, className }: { value: number; className: string }) => {
   return (
     <div className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-      <div
-        className={`h-full transition-all duration-500 ${className}`}
-        style={{ width: `${(value + 1) * 50}%` }}
-      />
+      <div className={`h-full transition-all duration-500 ${className}`} style={{ width: `${(value + 1) * 50}%` }} />
     </div>
   );
 };
@@ -61,7 +58,8 @@ const TimeSeriesVisualizer = () => {
           <p className="text-xs font-semibold uppercase tracking-widest text-fd-primary">Sequence model intuition</p>
           <h3 className="mt-2 mb-2 text-xl font-semibold uppercase text-fd-foreground">RNN Temporal Context</h3>
           <p className="m-0 max-w-2xl font-sans text-sm leading-6 text-fd-muted-foreground">
-            Step through time to see how the hidden state (memory) updates by combining the current input with the past context.
+            Step through time to see how the hidden state (memory) updates by combining the current input with the past
+            context.
           </p>
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
@@ -86,7 +84,9 @@ const TimeSeriesVisualizer = () => {
       {/* Sequence Overview */}
       <div className="mb-8 border-2 border-fd-foreground bg-fd-background p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
-          <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">Input Sequence (Time Series)</div>
+          <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+            Input Sequence (Time Series)
+          </div>
           <div className="shrink-0 border-2 border-fd-primary bg-fd-card px-2 py-1 text-xs font-bold text-fd-primary">
             t={Math.min(step, sequence.length - 1)}
           </div>
@@ -105,14 +105,17 @@ const TimeSeriesVisualizer = () => {
               return (
                 <div key={i} className="relative h-full flex-1">
                   <div
-                    className={`absolute bottom-0 w-full transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'}`}
+                    className={`absolute bottom-0 w-full transition-all duration-300 ${isCurrent ? "bg-fd-primary" : isPast ? "bg-fd-primary/40" : "bg-fd-muted"}`}
                     style={{ height }}
                   />
                 </div>
               );
             })}
           </div>
-          <div className="absolute inset-x-0 bottom-0 flex gap-1 pt-[1px]" style={{ height: `${negativeChartPercent}%` }}>
+          <div
+            className="absolute inset-x-0 bottom-0 flex gap-1 pt-[1px]"
+            style={{ height: `${negativeChartPercent}%` }}
+          >
             {sequence.map((val, i) => {
               const isPast = i < step;
               const isCurrent = i === step;
@@ -121,7 +124,7 @@ const TimeSeriesVisualizer = () => {
               return (
                 <div key={i} className="relative h-full flex-1">
                   <div
-                    className={`absolute top-0 w-full opacity-80 transition-all duration-300 ${isCurrent ? 'bg-fd-primary' : isPast ? 'bg-fd-primary/40' : 'bg-fd-muted'}`}
+                    className={`absolute top-0 w-full opacity-80 transition-all duration-300 ${isCurrent ? "bg-fd-primary" : isPast ? "bg-fd-primary/40" : "bg-fd-muted"}`}
                     style={{ height }}
                   />
                 </div>
@@ -133,12 +136,9 @@ const TimeSeriesVisualizer = () => {
 
       {/* RNN Cell Visualization */}
       <div className="overflow-hidden border-2 border-fd-foreground bg-fd-background">
-        <div
-          className="relative flex min-h-[22rem] items-center justify-center p-4 md:min-h-[17rem] md:p-6"
-        >
+        <div className="relative flex min-h-[22rem] items-center justify-center p-4 md:min-h-[17rem] md:p-6">
           {!isComplete ? (
             <div className="flex flex-col items-center justify-center gap-4 md:flex-row md:gap-8">
-
               <div className="flex w-full items-center justify-center gap-3 sm:gap-6 md:w-auto md:gap-8">
                 {/* Previous State */}
                 <div className="flex flex-col items-center gap-2 w-32">
@@ -157,7 +157,7 @@ const TimeSeriesVisualizer = () => {
                 </div>
 
                 {/* Plus / Combine */}
-                <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
+                <div className="mt-10 text-xl font-bold text-fd-muted-foreground">+</div>
 
                 {/* Current Input */}
                 <div className="flex flex-col items-center gap-2 w-24">
@@ -192,12 +192,13 @@ const TimeSeriesVisualizer = () => {
                   ))}
                 </div>
               </div>
-
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-fd-muted-foreground">
               <p className="mb-2 font-semibold uppercase text-fd-foreground">Sequence Complete</p>
-              <p className="max-w-sm text-center font-sans text-sm leading-6">The final hidden state now contains a compressed temporal representation of the entire waveform.</p>
+              <p className="max-w-sm text-center font-sans text-sm leading-6">
+                The final hidden state now contains a compressed temporal representation of the entire waveform.
+              </p>
               <button
                 type="button"
                 onClick={handleReset}
@@ -213,9 +214,19 @@ const TimeSeriesVisualizer = () => {
       {!isComplete && (
         <div className="mt-3 flex items-center bg-fd-background px-3 py-2 font-sans text-xs leading-5 text-fd-muted-foreground md:mt-4 md:min-h-12 md:border-l-4 md:border-fd-primary md:px-4 md:py-3">
           <span>
-            Notice how <span className="font-mono">h<sub>t</sub></span> is not just based on the current float{" "}
-            <span className="font-mono">x<sub>t</sub></span>, but heavily influenced by the context{" "}
-            <span className="font-mono">h<sub>t-1</sub></span> carried over from previous steps.
+            Notice how{" "}
+            <span className="font-mono">
+              h<sub>t</sub>
+            </span>{" "}
+            is not just based on the current float{" "}
+            <span className="font-mono">
+              x<sub>t</sub>
+            </span>
+            , but heavily influenced by the context{" "}
+            <span className="font-mono">
+              h<sub>t-1</sub>
+            </span>{" "}
+            carried over from previous steps.
           </span>
         </div>
       )}
