@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 // Simulated ECG-like sequence
 const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
@@ -32,6 +32,8 @@ const StateBar = ({ value, className }: { value: number; className: string }) =>
 
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
+  const cellPanelRef = useRef<HTMLDivElement>(null);
+  const [cellHeight, setCellHeight] = useState<number | null>(null);
 
   // Calculate states after processing each completed input.
   const states = [[0.0, 0.0, 0.0]]; // Initial state
@@ -53,6 +55,19 @@ const TimeSeriesVisualizer = () => {
   const handleReset = () => {
     setStep(0);
   };
+
+  useLayoutEffect(() => {
+    const panel = cellPanelRef.current;
+    if (!panel) return;
+
+    const updateHeight = () => setCellHeight(panel.offsetHeight);
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(panel);
+
+    return () => observer.disconnect();
+  }, [isComplete]);
 
   return (
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
@@ -132,82 +147,90 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* RNN Cell Visualization */}
-      <div className={`relative flex items-center justify-center overflow-hidden border-2 border-fd-foreground bg-fd-background p-6 ${isComplete ? 'h-[31rem] md:h-[17rem]' : 'h-[25rem] md:h-[13rem]'}`}>
-        {!isComplete ? (
-          <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-8">
+      <div
+        className="overflow-hidden border-2 border-fd-foreground bg-fd-background transition-[height] duration-200 ease-out motion-reduce:transition-none"
+        style={{ height: cellHeight ?? undefined }}
+      >
+        <div
+          ref={cellPanelRef}
+          className={`relative flex items-center justify-center p-6 ${isComplete ? 'min-h-[31rem] md:min-h-[17rem]' : 'min-h-[25rem] md:min-h-[13rem]'}`}
+        >
+          {!isComplete ? (
+            <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-8">
 
-            <div className="flex w-full items-center justify-center gap-4 sm:gap-6 md:w-auto md:gap-8">
-              {/* Previous State */}
+              <div className="flex w-full items-center justify-center gap-4 sm:gap-6 md:w-auto md:gap-8">
+                {/* Previous State */}
+                <div className="flex flex-col items-center gap-2 w-32">
+                  <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
+                    Previous State
+                    <br />
+                    <span className="font-mono normal-case">
+                      h<sub>t-1</sub>
+                    </span>
+                  </div>
+                  <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
+                    {previousState.map((v, i) => (
+                      <StateBar key={i} value={v} className="bg-fd-foreground" />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Plus / Combine */}
+                <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
+
+                {/* Current Input */}
+                <div className="flex flex-col items-center gap-2 w-24">
+                  <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
+                    Current Input
+                    <br />
+                    <span className="font-mono normal-case">
+                      x<sub>t</sub>
+                    </span>
+                  </div>
+                  <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
+                    {currentInput?.toFixed(1)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="text-2xl font-bold text-fd-muted-foreground md:mt-10">→</div>
+
+              {/* Next State */}
               <div className="flex flex-col items-center gap-2 w-32">
-                <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
-                  Previous State
+                <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">
+                  New State
                   <br />
                   <span className="font-mono normal-case">
-                    h<sub>t-1</sub>
+                    h<sub>t</sub>
                   </span>
                 </div>
-                <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
-                  {previousState.map((v, i) => (
-                    <StateBar key={i} value={v} className="bg-fd-foreground" />
+                <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
+                  {currentState.map((v, i) => (
+                    <StateBar key={i} value={v} className="bg-fd-primary" />
                   ))}
                 </div>
               </div>
 
-              {/* Plus / Combine */}
-              <div className="text-xl font-bold text-fd-muted-foreground md:mt-10">+</div>
-
-              {/* Current Input */}
-              <div className="flex flex-col items-center gap-2 w-24">
-                <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
-                  Current Input
-                  <br />
-                  <span className="font-mono normal-case">
-                    x<sub>t</sub>
-                  </span>
-                </div>
-                <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                  {currentInput?.toFixed(1)}
-                </div>
-              </div>
             </div>
-
-            {/* Arrow */}
-            <div className="text-2xl font-bold text-fd-muted-foreground md:mt-10">→</div>
-
-            {/* Next State */}
-            <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">
-                New State
-                <br />
-                <span className="font-mono normal-case">
-                  h<sub>t</sub>
-                </span>
-              </div>
-              <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                {currentState.map((v, i) => (
-                  <StateBar key={i} value={v} className="bg-fd-primary" />
-                ))}
-              </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-fd-muted-foreground">
+              <p className="mb-2 font-semibold uppercase text-fd-foreground">Sequence Complete</p>
+              <p className="max-w-sm text-center font-sans text-sm leading-6">The final hidden state now contains a compressed temporal representation of the entire waveform.</p>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="mt-4 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-4 py-2 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+              >
+                Restart
+              </button>
             </div>
-
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-fd-muted-foreground">
-            <p className="mb-2 font-semibold uppercase text-fd-foreground">Sequence Complete</p>
-            <p className="max-w-sm text-center font-sans text-sm leading-6">The final hidden state now contains a compressed temporal representation of the entire waveform.</p>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="mt-4 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-4 py-2 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
-            >
-              Restart
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {!isComplete && (
-        <div className="mt-4 flex h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
+        <div className="mt-4 flex min-h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 py-3 font-sans text-xs leading-5 text-fd-muted-foreground md:min-h-12">
           <span>
             Notice how <span className="font-mono">h<sub>t</sub></span> is not just based on the current float{" "}
             <span className="font-mono">x<sub>t</sub></span>, but heavily influenced by the context{" "}
