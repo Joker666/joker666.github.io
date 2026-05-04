@@ -19,6 +19,17 @@ const computeNextState = (x: number, prevState: number[]) => {
   ];
 };
 
+const StateBar = ({ value, className }: { value: number; className: string }) => {
+  return (
+    <div className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
+      <div
+        className={`h-full transition-all duration-500 ${className}`}
+        style={{ width: `${(value + 1) * 50}%` }}
+      />
+    </div>
+  );
+};
+
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
 
@@ -128,15 +139,16 @@ const TimeSeriesVisualizer = () => {
             <div className="flex w-full items-center justify-center gap-4 sm:gap-6 md:w-auto md:gap-8">
               {/* Previous State */}
               <div className="flex flex-col items-center gap-2 w-32">
-                <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Previous State<br />$h_{`{t-1}`}$</div>
+                <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
+                  Previous State
+                  <br />
+                  <span className="font-mono normal-case">
+                    h<sub>t-1</sub>
+                  </span>
+                </div>
                 <div className="flex w-full flex-col gap-1 border-2 border-fd-foreground bg-fd-card p-2">
                   {previousState.map((v, i) => (
-                    <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-                      <div
-                        className="h-full bg-fd-foreground transition-all duration-500"
-                        style={{ width: `${(v + 1) * 50}%` }}
-                      />
-                    </div>
+                    <StateBar key={i} value={v} className="bg-fd-foreground" />
                   ))}
                 </div>
               </div>
@@ -146,7 +158,13 @@ const TimeSeriesVisualizer = () => {
 
               {/* Current Input */}
               <div className="flex flex-col items-center gap-2 w-24">
-                <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">Current Input<br />$x_t$</div>
+                <div className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
+                  Current Input
+                  <br />
+                  <span className="font-mono normal-case">
+                    x<sub>t</sub>
+                  </span>
+                </div>
                 <div className="flex h-16 w-16 items-center justify-center border-2 border-fd-primary bg-fd-card font-mono text-lg font-bold text-fd-primary shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                   {currentInput?.toFixed(1)}
                 </div>
@@ -158,15 +176,16 @@ const TimeSeriesVisualizer = () => {
 
             {/* Next State */}
             <div className="flex flex-col items-center gap-2 w-32">
-              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">New State<br />$h_t$</div>
+              <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-primary">
+                New State
+                <br />
+                <span className="font-mono normal-case">
+                  h<sub>t</sub>
+                </span>
+              </div>
               <div className="flex w-full flex-col gap-1 border-2 border-fd-primary bg-fd-card p-2 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
                 {currentState.map((v, i) => (
-                  <div key={i} className="h-4 w-full overflow-hidden border border-fd-foreground bg-fd-secondary">
-                    <div
-                      className="h-full bg-fd-primary transition-all duration-500"
-                      style={{ width: `${(v + 1) * 50}%` }}
-                    />
-                  </div>
+                  <StateBar key={i} value={v} className="bg-fd-primary" />
                 ))}
               </div>
             </div>
@@ -190,7 +209,9 @@ const TimeSeriesVisualizer = () => {
       {!isComplete && (
         <div className="mt-4 flex h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 font-sans text-xs leading-5 text-fd-muted-foreground md:h-12">
           <span>
-            Notice how $h_t$ is not just based on the current float $x_t$, but heavily influenced by the context $h_{`{t-1}`}$ carried over from previous steps.
+            Notice how <span className="font-mono">h<sub>t</sub></span> is not just based on the current float{" "}
+            <span className="font-mono">x<sub>t</sub></span>, but heavily influenced by the context{" "}
+            <span className="font-mono">h<sub>t-1</sub></span> carried over from previous steps.
           </span>
         </div>
       )}
