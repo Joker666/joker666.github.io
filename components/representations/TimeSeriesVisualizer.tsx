@@ -22,16 +22,16 @@ const computeNextState = (x: number, prevState: number[]) => {
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
 
-  // Calculate states up to current step
+  // Calculate states after processing each completed input.
   const states = [[0.0, 0.0, 0.0]]; // Initial state
   for (let i = 0; i < step; i++) {
     states.push(computeNextState(sequence[i], states[i]));
   }
 
-  const currentState = states[step];
-  const previousState = step > 0 ? states[step - 1] : [0.0, 0.0, 0.0];
+  const previousState = states[step];
   const currentInput = sequence[step] !== undefined ? sequence[step] : null;
   const isComplete = step >= sequence.length;
+  const currentState = currentInput !== null ? computeNextState(currentInput, previousState) : previousState;
 
   const handleNext = () => {
     if (step < sequence.length) {
