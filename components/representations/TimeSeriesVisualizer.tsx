@@ -157,7 +157,7 @@ const TimeSeriesVisualizer = () => {
                 </div>
 
                 {/* Plus / Combine */}
-                <div className="mt-10 text-xl font-bold text-fd-muted-foreground">+</div>
+                <div className="mt-10 ml-4 text-xl font-bold text-fd-muted-foreground">+</div>
 
                 {/* Current Input */}
                 <div className="flex flex-col items-center gap-2 w-24">
@@ -175,7 +175,7 @@ const TimeSeriesVisualizer = () => {
               </div>
 
               {/* Arrow */}
-              <div className="text-xl font-bold text-fd-muted-foreground md:mt-10 md:text-2xl">→</div>
+              <div className="text-xl font-bold text-fd-muted-foreground md:mt-10 md:mr-2 md:text-2xl">→</div>
 
               {/* Next State */}
               <div className="flex flex-col items-center gap-2 w-32">
@@ -212,7 +212,7 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {!isComplete && (
-        <div className="mt-3 flex items-center bg-fd-background px-3 py-2 font-sans text-xs leading-5 text-fd-muted-foreground md:mt-4 md:min-h-12 md:border-l-4 md:border-fd-primary md:px-4 md:py-3">
+        <div className="mt-3 flex items-center bg-fd-background font-sans text-xs leading-5 text-fd-muted-foreground md:mt-4 md:min-h-12 md:border-l-4 md:border-fd-primary md:px-4 md:py-3">
           <span>
             Notice how{" "}
             <span className="font-mono">
@@ -222,7 +222,7 @@ const TimeSeriesVisualizer = () => {
             <span className="font-mono">
               x<sub>t</sub>
             </span>
-            , but heavily influenced by the context{" "}
+            , but influenced by the context{" "}
             <span className="font-mono">
               h<sub>t-1</sub>
             </span>{" "}
