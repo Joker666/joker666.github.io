@@ -211,7 +211,7 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {!isComplete && (
-        <div className="mt-4 flex min-h-20 items-center border-l-4 border-fd-primary bg-fd-background px-4 py-3 font-sans text-xs leading-5 text-fd-muted-foreground md:min-h-12">
+        <div className="mt-3 flex items-center bg-fd-background px-3 py-2 font-sans text-xs leading-5 text-fd-muted-foreground md:mt-4 md:min-h-12 md:border-l-4 md:border-fd-primary md:px-4 md:py-3">
           <span>
             Notice how <span className="font-mono">h<sub>t</sub></span> is not just based on the current float{" "}
             <span className="font-mono">x<sub>t</sub></span>, but heavily influenced by the context{" "}
