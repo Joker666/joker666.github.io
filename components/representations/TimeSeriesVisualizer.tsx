@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 // Simulated ECG-like sequence
 const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
@@ -32,8 +32,6 @@ const StateBar = ({ value, className }: { value: number; className: string }) =>
 
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
-  const cellPanelRef = useRef<HTMLDivElement>(null);
-  const [cellHeight, setCellHeight] = useState<number | null>(null);
 
   // Calculate states after processing each completed input.
   const states = [[0.0, 0.0, 0.0]]; // Initial state
@@ -55,19 +53,6 @@ const TimeSeriesVisualizer = () => {
   const handleReset = () => {
     setStep(0);
   };
-
-  useLayoutEffect(() => {
-    const panel = cellPanelRef.current;
-    if (!panel) return;
-
-    const updateHeight = () => setCellHeight(panel.offsetHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(panel);
-
-    return () => observer.disconnect();
-  }, [isComplete]);
 
   return (
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
@@ -147,12 +132,8 @@ const TimeSeriesVisualizer = () => {
       </div>
 
       {/* RNN Cell Visualization */}
-      <div
-        className="overflow-hidden border-2 border-fd-foreground bg-fd-background transition-[height] duration-200 ease-out motion-reduce:transition-none"
-        style={{ height: cellHeight ?? undefined }}
-      >
+      <div className="overflow-hidden border-2 border-fd-foreground bg-fd-background">
         <div
-          ref={cellPanelRef}
           className={`relative flex items-center justify-center p-6 ${isComplete ? 'min-h-[31rem] md:min-h-[17rem]' : 'min-h-[25rem] md:min-h-[13rem]'}`}
         >
           {!isComplete ? (
