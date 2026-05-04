@@ -134,12 +134,12 @@ const TimeSeriesVisualizer = () => {
       {/* RNN Cell Visualization */}
       <div className="overflow-hidden border-2 border-fd-foreground bg-fd-background">
         <div
-          className="relative flex min-h-[31rem] items-center justify-center p-6 md:min-h-[17rem]"
+          className="relative flex min-h-[22rem] items-center justify-center p-4 md:min-h-[17rem] md:p-6"
         >
           {!isComplete ? (
-            <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-8">
+            <div className="flex flex-col items-center justify-center gap-4 md:flex-row md:gap-8">
 
-              <div className="flex w-full items-center justify-center gap-4 sm:gap-6 md:w-auto md:gap-8">
+              <div className="flex w-full items-center justify-center gap-3 sm:gap-6 md:w-auto md:gap-8">
                 {/* Previous State */}
                 <div className="flex flex-col items-center gap-2 w-32">
                   <div className="text-center text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
@@ -175,7 +175,7 @@ const TimeSeriesVisualizer = () => {
               </div>
 
               {/* Arrow */}
-              <div className="text-2xl font-bold text-fd-muted-foreground md:mt-10">→</div>
+              <div className="text-xl font-bold text-fd-muted-foreground md:mt-10 md:text-2xl">→</div>
 
               {/* Next State */}
               <div className="flex flex-col items-center gap-2 w-32">
