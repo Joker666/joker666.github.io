@@ -26,6 +26,11 @@ function sendTrackingEvent(slug: string, event: "start" | "read") {
     return;
   }
 
+  let finalUrl = readTrackerUrl;
+  if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://") && !finalUrl.startsWith("/")) {
+    finalUrl = finalUrl.includes("localhost") ? `http://${finalUrl}` : `https://${finalUrl}`;
+  }
+
   const body = JSON.stringify({
     slug,
     readerId: getReaderId(),
@@ -33,19 +38,30 @@ function sendTrackingEvent(slug: string, event: "start" | "read") {
   });
 
   if (navigator.sendBeacon) {
-    const blob = new Blob([body], { type: "application/json" });
-    navigator.sendBeacon(readTrackerUrl, blob);
-    return;
+    try {
+      const blob = new Blob([body], { type: "application/json" });
+      if (navigator.sendBeacon(finalUrl, blob)) {
+        return;
+      }
+    } catch (e) {
+      console.warn("sendBeacon failed, falling back to fetch", e);
+    }
   }
 
-  void fetch(readTrackerUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body,
-    keepalive: true,
-  });
+  try {
+    void fetch(finalUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+      keepalive: true,
+    }).catch((e) => {
+      console.warn("fetch tracking failed", e);
+    });
+  } catch (e) {
+    console.warn("fetch tracking failed synchronously", e);
+  }
 }
 
 function getScrollProgress() {
