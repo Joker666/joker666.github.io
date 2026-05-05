@@ -1,5 +1,6 @@
 # deps
 /node_modules
+**/node_modules
 
 # generated content
 .source
@@ -26,3 +27,6 @@ og
 .env*.local
 .vercel
 next-env.d.ts
+workers/read-tracker/wrangler.toml
+workers/read-tracker/.wrangler
+.env
