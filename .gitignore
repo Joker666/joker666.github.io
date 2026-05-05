@@ -29,3 +29,4 @@ og
 next-env.d.ts
 workers/read-tracker/wrangler.toml
 workers/read-tracker/.wrangler
+.env
