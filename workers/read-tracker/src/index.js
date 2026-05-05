@@ -18,11 +18,17 @@ function getCorsHeaders(request, env) {
   const allowedOrigin = env.ALLOWED_ORIGIN;
 
   if (!allowedOrigin) {
-    return {
-      "Access-Control-Allow-Origin": "*",
+    const corsOrigin = origin || "*";
+    const headers = {
+      "Access-Control-Allow-Origin": corsOrigin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      Vary: "Origin",
     };
+    if (corsOrigin !== "*") {
+      headers["Access-Control-Allow-Credentials"] = "true";
+    }
+    return headers;
   }
 
   if (origin === allowedOrigin) {
@@ -30,6 +36,7 @@ function getCorsHeaders(request, env) {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
       Vary: "Origin",
     };
   }
