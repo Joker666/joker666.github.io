@@ -21,7 +21,10 @@ function getReaderId() {
 }
 
 function sendTrackingEvent(slug: string, event: "start" | "read") {
-  if (!readTrackerUrl) return;
+  if (!readTrackerUrl) {
+    console.warn("Read tracker URL not configured");
+    return;
+  }
 
   const body = JSON.stringify({
     slug,
