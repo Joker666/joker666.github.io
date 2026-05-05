@@ -5,6 +5,7 @@ import { InlineTOC } from "fumadocs-ui/components/inline-toc";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReadTracker } from "./read-tracker";
 
 export default async function Page(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
@@ -19,6 +20,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
 
   return (
     <main className="w-full max-w-4xl mx-auto px-4 py-12">
+      <ReadTracker slug={params.slug} />
       <div className="mb-8">
         <Link href="/blog" className="font-mono text-sm sm:px-2 py-1 transition-colors">
           ← BACK

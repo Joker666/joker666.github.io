@@ -1,0 +1,6 @@
+name = "joker666-read-tracker"
+main = "src/index.js"
+compatibility_date = "2026-05-05"
+
+[vars]
+ALLOWED_ORIGIN = "https://joker666.github.io"
