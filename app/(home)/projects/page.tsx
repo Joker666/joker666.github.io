@@ -3,10 +3,16 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "A selection of projects I've worked on, including Cogman, Journey+, Imgforge, and Today.",
+  description: "A selection of projects I've worked on, including AskMyDocs, Cogman, Journey+, Imgforge, and Today.",
 };
 
 const projects = [
+  {
+    id: "askmydocs",
+    title: "AskMyDocs",
+    description: "A local PDF Q&A backend built with FastAPI, Docling, PostgreSQL + pgvector, Pydantic AI, and Ollama.",
+    url: "https://github.com/Joker666/AskMyDocs",
+  },
   {
     id: "cogman",
     title: "Cogman",
