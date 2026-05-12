@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -20,12 +20,6 @@ const projects = [
     url: "https://github.com/Joker666/cogman",
   },
   {
-    id: "journey-plus",
-    title: "Journey+",
-    description: "A journaling app for iOS.",
-    url: "https://apps.apple.com/us/app/journey-daily-diary-journal/id6457254962",
-  },
-  {
     id: "imgforge",
     title: "Imgforge",
     description: "A fast and secure image proxy built on libvips. Drop-in compatible with imgproxy URLs.",
@@ -36,6 +30,12 @@ const projects = [
     title: "Today",
     description: "The minimal to-do app that clears your list every morning.",
     url: "https://apps.apple.com/us/app/today-a-daily-to-do-list/id6759506994",
+  },
+  {
+    id: "journey-plus",
+    title: "Journey+",
+    description: "A journaling app for iOS.",
+    url: "https://apps.apple.com/us/app/journey-daily-diary-journal/id6457254962",
   },
 ];
 
