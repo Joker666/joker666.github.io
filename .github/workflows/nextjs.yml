@@ -36,7 +36,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 11.5.0
+          version: 10
       - name: Detect package manager
         id: detect-package-manager
         run: |
@@ -76,10 +76,6 @@ jobs:
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml', '**/package-lock.json', '**/yarn.lock') }}-
-      - name: Bypass supply-chain policy
-        run: |
-          echo "PNPM_PACKAGE_IMPORT_METHOD=auto" >> $GITHUB_ENV
-          echo "PNPM_MINIMUM_RELEASE_AGE=0" >> $GITHUB_ENV
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{
           steps.detect-package-manager.outputs.command }}
