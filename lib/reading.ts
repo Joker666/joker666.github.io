@@ -25,6 +25,15 @@ export const readingList: ReadingEntry[] = [
     tags: ["life", "memory", "reflection"],
     featured: true,
   },
+  {
+    title: "The Grand Line",
+    author: "ゆ 前",
+    publication: "The Pilgrim Age",
+    url: "https://pilgrima.ge/p/the-grand-line",
+    note: "There's a thread we do not always know is there. A path, a time, a memory, everything that happens can somehow converge and count. A day can be lived and forgotten, but it may still create a new thread that connects dots unknown.",
+    tags: ["memory", "pilgrimage", "meaning"],
+    featured: true,
+  },
 ];
 
 export const featuredReading = readingList.filter((entry) => entry.featured).slice(0, 3);

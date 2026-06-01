@@ -110,7 +110,7 @@ const TimeSeriesVisualizer = () => {
           className="relative flex h-28 gap-1 overflow-hidden"
           style={{ "--zero-line": `${positiveChartPercent}%` } as React.CSSProperties}
         >
-          <div className="absolute inset-x-0 top-[var(--zero-line)] border-b border-fd-border" />
+          <div className="absolute inset-x-0 top-(--zero-line) border-b border-fd-border" />
           <div className="absolute inset-x-0 top-0 flex gap-1" style={{ height: `${positiveChartPercent}%` }}>
             {sequence.map((val, i) => {
               const isPast = i < step;
@@ -127,10 +127,7 @@ const TimeSeriesVisualizer = () => {
               );
             })}
           </div>
-          <div
-            className="absolute inset-x-0 bottom-0 flex gap-1 pt-[1px]"
-            style={{ height: `${negativeChartPercent}%` }}
-          >
+          <div className="absolute inset-x-0 bottom-0 flex gap-1 pt-px" style={{ height: `${negativeChartPercent}%` }}>
             {sequence.map((val, i) => {
               const isPast = i < step;
               const isCurrent = i === step;
@@ -156,7 +153,7 @@ const TimeSeriesVisualizer = () => {
         <div ref={rnnContentRef} className="flex flex-col gap-3 md:gap-4">
           {/* RNN Cell Visualization */}
           <div className="overflow-hidden border-2 border-fd-foreground bg-fd-background">
-            <div className="relative flex min-h-[22rem] items-center justify-center p-4 md:min-h-[17rem] md:p-6">
+            <div className="relative flex min-h-88 items-center justify-center p-4 md:min-h-68 md:p-6">
               {!isComplete ? (
                 <div className="flex flex-col items-center justify-center gap-4 md:flex-row md:gap-8">
                   <div className="flex w-full items-center justify-center gap-3 sm:gap-6 md:w-auto md:gap-8">

@@ -13,28 +13,28 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@takumi-rs/image-response": "^1.1.2",
-    "fumadocs-core": "16.8.5",
-    "fumadocs-mdx": "14.3.2",
-    "fumadocs-ui": "16.8.5",
+    "@takumi-rs/image-response": "^1.6.0",
+    "fumadocs-core": "16.9.3",
+    "fumadocs-mdx": "15.0.10",
+    "fumadocs-ui": "16.9.3",
     "gray-matter": "^4.0.3",
-    "katex": "^0.16.45",
-    "lucide-react": "^1.14.0",
-    "next": "16.2.4",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "katex": "^0.17.0",
+    "lucide-react": "^1.17.0",
+    "next": "16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "zod": "^4.4.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.12",
-    "tailwindcss": "^4.2.4",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   }
 }
