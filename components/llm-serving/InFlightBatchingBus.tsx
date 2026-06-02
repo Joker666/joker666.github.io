@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Mode = "static" | "inflight";
 
@@ -124,32 +124,43 @@ const modeCopy: Record<Mode, { title: string; detail: string; metric: string }> 
 
 const SeatBox = ({ seat }: { seat: Seat }) => {
   const isEmpty = seat.name === "empty";
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const update = () => setHeight(el.offsetHeight);
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [seat.status, seat.name, seat.remaining]);
 
   return (
     <div
-      className={`flex min-h-28 flex-col justify-between border-2 p-3 transition-all ${
+      className={`overflow-hidden border-2 transition-[height] duration-200 ease-out motion-reduce:transition-none ${
         isEmpty
           ? "border-dashed border-fd-muted-foreground bg-fd-secondary text-fd-muted-foreground"
           : seat.status === "boards"
             ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
             : "border-fd-foreground bg-fd-card text-fd-foreground"
       }`}
+      style={{ height: height ?? undefined }}
     >
-      <div>
+      <div ref={contentRef} className="p-3">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-semibold uppercase tracking-widest">{isEmpty ? "idle slot" : "request"}</span>
           {!isEmpty && <span className="border border-current px-2 py-0.5 text-xs font-bold">{seat.name}</span>}
         </div>
-        <div className="mt-2 text-sm font-semibold">
+        <div className="mt-3 text-sm font-semibold">
           {isEmpty ? "No token work" : `${seat.remaining} tokens left`}
         </div>
-      </div>
-      <div
-        className={`mt-2 text-[11px] font-semibold uppercase tracking-widest transition-opacity ${
-          seat.status ? "opacity-100" : "opacity-0 select-none"
-        }`}
-      >
-        {seat.status === "boards" ? "boards now" : seat.status === "finishes" ? "finishes now" : "\u00A0"}
+        {seat.status && (
+          <div className="mt-3 text-[11px] font-semibold uppercase tracking-widest text-current animate-in fade-in slide-in-from-top-1 duration-200">
+            {seat.status === "boards" ? "boards now" : "finishes now"}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -225,7 +236,7 @@ export default function InFlightBatchingBus() {
 
           <div className="grid gap-3 md:grid-cols-3">
             {seats.map((seat, index) => (
-              <SeatBox key={`${step}-${index}-${seat.name}`} seat={seat} />
+              <SeatBox key={index} seat={seat} />
             ))}
           </div>
 
