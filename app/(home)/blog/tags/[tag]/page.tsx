@@ -1,4 +1,5 @@
 import { TagDetailPage } from "@/app/(home)/components/tag-pages";
+import { formatPostDate } from "@/lib/date";
 import { siteConfig } from "@/lib/site";
 import { slugifyTag } from "@/lib/string-utils";
 import { getAllTags, getPostsByTagSlug } from "@/lib/tags";
@@ -38,11 +39,7 @@ export default async function TagPage({ params }: PageProps) {
           >
             <Link href={post.url} className="flex flex-col">
               <span className="text-xs font-mono uppercase tracking-widest text-fd-muted-foreground mb-6">
-                {new Date(post.data.date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatPostDate(post.data.date)}
               </span>
 
               <h2 className="text-2xl font-semibold mb-6 group-hover:text-fd-primary transition-colors">

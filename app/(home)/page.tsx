@@ -1,4 +1,5 @@
 import { getPosts } from "@/lib/source";
+import { formatPostDate } from "@/lib/date";
 import { PostList } from "./components/post-list";
 
 export default function HomePage() {
@@ -7,12 +8,7 @@ export default function HomePage() {
     .map((post) => ({
       title: post.data.title,
       url: post.url,
-      dateLabel: post.data.date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      }),
+      dateLabel: formatPostDate(post.data.date, "short"),
       description: post.data.description,
       tags: post.data.tags,
       draft: post.data.draft,

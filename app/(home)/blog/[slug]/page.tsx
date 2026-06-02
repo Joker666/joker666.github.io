@@ -1,4 +1,5 @@
 import { blogPosts, getPageImage, getPosts } from "@/lib/source";
+import { formatPostDate } from "@/lib/date";
 import { slugifyTag } from "@/lib/string-utils";
 import { getMDXComponents } from "@/mdx-components";
 import { InlineTOC } from "fumadocs-ui/components/inline-toc";
@@ -40,11 +41,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
           <div className="flex flex-col gap-4 font-mono text-sm text-fd-muted-foreground uppercase tracking-widest mb-6">
             <div className="flex items-center gap-4">
               <span>
-                {new Date(page.data.date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatPostDate(page.data.date)}
               </span>
               <span>•</span>
               <span>{readingTime} min read</span>
