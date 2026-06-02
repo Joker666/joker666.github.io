@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Mode = "static" | "inflight";
 
@@ -127,7 +127,7 @@ const SeatBox = ({ seat }: { seat: Seat }) => {
 
   return (
     <div
-      className={`min-h-24 border-2 p-3 transition-all ${
+      className={`flex min-h-28 flex-col justify-between border-2 p-3 transition-all ${
         isEmpty
           ? "border-dashed border-fd-muted-foreground bg-fd-secondary text-fd-muted-foreground"
           : seat.status === "boards"
@@ -135,18 +135,22 @@ const SeatBox = ({ seat }: { seat: Seat }) => {
             : "border-fd-foreground bg-fd-card text-fd-foreground"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-widest">{isEmpty ? "idle slot" : "request"}</span>
-        {!isEmpty && <span className="border border-current px-2 py-0.5 text-xs font-bold">{seat.name}</span>}
-      </div>
-      <div className="mt-3 text-sm font-semibold">
-        {isEmpty ? "No token work" : `${seat.remaining} tokens left`}
-      </div>
-      {seat.status && (
-        <div className="mt-2 text-[11px] font-semibold uppercase tracking-widest">
-          {seat.status === "boards" ? "boards now" : "finishes now"}
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold uppercase tracking-widest">{isEmpty ? "idle slot" : "request"}</span>
+          {!isEmpty && <span className="border border-current px-2 py-0.5 text-xs font-bold">{seat.name}</span>}
         </div>
-      )}
+        <div className="mt-2 text-sm font-semibold">
+          {isEmpty ? "No token work" : `${seat.remaining} tokens left`}
+        </div>
+      </div>
+      <div
+        className={`mt-2 text-[11px] font-semibold uppercase tracking-widest transition-opacity ${
+          seat.status ? "opacity-100" : "opacity-0 select-none"
+        }`}
+      >
+        {seat.status === "boards" ? "boards now" : seat.status === "finishes" ? "finishes now" : "\u00A0"}
+      </div>
     </div>
   );
 };
@@ -154,6 +158,15 @@ const SeatBox = ({ seat }: { seat: Seat }) => {
 export default function InFlightBatchingBus() {
   const [mode, setMode] = useState<Mode>("inflight");
   const [step, setStep] = useState(1);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
+      setStep((prev) => (prev === 8 ? 1 : prev + 1));
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   const schedule = mode === "static" ? staticSchedule : inFlightSchedule;
   const seats = schedule[step];
@@ -217,15 +230,56 @@ export default function InFlightBatchingBus() {
           </div>
 
           <div className="mt-5 border-t-2 border-fd-foreground pt-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-              Token iteration
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
+                Token iteration
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPlaying(false);
+                    setStep((prev) => (prev === 1 ? 8 : prev - 1));
+                  }}
+                  className="cursor-pointer border-2 border-fd-foreground bg-fd-card px-2 py-1 text-xs font-bold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[2px_2px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                  title="Previous Step"
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPlaying((prev) => !prev)}
+                  className={`cursor-pointer border-2 border-fd-foreground px-2 py-1 text-xs font-bold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none ${
+                    isPlaying
+                      ? "bg-fd-primary text-fd-primary-foreground"
+                      : "bg-fd-card hover:bg-fd-secondary"
+                  }`}
+                  title={isPlaying ? "Pause Simulation" : "Play Simulation"}
+                >
+                  {isPlaying ? "Pause ⏸" : "Play ▶"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPlaying(false);
+                    setStep((prev) => (prev === 8 ? 1 : prev + 1));
+                  }}
+                  className="cursor-pointer border-2 border-fd-foreground bg-fd-card px-2 py-1 text-xs font-bold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[2px_2px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                  title="Next Step"
+                >
+                  Next
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-8 gap-1">
               {steps.map((item) => (
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setStep(item)}
+                  onClick={() => {
+                    setIsPlaying(false);
+                    setStep(item);
+                  }}
                   className={`h-10 cursor-pointer border-2 text-xs font-bold transition-colors ${
                     step === item
                       ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
