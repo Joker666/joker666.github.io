@@ -1,0 +1,184 @@
+---
+title: "LLM Serving and the Bus That Never Stops"
+description: "In-flight batching is the trick that keeps LLM serving from wasting GPU seats."
+author: Rafi Hasan
+date: "2026-06-02"
+draft: true
+tags: ["machine-learning", "llm", "inference"]
+---
+
+I used to think batching requests for a machine learning model was a solved problem. I have hosted models and served requests. Batching speeds up serving requests. If you don't batch, for example, send one tiny request at a time, the GPU behaves like a giant bus carrying one passenger. It can move, but the economics are terrible. This is why batching exists. But LLMs make batching weird.
+
+### The Idea
+
+In a traditional web backend or a standard computer vision pipeline, it's straightforward. You put requests into a queue, wait until you hit a batch size of 4 or 8, slam them into the GPU, and return the results. Standard engineering. A single trip through the model.
+
+```text
+input -> model -> output
+```
+
+An image classifier does this. An embedding model does this. You pass in data, the model runs, and you get the result. But LLM serving completely breaks this mental model. LLM generation is weird. It's iterative. It generates one token at a time.
+
+```text
+prompt -> prefill
+token 1 -> decode
+token 2 -> decode
+token 3 -> decode
+...
+```
+
+This means serving an LLM is not just "run the model once." It is a scheduling problem that repeats every token. If you treat LLM requests like traditional web requests, your GPU efficiency plummets, your latency spikes, and your cloud bill skyrockets.
+
+> LLM serving is a loop. Every token is another chance to waste the GPU or fill it.
+
+That one sentence is the whole trick.
+
+### The Two Phases
+
+Each request has two phases. The first phase is **prefill**. The model reads the prompt and builds up the internal attention state. The second phase is **decode**. The model generates the next token, then the next token, then the next token. Decode is usually lighter per step, but it happens many times. The server also keeps a **KV cache**, which stores the key and value tensors from previous tokens. Without this cache, the model would need to recompute the whole previous sequence every time it generates a new token. The cache saves compute, but it consumes GPU memory. So the scheduler is balancing two things:
+
+- enough active requests to keep the GPU busy
+- enough KV cache space to avoid running out of memory
+
+This is where normal batching starts to crack. The root of the problem comes down to how LLMs generate text. They use autoregressive decoding. This is just a fancy way of saying they predict one single token at a time, feed that token back into themselves, and predict the next one. If User A asks for a haiku (15 tokens) and User B asks for a full Python script (500 tokens), their requests take completely different amounts of time to finish.
+
+### Static Batching
+
+Imagine three requests arrive together.
+
+```text
+A -> needs 8 output tokens
+B -> needs 2 output tokens
+C -> needs 6 output tokens
+```
+
+Static batching puts them on the same bus and makes the bus finish the whole trip before taking new passengers.
+
+```text
+Step 1: A B C
+Step 2: A B C  # B is done
+Step 3: A _ C
+Step 4: A _ C
+Step 5: A _ C
+Step 6: A _ _  # C is done
+Step 7: A _ _
+Step 8: A _ _  # A is done
+```
+
+The GPU is still running, but some seats are empty. Request B finished early, yet its slot is no longer useful. A new request may be waiting outside, but the static batch does not naturally let it join mid-generation.
+
+That is the waste.
+
+### The Bus Analogy
+
+I like thinking about in-flight batching as a bus that never fully stops.
+
+Normal batching says:
+
+```text
+The bus leaves.
+Someone gets off early.
+The seat stays empty.
+New passengers wait for the next bus.
+```
+
+In-flight batching says:
+
+```text
+The bus is still moving.
+Someone gets off.
+The conductor checks the queue.
+A new passenger takes the seat.
+The bus keeps going.
+```
+
+In LLM serving, the bus is the active batch. A seat is not just a "batch slot"; it is also GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
+
+<InFlightBatchingBus />
+
+The important part is that the batch is no longer a fixed thing. It is alive.
+
+### In-flight Batching
+
+In-flight batching is also called continuous batching or iteration-level batching. The names are useful because they describe the same idea from different angles.
+
+At every generation iteration, the scheduler asks:
+
+- Which requests are still active?
+- Which requests just finished?
+- Which new requests are waiting?
+- Is there enough KV cache space?
+- Can we add new work without hurting latency too much?
+
+Then it runs the next token step for the active set.
+
+Very roughly:
+
+```python
+active_batch = []
+
+while server_is_running:
+    add_new_requests_if_memory_allows(active_batch)
+
+    run_one_token_iteration(active_batch)
+
+    for request in active_batch:
+        if request.is_finished():
+            stream_response_done(request)
+            free_kv_cache(request)
+```
+
+Of course production systems are more complicated. They deal with priorities, timeouts, chunked prefill, speculative decoding, multiple GPUs, tensor parallelism, and fairness. But this loop is the shape of the idea.
+
+### Why It Matters
+
+The naive way to improve throughput is to make the batch larger. That works until it does not.
+
+Bigger batches can increase throughput, but they can also make users wait longer before the first token. In a chatbot, the first token matters a lot. A user can tolerate a long answer streaming over time, but waiting too long before anything appears feels broken.
+
+So LLM serving has a slightly different objective than plain inference:
+
+```text
+maximize tokens/sec
+without destroying time to first token
+without wasting KV cache
+without letting long requests block short ones
+```
+
+In-flight batching helps because it attacks the idle-slot problem directly. Short requests can finish and leave. New requests can enter. The GPU keeps getting a dense batch of token work instead of dragging empty seats through the loop.
+
+### The Trick
+
+The trick is not that the GPU understands concurrent requests. It does not. The application server, runtime, tokenizer, queue, inference scheduler, and GPU runtime coordinate the work. The GPU mostly sees large tensor operations.
+
+So "serving many users on a GPU" is really an orchestration problem.
+
+```text
+CPU side:
+auth, validation, tokenization, queues, scheduling
+
+GPU side:
+prefill, decode, attention, matrix multiplication, KV cache
+```
+
+The scheduler is the interesting layer between them. It turns messy user traffic into efficient GPU work.
+
+That is why in-flight batching feels like a serving primitive, not just an optimization. Once generation is token-by-token, the batch has to be token-by-token too.
+
+### Conclusion
+
+The mental model I am keeping is this:
+
+> Static batching fills the bus once. In-flight batching keeps filling the bus while the trip is happening.
+
+That small change matters because LLM requests do not finish together. Prompts have different lengths. Answers have different lengths. Some users ask for "hi", and some ask for a full essay. If the server treats all of them as one fixed batch, short requests create holes and long requests drag everyone else along.
+
+In-flight batching makes the active batch dynamic. Finished requests leave. New requests join. KV cache is reused and recycled. The GPU stays busy with useful token work.
+
+The model is still the impressive part. But the scheduler is what makes the model economically usable.
+
+### Resources
+
+- [TensorRT-LLM executor batching modes](https://nvidia.github.io/TensorRT-LLM/_cpp_gen/executor.html)
+- [TensorRT-LLM KV cache and attention](https://nvidia.github.io/TensorRT-LLM/advanced/gpt-attention.html)
+- [NVIDIA Triton dynamic batching guide](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/tutorials/Conceptual_Guide/Part_2-improving_resource_utilization/README.html)
