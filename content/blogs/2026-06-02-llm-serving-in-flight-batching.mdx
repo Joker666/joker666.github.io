@@ -62,12 +62,12 @@ Step 8: A _ _  # A is done
 
 Even though B and C finished early, their seats cannot be reassigned. The GPU keeps running, but it wastes memory and computes empty padding tokens. That is the waste.
 
-### The Fixed Tour Bus vs. The Dynamic City Transit
+### The Fixed Tour Bus vs. The Dynamic City Transit Bus
 
-I like thinking about the difference between static and in-flight batching as the difference between a pre-booked tour bus and a public city transit shuttle:
+I like thinking about the difference between static and in-flight batching as the difference between a pre-booked tour bus and a public city transit bus:
 
 *   **The Fixed Tour Bus (Static Batching):** A tour bus leaves the station with a set passenger list. Even if a passenger decides to get off early at stop 2, their seat must remain empty for the rest of the trip. The bus cannot pick up new passengers on the road. Instead, it must complete the entire tour and return to the station before loading a new group.
-*   **The Dynamic City Transit (In-Flight Batching):** A transit shuttle that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the shuttle pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
+*   **The Dynamic City Transit (In-Flight Batching):** A transit bus that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the bus pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
 
 In LLM serving, the bus is the active batch. A seat is not just a "batch slot." It represents GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
 
