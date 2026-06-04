@@ -10,17 +10,30 @@ type Seat = {
   status?: "finishes" | "boards" | "waiting";
 };
 
-const steps = [1, 2, 3, 4, 5, 6, 7, 8];
+const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-const waitingByStep: Record<number, string[]> = {
+const waitingInFlight: Record<number, string[]> = {
   1: [],
   2: ["D"],
-  3: ["D"],
+  3: [],
   4: ["E"],
   5: ["E"],
   6: ["F"],
-  7: ["F"],
+  7: [],
   8: [],
+  9: [],
+};
+
+const waitingStatic: Record<number, string[]> = {
+  1: [],
+  2: ["D"],
+  3: ["D"],
+  4: ["D", "E"],
+  5: ["D", "E"],
+  6: ["D", "E", "F"],
+  7: ["D", "E", "F"],
+  8: ["D", "E", "F"],
+  9: ["D", "E", "F"],
 };
 
 const staticSchedule: Record<number, Seat[]> = {
@@ -61,6 +74,11 @@ const staticSchedule: Record<number, Seat[]> = {
   ],
   8: [
     { name: "A", remaining: 0, status: "finishes" },
+    { name: "empty", remaining: 0 },
+    { name: "empty", remaining: 0 },
+  ],
+  9: [
+    { name: "empty", remaining: 0 },
     { name: "empty", remaining: 0 },
     { name: "empty", remaining: 0 },
   ],
@@ -106,6 +124,11 @@ const inFlightSchedule: Record<number, Seat[]> = {
     { name: "A", remaining: 0, status: "finishes" },
     { name: "F", remaining: 1 },
     { name: "E", remaining: 0, status: "finishes" },
+  ],
+  9: [
+    { name: "empty", remaining: 0 },
+    { name: "F", remaining: 0, status: "finishes" },
+    { name: "empty", remaining: 0 },
   ],
 };
 
@@ -174,20 +197,29 @@ export default function InFlightBatchingBus() {
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
-      setStep((prev) => (prev === 8 ? 1 : prev + 1));
+      setStep((prev) => (prev === 9 ? 1 : prev + 1));
     }, 1500);
     return () => clearInterval(interval);
   }, [isPlaying]);
 
   const schedule = mode === "static" ? staticSchedule : inFlightSchedule;
   const seats = schedule[step];
-  const waiting = waitingByStep[step];
+  const waiting = mode === "static" ? waitingStatic[step] : waitingInFlight[step];
   const activeCopy = modeCopy[mode];
 
   const slotSummary = useMemo(() => {
     const occupied = seats.filter((seat) => seat.name !== "empty").length;
     return `${occupied}/3 active seats`;
   }, [seats]);
+
+  const activeDetail = useMemo(() => {
+    if (step === 9) {
+      return mode === "static"
+        ? "Only 3 requests (A, B, C) completed. Requests D, E, and F remained stranded in the queue."
+        : "All 6 requests (A, B, C, D, E, F) completed successfully in 9 steps.";
+    }
+    return activeCopy.detail;
+  }, [step, mode, activeCopy.detail]);
 
   return (
     <div className="my-8 border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
@@ -227,7 +259,7 @@ export default function InFlightBatchingBus() {
               <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
                 {activeCopy.title}
               </div>
-              <div className="mt-1 font-sans text-sm leading-6 text-fd-muted-foreground">{activeCopy.detail}</div>
+              <div className="mt-1 font-sans text-sm leading-6 text-fd-muted-foreground">{activeDetail}</div>
             </div>
             <div className="border-2 border-fd-primary bg-fd-card px-3 py-2 text-xs font-bold text-fd-primary">
               {slotSummary}
@@ -250,7 +282,7 @@ export default function InFlightBatchingBus() {
                   type="button"
                   onClick={() => {
                     setIsPlaying(false);
-                    setStep((prev) => (prev === 1 ? 8 : prev - 1));
+                    setStep((prev) => (prev === 1 ? 9 : prev - 1));
                   }}
                   className="cursor-pointer border-2 border-fd-foreground bg-fd-card px-2 py-1 text-xs font-bold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[2px_2px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none"
                   title="Previous Step"
@@ -273,7 +305,7 @@ export default function InFlightBatchingBus() {
                   type="button"
                   onClick={() => {
                     setIsPlaying(false);
-                    setStep((prev) => (prev === 8 ? 1 : prev + 1));
+                    setStep((prev) => (prev === 9 ? 1 : prev + 1));
                   }}
                   className="cursor-pointer border-2 border-fd-foreground bg-fd-card px-2 py-1 text-xs font-bold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-fd-secondary hover:shadow-[2px_2px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none"
                   title="Next Step"
@@ -282,7 +314,7 @@ export default function InFlightBatchingBus() {
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-8 gap-1">
+            <div className="grid grid-cols-9 gap-1">
               {steps.map((item) => (
                 <button
                   key={item}
@@ -297,7 +329,7 @@ export default function InFlightBatchingBus() {
                       : "border-fd-foreground bg-fd-card hover:bg-fd-secondary"
                   }`}
                 >
-                  {item}
+                  {item === 9 ? "End" : item}
                 </button>
               ))}
             </div>

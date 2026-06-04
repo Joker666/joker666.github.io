@@ -2,8 +2,7 @@
 title: "LLM Serving and the Bus That Never Stops"
 description: "In-flight batching is the trick that keeps LLM serving from wasting GPU seats."
 author: Rafi Hasan
-date: "2026-06-02"
-draft: true
+date: "2026-04-02"
 tags: ["machine-learning", "llm", "inference"]
 ---
 
@@ -67,7 +66,7 @@ Even though B and C finished early, their seats cannot be reassigned. The GPU ke
 I like thinking about the difference between static and in-flight batching as the difference between a pre-booked tour bus and a public city transit bus:
 
 *   **The Fixed Tour Bus (Static Batching):** A tour bus leaves the station with a set passenger list. Even if a passenger decides to get off early at stop 2, their seat must remain empty for the rest of the trip. The bus cannot pick up new passengers on the road. Instead, it must complete the entire tour and return to the station before loading a new group.
-*   **The Dynamic City Transit (In-Flight Batching):** A transit bus that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the bus pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
+*   **The Dynamic City Transit Bus (In-Flight Batching):** A transit bus that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the bus pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
 
 In LLM serving, the bus is the active batch. A seat is not just a "batch slot." It represents GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
 
@@ -104,7 +103,7 @@ In-flight batching resolves these constraints by keeping the active batch dense 
 
 ### Resources
 
-- [Orca: A Distributed Serving System for In-Flight Batching of Generative Deep Learning Models (OSDI 2022)](https://www.usenix.org/system/files/osdi22-yu.pdf)
 - [TensorRT-LLM executor batching modes](https://nvidia.github.io/TensorRT-LLM/_cpp_gen/executor.html)
 - [TensorRT-LLM KV cache and attention](https://nvidia.github.io/TensorRT-LLM/advanced/gpt-attention.html)
 - [NVIDIA Triton dynamic batching guide](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/tutorials/Conceptual_Guide/Part_2-improving_resource_utilization/README.html)
+- [Orca: A Distributed Serving System for In-Flight Batching of Generative Deep Learning Models](https://www.usenix.org/system/files/osdi22-yu.pdf)
