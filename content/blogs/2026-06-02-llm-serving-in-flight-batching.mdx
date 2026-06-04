@@ -77,7 +77,7 @@ The important part is that the batch is no longer a fixed group of requests. It 
 
 ### In-flight Batching
 
-In-flight batching is also called continuous batching or iteration-level batching. The names are useful because they describe the same idea from different angles. So how do engines like vLLM or TensorRT-LLM actually implement this "dynamic bus" in code? They shift the scheduling boundary from the request level to the iteration level.
+In-flight batching is also called continuous batching or iteration-level batching. So how do engines like vLLM or TensorRT-LLM actually implement this "dynamic bus" in code? They shift the scheduling boundary from the request level to the iteration level.
 
 At every generation iteration, the scheduler asks:
 
@@ -93,32 +93,14 @@ Of course production systems are more complicated. They deal with priorities, ti
 
 ### Why It Matters
 
-The naive way to improve throughput is to make the batch larger. That works until it does not.
+The naive way to improve throughput is to make the batch larger. That works until it does not. Bigger batches can increase throughput, but they can also make users wait longer before the first token. In a chatbot, the first token matters a lot. A user can tolerate a long answer streaming over time, but waiting too long before anything appears feels broken. So LLM serving has a slightly different objective than plain inference:
 
-Bigger batches can increase throughput, but they can also make users wait longer before the first token. In a chatbot, the first token matters a lot. A user can tolerate a long answer streaming over time, but waiting too long before anything appears feels broken.
+- maximize tokens/sec
+- without destroying time to first token
+- without wasting KV cache
+- without letting long requests block short ones
 
-So LLM serving has a slightly different objective than plain inference:
-
-```text
-maximize tokens/sec
-without destroying time to first token
-without wasting KV cache
-without letting long requests block short ones
-```
-
-In-flight batching helps because it attacks the idle-slot problem directly. Short requests can finish and leave. New requests can enter. The GPU keeps getting a dense batch of token work instead of dragging empty seats through the loop.
-
-### Conclusion
-
-The mental model I am keeping is this:
-
-> Static batching fills the bus once. In-flight batching keeps filling the bus while the trip is happening.
-
-That small change matters because LLM requests do not finish together. Prompts have different lengths. Answers have different lengths. Some users ask for "hi", and some ask for a full essay. If the server treats all of them as one fixed batch, short requests create holes and long requests drag everyone else along.
-
-In-flight batching makes the active batch dynamic. Finished requests leave. New requests join. KV cache is reused and recycled. The GPU stays busy with useful token work.
-
-The model is still the impressive part. But the scheduler is what makes the model economically usable.
+In-flight batching resolves these constraints by keeping the active batch dense with useful work on every iteration. By making the batch dynamic, we avoid the idle slots and padding of static batching. The LLM itself gets all the attention, but the scheduler is what makes it economically viable.
 
 ### Resources
 
