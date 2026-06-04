@@ -338,7 +338,7 @@ export default function InFlightBatchingBus() {
 
         <div className="border-2 border-fd-foreground bg-fd-background p-4">
           <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">Bus stop queue</div>
-          <div className="mt-4 min-h-28 space-y-2">
+          <div className="mt-4 min-h-12 md:min-h-28 space-y-2">
             {waiting.length === 0 ? (
               <div className="border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-3 text-sm text-fd-muted-foreground">
                 nobody waiting
