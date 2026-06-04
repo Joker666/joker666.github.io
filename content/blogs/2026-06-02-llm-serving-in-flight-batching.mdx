@@ -91,11 +91,11 @@ In LLM serving, the bus is the active batch. A seat is not just a "batch slot"; 
 
 <InFlightBatchingBus />
 
-The important part is that the batch is no longer a fixed thing. It is alive.
+The important part is that the batch is no longer a fixed thing. It is a variable.
 
 ### In-flight Batching
 
-In-flight batching is also called continuous batching or iteration-level batching. The names are useful because they describe the same idea from different angles.
+In-flight batching is also called continuous batching or iteration-level batching. The names are useful because they describe the same idea from different angles. So how do engines like vLLM or TensorRT-LLM actually implement this "dynamic bus" in code? They shift the scheduling boundary from the request level to the iteration level.
 
 At every generation iteration, the scheduler asks:
 
@@ -105,23 +105,7 @@ At every generation iteration, the scheduler asks:
 - Is there enough KV cache space?
 - Can we add new work without hurting latency too much?
 
-Then it runs the next token step for the active set.
-
-Very roughly:
-
-```python
-active_batch = []
-
-while server_is_running:
-    add_new_requests_if_memory_allows(active_batch)
-
-    run_one_token_iteration(active_batch)
-
-    for request in active_batch:
-        if request.is_finished():
-            stream_response_done(request)
-            free_kv_cache(request)
-```
+Instead of waiting for a batch of requests to finish entirely before running the next batch, the execution engine runs a single forward pass of the transformer model (generating exactly one token for all active requests), pauses for a microsecond to look at the queue, and rebuilds the batch for the very next token.
 
 Of course production systems are more complicated. They deal with priorities, timeouts, chunked prefill, speculative decoding, multiple GPUs, tensor parallelism, and fairness. But this loop is the shape of the idea.
 
@@ -141,24 +125,6 @@ without letting long requests block short ones
 ```
 
 In-flight batching helps because it attacks the idle-slot problem directly. Short requests can finish and leave. New requests can enter. The GPU keeps getting a dense batch of token work instead of dragging empty seats through the loop.
-
-### The Trick
-
-The trick is not that the GPU understands concurrent requests. It does not. The application server, runtime, tokenizer, queue, inference scheduler, and GPU runtime coordinate the work. The GPU mostly sees large tensor operations.
-
-So "serving many users on a GPU" is really an orchestration problem.
-
-```text
-CPU side:
-auth, validation, tokenization, queues, scheduling
-
-GPU side:
-prefill, decode, attention, matrix multiplication, KV cache
-```
-
-The scheduler is the interesting layer between them. It turns messy user traffic into efficient GPU work.
-
-That is why in-flight batching feels like a serving primitive, not just an optimization. Once generation is token-by-token, the batch has to be token-by-token too.
 
 ### Conclusion
 
