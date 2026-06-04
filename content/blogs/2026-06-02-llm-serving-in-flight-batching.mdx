@@ -31,11 +31,9 @@ This means serving an LLM is not just "run the model once." It is a scheduling p
 
 > LLM serving is a loop. Every token is another chance to waste the GPU or fill it.
 
-That one sentence is the whole trick.
-
 ### Prefill, Decode, and the KV Cache
 
-Each request has two phases. The first phase is **prefill**. The model reads the prompt and builds the internal attention state. The second phase is **decode**, which uses *autoregressive decoding* to generate text one token at a time—feeding each generated token back into the model to predict the next. 
+Each request has two phases. The first phase is **prefill**, where the model reads the prompt and builds the internal attention state. The second phase is **decode**, which uses *autoregressive decoding* to generate text one token at a time, feeding each generated token back into the model to predict the next. 
 
 Because decode steps run repeatedly until an end condition is met, requests vary wildly in duration. To avoid recomputing the prompt history at every step, the server maintains a **KV cache** in GPU memory. The scheduler's goal is to keep the GPU busy with token generation without running out of this finite cache memory.
 
@@ -64,34 +62,18 @@ Step 8: A _ _  # A is done
 
 Even though B and C finished early, their seats cannot be reassigned. The GPU keeps running, but it wastes memory and computes empty padding tokens. That is the waste.
 
-### The Bus Analogy
+### The Fixed Tour Bus vs. The Dynamic City Transit
 
-I like thinking about in-flight batching as a bus that never fully stops.
+I like thinking about the difference between static and in-flight batching as the difference between a pre-booked tour bus and a public city transit shuttle:
 
-Normal batching says:
+*   **The Fixed Tour Bus (Static Batching):** A tour bus leaves the station with a set passenger list. Even if a passenger decides to get off early at stop 2, their seat must remain empty for the rest of the trip. The bus cannot pick up new passengers on the road; it must complete the entire tour and return to the station before loading a new group.
+*   **The Dynamic City Transit (In-Flight Batching):** A transit shuttle that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the shuttle pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
 
-```text
-The bus leaves.
-Someone gets off early.
-The seat stays empty.
-New passengers wait for the next bus.
-```
-
-In-flight batching says:
-
-```text
-The bus is still moving.
-Someone gets off.
-The conductor checks the queue.
-A new passenger takes the seat.
-The bus keeps going.
-```
-
-In LLM serving, the bus is the active batch. A seat is not just a "batch slot"; it is also GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
+In LLM serving, the bus is the active batch. A seat is not just a "batch slot"—it represents GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
 
 <InFlightBatchingBus />
 
-The important part is that the batch is no longer a fixed thing. It is a variable.
+The important part is that the batch is no longer a fixed group of requests. It is a dynamic, fluid variable.
 
 ### In-flight Batching
 
