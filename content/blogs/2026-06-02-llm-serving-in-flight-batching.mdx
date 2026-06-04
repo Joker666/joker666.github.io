@@ -35,9 +35,9 @@ That one sentence is the whole trick.
 
 ### Prefill, Decode, and the KV Cache
 
-Each request has two phases. The first phase is **prefill**. The model reads the prompt and builds the internal attention state. The second phase is **decode**. The model generates the next token, then the next token, then the next token. Decode is usually lighter per step, but it happens many times. To avoid recomputing the entire history at every step, the server maintains a **KV cache** in GPU memory. The scheduler's goal is to balance keeping the GPU busy with token work without running out of KV cache memory.
+Each request has two phases. The first phase is **prefill**. The model reads the prompt and builds the internal attention state. The second phase is **decode**, which uses *autoregressive decoding* to generate text one token at a time—feeding each generated token back into the model to predict the next. 
 
-The root of the problem comes down to how LLMs generate text. They use autoregressive decoding. This is just a fancy way of saying they predict one single token at a time, feed that token back into themselves, and predict the next one. If User A asks for a haiku (15 tokens) and User B asks for a full Python script (500 tokens), their requests take completely different amounts of time to finish.
+Because decode steps run repeatedly until an end condition is met, requests vary wildly in duration. To avoid recomputing the prompt history at every step, the server maintains a **KV cache** in GPU memory. The scheduler's goal is to keep the GPU busy with token generation without running out of this finite cache memory.
 
 ### Static Batching
 
