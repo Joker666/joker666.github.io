@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 // Simulated ECG-like sequence
 const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
@@ -29,6 +29,7 @@ const StateBar = ({ value, className }: { value: number; className: string }) =>
 
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const rnnContentRef = useRef<HTMLDivElement>(null);
   const [rnnContentHeight, setRnnContentHeight] = useState<number | null>(null);
 
@@ -45,13 +46,31 @@ const TimeSeriesVisualizer = () => {
 
   const handleNext = () => {
     if (step < sequence.length) {
+      setIsPlaying(false);
       setStep((s) => s + 1);
     }
   };
 
   const handleReset = () => {
+    setIsPlaying(false);
     setStep(0);
   };
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      setStep((currentStep) => (currentStep >= sequence.length ? currentStep : currentStep + 1));
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (step >= sequence.length) {
+      setIsPlaying(false);
+    }
+  }, [step]);
 
   useLayoutEffect(() => {
     const content = rnnContentRef.current;
@@ -92,6 +111,19 @@ const TimeSeriesVisualizer = () => {
             className="flex-1 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none sm:flex-none"
           >
             Step Forward
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsPlaying((prev) => !prev)}
+            disabled={isComplete}
+            className={`flex-1 cursor-pointer border-2 border-fd-foreground px-3 py-1 text-sm font-semibold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none sm:flex-none ${
+              isPlaying
+                ? "bg-fd-primary text-fd-primary-foreground"
+                : "bg-fd-background text-fd-foreground hover:bg-fd-secondary"
+            }`}
+            title={isPlaying ? "Pause Sequence" : "Play Sequence"}
+          >
+            {isPlaying ? "Pause ⏸" : "Play ▶"}
           </button>
         </div>
       </div>
