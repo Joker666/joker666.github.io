@@ -114,3 +114,10 @@ pre {
     position: relative;
     top: 1.6px;
 }
+
+/* Hide navbar and footer borders on desktop (when theme toggle is visible in navbar) */
+@media (min-width: 1024px) {
+    #nd-nav > div {
+        border-bottom-style: none;
+    }
+}
