@@ -121,7 +121,12 @@ pre {
     border-bottom-style: none;
   }
 
-  #nd-nav nav > a:first-child {
-    border-bottom: 1px solid var(--color-fd-foreground);
+  #nd-nav nav > ul:first-of-type a {
+    border-bottom: 1px solid transparent;
+  }
+
+  #nd-nav nav > ul:first-of-type a:hover,
+  #nd-nav nav > ul:first-of-type a[data-active="true"] {
+    border-bottom-color: var(--color-fd-primary);
   }
 }
