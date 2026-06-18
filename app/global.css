@@ -131,11 +131,26 @@ pre {
   }
 
   #nd-nav nav > ul:first-of-type a {
+    position: relative;
     border-bottom: 1px solid transparent;
+  }
+
+  #nd-nav nav > ul:first-of-type a::after {
+    position: absolute;
+    right: 0.5rem;
+    bottom: -1px;
+    left: 0.5rem;
+    height: 1px;
+    content: "";
   }
 
   #nd-nav nav > ul:first-of-type a:hover,
   #nd-nav nav > ul:first-of-type a[data-active="true"] {
-    border-bottom-color: var(--color-fd-primary);
+    border-bottom-color: transparent;
+  }
+
+  #nd-nav nav > ul:first-of-type a:hover::after,
+  #nd-nav nav > ul:first-of-type a[data-active="true"]::after {
+    background-color: var(--color-fd-primary);
   }
 }
