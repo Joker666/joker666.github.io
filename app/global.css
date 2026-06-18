@@ -130,9 +130,9 @@ pre {
   #nd-nav nav > a:first-child::after {
     position: absolute;
     right: 0;
-    bottom: 1px;
+    bottom: 0.0625rem;
     left: 0;
-    height: 1px;
+    height: 2px;
     content: "";
   }
 
@@ -150,7 +150,7 @@ pre {
     right: 0.5rem;
     bottom: -1px;
     left: 0.5rem;
-    height: 1px;
+    height: 2px;
     content: "";
   }
 
