@@ -123,6 +123,7 @@ pre {
 
   #nd-nav nav > a:first-child {
     border-bottom: 1px solid transparent;
+    padding-block: 0.5rem;
   }
 
   #nd-nav nav > a:first-child:hover {
