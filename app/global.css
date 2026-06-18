@@ -121,6 +121,10 @@ pre {
     border-bottom-style: none;
   }
 
+  #nd-nav > div.is-scrolled {
+    border-bottom: 2px solid var(--color-fd-foreground);
+  }
+
   #nd-nav nav > a:first-child {
     position: relative;
     border-bottom: 1px solid transparent;
