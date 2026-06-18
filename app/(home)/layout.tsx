@@ -19,8 +19,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <HomeLayout {...options} className="[--fd-layout-width:var(--container-4xl)]">
       {pathname === "/" && (
         <style>{`
-          #nd-nav nav > a:first-child {
-            border-bottom-color: var(--color-fd-primary);
+          #nd-nav nav > a:first-child::after {
+            background-color: var(--color-fd-primary);
           }
         `}</style>
       )}

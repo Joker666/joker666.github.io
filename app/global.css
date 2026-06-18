@@ -122,12 +122,22 @@ pre {
   }
 
   #nd-nav nav > a:first-child {
+    position: relative;
     border-bottom: 1px solid transparent;
     padding-block: 0.5rem;
   }
 
-  #nd-nav nav > a:first-child:hover {
-    border-bottom-color: var(--color-fd-primary);
+  #nd-nav nav > a:first-child::after {
+    position: absolute;
+    right: 0;
+    bottom: 1px;
+    left: 0;
+    height: 1px;
+    content: "";
+  }
+
+  #nd-nav nav > a:first-child:hover::after {
+    background-color: var(--color-fd-primary);
   }
 
   #nd-nav nav > ul:first-of-type a {
