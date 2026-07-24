@@ -6,19 +6,19 @@ date: "2026-04-02"
 tags: ["machine-learning", "llm", "inference"]
 ---
 
-I used to think batching requests for a machine learning model was mostly solved. I have hosted models and served requests. Batch them, send them through the GPU together, get better throughput. Simple enough.
+I used to think batching requests for a machine learning model was a solved problem. I have hosted models and served requests before. Put a few requests together, send them through the GPU, and get better throughput. Simple.
 
-If you skip batching and send one tiny request at a time, the GPU is basically a giant bus carrying one passenger. It still moves. The economics are just awful. This is why batching exists. But LLMs make batching weird.
+Without batching, a GPU is like a giant bus carrying one passenger. It still gets to the destination, but it is an expensive way to move one person. LLMs make this familiar problem weird because every passenger is going to a different stop.
 
 ### The Idea
 
-In a traditional web backend or a standard computer vision pipeline, it's straightforward. You put requests into a queue, wait until you hit a batch size of 4 or 8, slam them into the GPU, and return the results. Standard engineering. A single trip through the model.
+For something like an image classifier, batching is straightforward. Put requests in a queue, wait until there are 4 or 8 of them, run the batch through the GPU, and return the results. Each request takes a single trip through the model.
 
 ```text
 input -> model -> output
 ```
 
-An image classifier does this. An embedding model does this. You pass in data, the model runs, and you get the result. But LLM serving completely breaks this mental model. LLM generation is iterative. It generates one token at a time.
+Embedding models work the same way. You pass in some data, the model runs once, and you get a result. An LLM does not quite work like this. It generates one token at a time.
 
 ```text
 prompt -> prefill
@@ -28,15 +28,15 @@ token 3 -> decode
 ...
 ```
 
-Serving an LLM is not "run the model once." It is a scheduling problem that repeats every token. Treat LLM requests like ordinary inference requests and GPU efficiency drops fast. Latency gets worse. The cloud bill follows.
+So serving an LLM is not a single call to `model(input)`. The server has to schedule the requests again after every token. If it treats them like ordinary inference requests, some requests finish early while the others keep the whole batch alive.
 
-> LLM serving is a loop. Every token is another chance to waste the GPU or fill it.
+> With LLM serving, the batch can change after every generated token.
 
 ### Prefill, Decode, and the KV Cache
 
-Each request has two phases. In **prefill**, the model reads the prompt and builds the internal attention state. In **decode**, the model uses *autoregressive decoding* to generate text one token at a time, feeding each new token back in to predict the next one.
+An LLM request has two phases. During **prefill**, the model reads the prompt and builds its attention state. During **decode**, it generates a token, feeds that token back into the model, and predicts the next one.
 
-Decode runs until the request hits an end condition, so request lengths vary wildly. To avoid recomputing the prompt history at every step, the server keeps a **KV cache** in GPU memory. The scheduler has to keep the GPU busy without running out of that finite cache.
+Decode continues until the model produces an end token or reaches a limit. Some answers take 10 tokens and others take 1,000. The server does not want to recompute the entire prompt and output history every time, so it keeps the attention keys and values in a **KV cache** on the GPU. This cache is fast, but GPU memory is finite. The scheduler has to juggle both compute and cache space.
 
 ### Static Batching
 
@@ -48,7 +48,7 @@ B -> needs 2 output tokens
 C -> needs 6 output tokens
 ```
 
-Static batching puts them on the same bus and makes the bus finish the whole trip before taking new passengers.
+Static batching puts them together and waits for the longest request to finish before admitting another batch.
 
 ```text
 Step 1: A B C
@@ -61,47 +61,45 @@ Step 7: A _ _
 Step 8: A _ _  # A is done
 ```
 
-Even though B and C finished early, their seats cannot be reassigned. The GPU keeps running, but it wastes memory and computes empty padding tokens. That is the waste.
+After B finishes, its position in the batch is useless. The same thing happens to C two steps later. No waiting request can take either position until A is done, so the batch becomes more empty with every step.
 
 ### The Tour Bus vs. The City Bus
 
-I like thinking about the difference between static and in-flight batching as the difference between a pre-booked tour bus and a public city bus. Both are buses, but they operate very differently.
+The way I understand the difference is to picture two kinds of buses.
 
-*   **The Tour Bus (Static Batching):** A tour bus leaves the station with a fixed passenger list. If someone gets off at stop 2, their seat stays empty for the rest of the route. The bus does not pick up anyone new. It finishes the tour, returns to the station, and loads the next group.
-*   **The City Bus (In-Flight Batching):** A bus that runs a continuous loop. As soon as a passenger reaches their destination and steps off, the bus pauses briefly at the next stop, lets a new passenger board to fill the empty seat, and immediately continues its journey.
+A tour bus leaves with a fixed passenger list. If someone gets off at the second stop, that seat stays empty for the rest of the tour. The bus only takes a new group after it returns to the station. This is static batching.
 
-In LLM serving, the bus is the active batch. A seat is not just a "batch slot." It represents GPU memory and KV cache capacity. Getting off means a request has hit an end condition. Boarding means a new request has enough memory budget to join the active generation loop.
+A city bus keeps running the same route. People get off at each stop and new people take their seats. This is in-flight batching.
+
+For an LLM server, the bus is the active batch. A seat represents GPU compute and some KV cache memory. A request gets off when it finishes generating. If there is enough memory, the scheduler can put a waiting request in that newly empty seat.
 
 <InFlightBatchingBus />
 
-The batch is no longer a fixed group of requests. It changes between tokens.
+The important part is that the passenger list is no longer fixed. It can change between tokens.
 
 ### In-flight Batching
 
-In-flight batching is also called continuous batching or iteration-level batching. Engines like vLLM and TensorRT-LLM make it work by moving the scheduling boundary from the request level to the iteration level.
+In-flight batching is also called continuous batching or iteration-level batching. Instead of scheduling a whole request at once, engines such as vLLM and TensorRT-LLM schedule one generation step at a time.
 
-At every generation iteration, the scheduler asks:
+After each step, the scheduler has a few decisions to make:
 
 - Which requests are still active?
 - Which requests just finished?
 - Which new requests are waiting?
 - Is there enough KV cache space?
-- Can we add new work without hurting latency too much?
+- Should a waiting request join the next step?
 
-Instead of waiting for a batch of requests to finish entirely before running the next batch, the execution engine runs a single forward pass of the transformer model (generating exactly one token for all active requests), pauses for a microsecond to look at the queue, and rebuilds the batch for the very next token.
+It then builds the next batch from the requests that are still generating and any new requests it can fit. One forward pass generates one token for each active decode request, and then the scheduler gets another chance to rearrange the batch.
 
-Of course production systems are more complicated. They deal with priorities, timeouts, chunked prefill, speculative decoding, multiple GPUs, tensor parallelism, and fairness. But the loop above is the core of the idea.
+Real serving engines have more to worry about, including prompt prefills, priorities, multiple GPUs, and fairness. But this loop is the part I had been missing. The scheduling decision happens over and over, not only when a request first arrives.
 
 ### Why It Matters
 
-The naive way to improve throughput is to make the batch larger. That works until it does not. Bigger batches can increase throughput, but they can also make users wait longer before the first token. In a chatbot, the first token matters a lot. A user can tolerate a long answer streaming over time, but waiting too long before anything appears feels broken. So LLM serving has a slightly different objective than plain inference:
+The obvious way to get more throughput is to increase the batch size. That works, but now a request may sit in a queue while the server waits to fill the batch. For a chatbot, that delay is noticeable. I do not mind watching an answer stream for a few seconds, but staring at an empty screen before the first token makes the application feel stuck.
 
-- maximize tokens/sec
-- without destroying time to first token
-- without wasting KV cache
-- without letting long requests block short ones
+The server is trying to produce more tokens per second while keeping that first-token delay reasonable. It also has to stay within the KV cache budget, and a long answer should not hold up every short one behind it.
 
-In-flight batching resolves these constraints by keeping the active batch dense with useful work on every iteration. It avoids the empty seats and padding that static batching leaves behind. The model gets most of the attention. The scheduler is what makes serving it affordable.
+In-flight batching helps because the server can fill a slot as soon as it becomes available. There is still a lot of difficult engineering in deciding which request gets that slot. But the basic trick is surprisingly simple: do not wait for the whole bus to come back when one passenger has already gotten off.
 
 ### Resources
 
