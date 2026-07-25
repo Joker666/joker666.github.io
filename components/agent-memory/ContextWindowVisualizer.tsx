@@ -9,10 +9,7 @@ type ContextBlock = {
   tokens: number;
   tokensBloated?: number;
   description: string;
-  colorClass: string;
-  borderClass: string;
-  badgeClass: string;
-  activeRingClass: string;
+  meterClass: string;
 };
 
 const BLOCKS: ContextBlock[] = [
@@ -23,10 +20,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 2500,
     tokensBloated: 2500,
     description: "The agent's support role, available actions, and safety boundaries.",
-    colorClass: "bg-purple-100/70 text-purple-900 dark:bg-purple-950/40 dark:text-purple-300",
-    borderClass: "border-purple-300 dark:border-purple-500/40",
-    badgeClass: "bg-purple-700 text-white dark:bg-purple-500",
-    activeRingClass: "ring-purple-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/20",
   },
   {
     id: "rules",
@@ -35,10 +29,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 4000,
     tokensBloated: 4000,
     description: "Refund eligibility, identity verification, privacy, and escalation rules.",
-    colorClass: "bg-slate-100/80 text-slate-900 dark:bg-slate-900/60 dark:text-slate-300",
-    borderClass: "border-slate-300 dark:border-slate-500/40",
-    badgeClass: "bg-slate-700 text-white dark:bg-slate-500",
-    activeRingClass: "ring-slate-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/25",
   },
   {
     id: "history",
@@ -47,10 +38,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 12000,
     tokensBloated: 12000,
     description: "Messages between the customer, the human support agent, and the AI assistant.",
-    colorClass: "bg-sky-100/70 text-sky-900 dark:bg-sky-950/40 dark:text-sky-300",
-    borderClass: "border-sky-300 dark:border-sky-500/40",
-    badgeClass: "bg-sky-700 text-white dark:bg-sky-500",
-    activeRingClass: "ring-sky-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/30",
   },
   {
     id: "records",
@@ -59,10 +47,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 18000,
     tokensBloated: 18000,
     description: "Customer profile, order history, billing records, and related support cases.",
-    colorClass: "bg-teal-100/70 text-teal-900 dark:bg-teal-950/40 dark:text-teal-300",
-    borderClass: "border-teal-300 dark:border-teal-500/40",
-    badgeClass: "bg-teal-700 text-white dark:bg-teal-500",
-    activeRingClass: "ring-teal-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/35",
   },
   {
     id: "tools",
@@ -71,10 +56,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 16000,
     tokensBloated: 68000, // Bloated mode: huge 2,000-line CRM export
     description: "CRM searches, payment-provider responses, and knowledge-base results.",
-    colorClass: "bg-amber-100/70 text-amber-950 dark:bg-amber-950/40 dark:text-amber-300",
-    borderClass: "border-amber-300 dark:border-amber-500/40",
-    badgeClass: "bg-amber-700 text-white dark:bg-amber-500 dark:text-black",
-    activeRingClass: "ring-amber-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/45",
   },
   {
     id: "plan",
@@ -83,10 +65,7 @@ const BLOCKS: ContextBlock[] = [
     tokens: 1500,
     tokensBloated: 1500,
     description: "The current diagnosis, next support action, and escalation status.",
-    colorClass: "bg-rose-100/70 text-rose-900 dark:bg-rose-950/40 dark:text-rose-300",
-    borderClass: "border-rose-300 dark:border-rose-500/40",
-    badgeClass: "bg-rose-700 text-white dark:bg-rose-500",
-    activeRingClass: "ring-rose-400/70 dark:ring-fd-foreground",
+    meterClass: "bg-fd-foreground/55",
   },
 ];
 
@@ -162,7 +141,7 @@ export default function ContextWindowVisualizer() {
               <div
                 key={b.id}
                 style={{ width: `${pct}%` }}
-                className={`h-full transition-all duration-300 ${b.badgeClass}`}
+                className={`h-full transition-all duration-300 ${b.meterClass}`}
                 title={`${b.name}: ${tokens.toLocaleString()} tokens`}
               />
             );
@@ -190,16 +169,18 @@ export default function ContextWindowVisualizer() {
                   key={b.id}
                   type="button"
                   onClick={() => setActiveId(b.id)}
-                  className={`group flex w-full cursor-pointer items-center justify-between gap-3 border-2 p-2.5 text-left transition-all ${
-                    b.borderClass
-                  } ${b.colorClass} ${
+                  className={`group flex w-full cursor-pointer items-center justify-between gap-3 border-2 p-2.5 text-left text-fd-foreground transition-all ${
                     isActive
-                      ? `ring-2 ${b.activeRingClass} shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] -translate-y-0.5`
-                      : "opacity-85 hover:opacity-100 hover:-translate-y-0.5"
+                      ? "border-fd-foreground border-l-4 border-l-fd-primary bg-fd-card shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] -translate-y-0.5"
+                      : "border-fd-muted-foreground/40 bg-fd-secondary/25 opacity-85 hover:-translate-y-0.5 hover:border-fd-muted-foreground hover:bg-fd-secondary/50 hover:opacity-100"
                   }`}
                 >
                   <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                    <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${b.badgeClass}`} />
+                    <span
+                      className={`inline-block h-2.5 w-2.5 shrink-0 ${
+                        isActive ? "bg-fd-primary" : "bg-fd-muted-foreground/60"
+                      }`}
+                    />
                     <span className="font-sans text-xs font-bold text-fd-foreground">
                       {b.name}
                     </span>
@@ -226,7 +207,7 @@ export default function ContextWindowVisualizer() {
         <div className="flex flex-col justify-between border-2 border-fd-foreground bg-fd-background p-4">
           <div>
             <div className="flex items-center justify-between border-b-2 border-fd-foreground pb-2">
-              <span className={`px-2 py-0.5 font-sans text-xs font-bold text-white ${activeBlock.badgeClass}`}>
+              <span className="bg-fd-foreground px-2 py-0.5 font-sans text-xs font-bold text-fd-background">
                 {activeBlock.name}
               </span>
               <span className="font-mono text-xs font-bold text-fd-muted-foreground">

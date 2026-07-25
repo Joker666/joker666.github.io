@@ -264,7 +264,7 @@ export default function AgentDeskVisualizer() {
                 : "bg-fd-background text-fd-foreground hover:bg-fd-secondary"
             }`}
           >
-            {isPlaying ? "Pause" : "Play"}
+            {isPlaying ? "Pause ⏸" : "Play ▶"}
           </button>
         </div>
       </div>
