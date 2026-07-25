@@ -22,44 +22,44 @@ type DeskStep = {
 
 const steps: DeskStep[] = [
   {
-    title: "The task arrives",
-    description: "The agent starts with one task and plenty of room in its context window.",
+    title: "A customer reports a duplicate charge",
+    description: "Lisa opens the case with the customer's message and plenty of room in the context window.",
     contextUsage: 18,
     desk: [
       {
-        id: "task",
-        title: "Current task",
-        detail: "Fix the failing production build",
+        id: "case",
+        title: "Current case",
+        detail: "Customer sees two card charges for order #1842",
         tone: "active",
       },
     ],
     cabinet: [],
   },
   {
-    title: "The desk fills up",
-    description: "File reads and command output accumulate while the agent investigates the failure.",
+    title: "The case fills the desk",
+    description: "Conversation, CRM lookups, and payment results accumulate while Lisa investigates.",
     contextUsage: 92,
     desk: [
       {
-        id: "task",
-        title: "Current task",
-        detail: "Fix the failing production build",
+        id: "case",
+        title: "Current case",
+        detail: "Customer sees two card charges for order #1842",
       },
       {
-        id: "files",
-        title: "Files inspected",
-        detail: "package.json and database schema",
+        id: "conversation",
+        title: "Customer conversation",
+        detail: "Card appeared to be charged twice after checkout",
       },
       {
-        id: "error",
-        title: "Build output",
-        detail: "842 lines of errors",
+        id: "payment",
+        title: "Payment API",
+        detail: "One charge settled; one authorization is pending",
         tone: "active",
       },
       {
         id: "attempts",
-        title: "Failed attempts",
-        detail: "Six builds, three possible fixes",
+        title: "Actions considered",
+        detail: "Refund, reversal check, or billing escalation",
         tone: "muted",
       },
     ],
@@ -67,93 +67,93 @@ const steps: DeskStep[] = [
   },
   {
     title: "Compaction clears the desk",
-    description: "The long trace becomes one checkpoint. The task keeps moving without carrying every old detail.",
+    description: "The investigation becomes one checkpoint, preserving the useful facts without every lookup.",
     contextUsage: 34,
     desk: [
       {
-        id: "task",
-        title: "Current task",
-        detail: "Fix the failing production build",
+        id: "case",
+        title: "Current case",
+        detail: "Resolve the duplicate-charge report for order #1842",
       },
       {
         id: "checkpoint",
         title: "Progress checkpoint",
-        detail: "Build fails because generated database types are missing",
+        detail: "One payment settled; one authorization pending; do not refund yet",
         tone: "active",
       },
     ],
     cabinet: [],
   },
   {
-    title: "A new session begins",
-    description: "The context window starts empty. The checkpoint survives outside the model in external storage.",
+    title: "Lisa's session ends",
+    description: "The next session starts empty, but the case checkpoint survives in external storage.",
     contextUsage: 0,
     desk: [],
     cabinet: [
       {
         id: "checkpoint",
-        title: "Build checkpoint",
-        detail: "Generated database types are missing",
+        title: "Case #1842 checkpoint",
+        detail: "One settled payment and one pending authorization",
         tone: "active",
       },
     ],
   },
   {
-    title: "Retrieval brings back one note",
-    description: "A related task arrives. The agent retrieves the useful checkpoint instead of replaying the old session.",
+    title: "John receives a similar case",
+    description: "The agent retrieves Lisa's useful checkpoint instead of replaying her entire session.",
     contextUsage: 38,
     desk: [
       {
-        id: "task",
-        title: "Current task",
-        detail: "Continue the production build fix",
+        id: "case",
+        title: "Current case",
+        detail: "Investigate two card charges for order #1977",
       },
       {
         id: "retrieved",
         title: "Retrieved memory",
-        detail: "Generated database types are missing",
+        detail: "Compare transaction IDs and settlement states before refunding",
         tone: "active",
       },
     ],
     cabinet: [
       {
         id: "checkpoint",
-        title: "Build checkpoint",
-        detail: "Retrieved for this task",
+        title: "Case #1842 checkpoint",
+        detail: "Retrieved for this similar billing case",
         tone: "muted",
       },
       {
-        id: "auth",
-        title: "Auth investigation",
-        detail: "Unrelated memory stays filed away",
+        id: "delivery",
+        title: "Delivery delay case",
+        detail: "Unrelated support history stays filed away",
         tone: "muted",
       },
     ],
   },
   {
-    title: "The experience becomes a procedure",
-    description: "The agent keeps the useful lesson, so the next build can start with the fix instead of rediscovering it.",
+    title: "The resolution becomes a procedure",
+    description: "The agent keeps the useful lesson, so the next support case starts with a proven check.",
     contextUsage: 22,
     desk: [
       {
-        id: "success",
-        title: "Build passed",
-        detail: "Generated types are now present",
+        id: "resolved",
+        title: "Case resolved",
+        detail: "The pending authorization reversed without a second charge",
         tone: "success",
       },
     ],
     cabinet: [
       {
         id: "session",
-        title: "Build session",
-        detail: "The full debugging trace is archived",
+        title: "Case #1842",
+        detail: "The full support transcript is archived",
         tone: "muted",
       },
     ],
     handbook: {
       id: "procedure",
-      title: "Before building",
-      detail: "Run pnpm db:generate",
+      title: "Suspected duplicate charge",
+      detail: "Compare transaction IDs and settlement states before refunding",
       tone: "active",
     },
   },
@@ -234,8 +234,8 @@ export default function AgentDeskVisualizer() {
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-fd-foreground pb-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-fd-primary">Agent memory intuition</p>
-          <h3 className="mt-1 text-xl font-semibold uppercase">The agent's desk</h3>
+          <p className="text-xs font-semibold uppercase tracking-widest text-fd-primary">Support memory intuition</p>
+          <h3 className="mt-1 text-xl font-semibold uppercase">The support agent's desk</h3>
         </div>
 
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
@@ -302,8 +302,8 @@ export default function AgentDeskVisualizer() {
             <section className="border-2 border-fd-foreground bg-fd-background p-3">
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Context desk</h4>
-                  <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Only what is here reaches the model</p>
+                  <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Current case desk</h4>
+                  <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Only this case context reaches the model</p>
                 </div>
                 <span className="shrink-0 text-xs font-bold">{current.contextUsage}% full</span>
               </div>
@@ -326,7 +326,7 @@ export default function AgentDeskVisualizer() {
                   </div>
                 ) : (
                   <div className="flex min-h-24 items-center justify-center border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-4 text-center font-sans text-sm text-fd-muted-foreground">
-                    New session. The context window is empty.
+                    New support session. The context window is empty.
                   </div>
                 )}
               </div>

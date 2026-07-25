@@ -5,7 +5,7 @@ import { useState } from "react";
 type ContextBlock = {
   id: string;
   name: string;
-  category: "system" | "rules" | "history" | "files" | "tools" | "plan";
+  category: "system" | "rules" | "history" | "records" | "tools" | "plan";
   tokens: number;
   tokensBloated?: number;
   description: string;
@@ -18,11 +18,11 @@ type ContextBlock = {
 const BLOCKS: ContextBlock[] = [
   {
     id: "system",
-    name: "System Instructions",
+    name: "Support Agent Instructions",
     category: "system",
     tokens: 2500,
     tokensBloated: 2500,
-    description: "Core agent identity, capabilities, and safety boundaries defined by the platform.",
+    description: "The agent's support role, available actions, and safety boundaries.",
     colorClass: "bg-purple-100/70 text-purple-900 dark:bg-purple-950/40 dark:text-purple-300",
     borderClass: "border-purple-300 dark:border-purple-500/40",
     badgeClass: "bg-purple-700 text-white dark:bg-purple-500",
@@ -30,11 +30,11 @@ const BLOCKS: ContextBlock[] = [
   },
   {
     id: "rules",
-    name: "Repository Rules",
+    name: "Support Policies",
     category: "rules",
     tokens: 4000,
     tokensBloated: 4000,
-    description: "Project guidelines such as AGENTS.md, style rules, and folder structure tips.",
+    description: "Refund eligibility, identity verification, privacy, and escalation rules.",
     colorClass: "bg-slate-100/80 text-slate-900 dark:bg-slate-900/60 dark:text-slate-300",
     borderClass: "border-slate-300 dark:border-slate-500/40",
     badgeClass: "bg-slate-700 text-white dark:bg-slate-500",
@@ -42,23 +42,23 @@ const BLOCKS: ContextBlock[] = [
   },
   {
     id: "history",
-    name: "Conversation History",
+    name: "Current Case Conversation",
     category: "history",
     tokens: 12000,
     tokensBloated: 12000,
-    description: "Multi-turn messages between user and agent recording requests and answers.",
+    description: "Messages between the customer, the human support agent, and the AI assistant.",
     colorClass: "bg-sky-100/70 text-sky-900 dark:bg-sky-950/40 dark:text-sky-300",
     borderClass: "border-sky-300 dark:border-sky-500/40",
     badgeClass: "bg-sky-700 text-white dark:bg-sky-500",
     activeRingClass: "ring-sky-400/70 dark:ring-fd-foreground",
   },
   {
-    id: "files",
-    name: "Inspected Files",
-    category: "files",
+    id: "records",
+    name: "Customer & Order Records",
+    category: "records",
     tokens: 18000,
     tokensBloated: 18000,
-    description: "Source code files, schema definitions, and markdown docs read by the agent.",
+    description: "Customer profile, order history, billing records, and related support cases.",
     colorClass: "bg-teal-100/70 text-teal-900 dark:bg-teal-950/40 dark:text-teal-300",
     borderClass: "border-teal-300 dark:border-teal-500/40",
     badgeClass: "bg-teal-700 text-white dark:bg-teal-500",
@@ -66,11 +66,11 @@ const BLOCKS: ContextBlock[] = [
   },
   {
     id: "tools",
-    name: "Tool Outputs & Logs",
+    name: "CRM & API Results",
     category: "tools",
     tokens: 16000,
-    tokensBloated: 68000, // Bloated mode: huge 2000 line log file
-    description: "Terminal command outputs, test run tracebacks, and tool execution payloads.",
+    tokensBloated: 68000, // Bloated mode: huge 2,000-line CRM export
+    description: "CRM searches, payment-provider responses, and knowledge-base results.",
     colorClass: "bg-amber-100/70 text-amber-950 dark:bg-amber-950/40 dark:text-amber-300",
     borderClass: "border-amber-300 dark:border-amber-500/40",
     badgeClass: "bg-amber-700 text-white dark:bg-amber-500 dark:text-black",
@@ -78,11 +78,11 @@ const BLOCKS: ContextBlock[] = [
   },
   {
     id: "plan",
-    name: "Active Plan & Goal",
+    name: "Case Resolution Plan",
     category: "plan",
     tokens: 1500,
     tokensBloated: 1500,
-    description: "Current step-by-step target task and active execution status.",
+    description: "The current diagnosis, next support action, and escalation status.",
     colorClass: "bg-rose-100/70 text-rose-900 dark:bg-rose-950/40 dark:text-rose-300",
     borderClass: "border-rose-300 dark:border-rose-500/40",
     badgeClass: "bg-rose-700 text-white dark:bg-rose-500",
@@ -110,7 +110,7 @@ export default function ContextWindowVisualizer() {
       <div className="flex flex-col gap-3 border-b-2 border-fd-foreground pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-xs font-bold uppercase tracking-wider text-fd-primary">
-            Agent Context Assembly
+            Support Agent Context
           </div>
           <h3 className="m-0 text-lg font-extrabold uppercase tracking-tight text-fd-foreground">
             The Context Window
@@ -128,7 +128,7 @@ export default function ContextWindowVisualizer() {
                 : "text-fd-muted-foreground hover:text-fd-foreground"
             }`}
           >
-            Trimmed Context
+            Focused Context
           </button>
           <button
             type="button"
@@ -139,7 +139,7 @@ export default function ContextWindowVisualizer() {
                 : "text-fd-muted-foreground hover:text-fd-foreground"
             }`}
           >
-            Bloated Log Output
+            Raw CRM Export
           </button>
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function ContextWindowVisualizer() {
         {/* Visual Prompt Stack */}
         <div className="border-2 border-fd-foreground bg-fd-background p-3">
           <div className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-fd-muted-foreground">
-            <span>Prompt Payload Breakdown</span>
+            <span>Support Case Context</span>
             <span>Click to inspect</span>
           </div>
 
@@ -205,7 +205,7 @@ export default function ContextWindowVisualizer() {
                     </span>
                     {mode === "bloated" && b.id === "tools" && (
                       <span className="shrink-0 border border-amber-600 bg-amber-500/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-amber-700 dark:text-amber-300">
-                        +2,000 line log
+                        +2,000 line CRM export
                       </span>
                     )}
                   </div>
@@ -254,7 +254,7 @@ export default function ContextWindowVisualizer() {
               <div className="min-h-0 overflow-hidden">
                 <div className="border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 dark:text-amber-200">
                   <strong className="block font-bold">⚠️ Context Competition:</strong>
-                  Raw terminal output from a 2,000-line build log consumes over 50% of the entire window, crowding out conversation history and file definitions.
+                  A raw 2,000-line CRM export consumes over 50% of the entire window, crowding out the customer's conversation, support policies, and resolution plan.
                 </div>
               </div>
             </div>

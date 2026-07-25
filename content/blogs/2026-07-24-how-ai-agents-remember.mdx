@@ -18,15 +18,15 @@ So where does memory come from?
 
 > An agent remembers by rebuilding the right context for its next action.
 
-Deciding what "right" means is the whole problem. If you give it too little, the agent has to repeat work it has already done. If you give it too much, useful information gets buried under old file contents, command outputs, and conversations. From what I can tell, the state of the art for handling agentic memory falls into three broad approaches: compact the current context, retrieve old information from external storage, and turn past work into reusable experience.
+Deciding what "right" means is the whole problem. If you give it too little, the agent has to repeat work it has already done. If you give it too much, useful information gets buried under old customer records, raw API responses, and conversations. From what I can tell, the state of the art for handling agentic memory falls into three broad approaches: compact the current context, retrieve old information from external storage, and turn past work into reusable experience.
 
 ### The Context Window
 
-Let's separate the model from the agent. Every large language model has a context window. The agent is the system around it that fills that window. A coding agent's context might look something like this:
+Let's separate the model from the agent. Every large language model has a context window. The agent is the system around it that fills that window. The customer support agent's context might look something like this:
 
 <ContextWindowVisualizer />
 
-All of this is sent to the model as input. If the agent reads a 2,000-line log file, those lines now compete with the original task for attention. A one million token context window gives us more room, but it does not decide which 2,000 lines matter. It only postpones that decision.
+All of this is sent to the model as input. If the agent loads a 2,000-line CRM export, those lines now compete with the customer's message, the support policy, and the resolution plan for attention. A one million token context window gives us more room, but it does not decide which 2,000 lines matter. It only postpones that decision.
 
 Prompt caching is useful here, but I don't think it is memory. Caching can make a repeated prefix cheaper to process. It does not choose what the agent should remember.
 
@@ -34,50 +34,50 @@ Prompt caching is useful here, but I don't think it is memory. Caching can make 
 
 The simplest way to keep an agent running is to shrink its history when it gets too large. This is usually called compaction or context editing.
 
-Some content can be removed without much thought. If an agent reads a file, changes it, and reads the new version, the first copy is probably useless. The same goes for a test failure that has already been fixed. Tool results take up a surprising amount of the context, so deleting stale results can buy a lot of room.
+Some content can be removed without much thought. If the agent looks up an order several times, it probably does not need every copy of the same record. The same goes for an early troubleshooting path that the customer has already ruled out. CRM searches and API responses take up a surprising amount of the context, so deleting stale results can buy a lot of room.
 
 Eventually deletion is not enough. The agent has to summarize:
 
 ```text
 Before:
     40 messages
-    12 file reads
-    8 test runs
-    3 failed attempts
+    12 CRM lookups
+    8 payment API calls
+    3 possible resolutions
 
 After:
-    We changed the authentication middleware.
-    The remaining failure is in the refresh token test.
-    Do not change the public API.
+    The customer sees two card charges for order #1842.
+    One charge settled; the other is a pending authorization.
+    Do not issue a refund until the pending authorization is rechecked.
 ```
 
 The summary becomes a smaller representation of the work so far. It is similar to compressing a log into a checkpoint and continuing from there.
 
-This works well for the current task, but it is lossy. The summary may record that an approach failed and leave out the exact error that explained why. It can preserve the final decision but forget a constraint that led to it. Once the original context is removed, the agent cannot recover what the summary missed.
+This works well for the current case, but it is lossy. The summary may record that a refund was rejected and leave out the payment status that explained why. It can preserve the final decision but forget a policy constraint that led to it. Once the original context is removed, the agent cannot recover what the summary missed.
 
 There is also a strange feedback loop here. We ask the same model that filled the context to decide which parts of that context future calls will need. Most of the time this is fine. Sometimes the model confidently throws away the one detail it should have kept.
 
 ### Approach 2: External Memory and Retrieval
 
-Compaction helps an agent survive one long task. It does not help much when I start a new session tomorrow. For that, the agent needs storage outside the context window.
+Compaction helps an agent survive one long support case. It does not help much when Lisa ends her session and John handles a similar case tomorrow. For that, the agent needs storage outside the context window.
 
-The common solution is to save conversations, facts, task results, or files and retrieve a small set before each model call. The first version usually looks like this:
+The common solution is to save conversations, customer facts, case results, or records and retrieve a small set before each model call. The first version usually looks like this:
 
 ```text
 memory -> embedding -> vector database
 
-new task -> embedding -> similarity search -> relevant memories
+new case -> embedding -> similarity search -> relevant memories
 ```
 
-If the new task is about deploying a Go service, semantic search might retrieve notes from previous Go deployments. This is already much better than injecting the entire history.
+If John's new case is about a suspected duplicate card charge, semantic search might retrieve Lisa's earlier resolution for order #1842. This is already much better than injecting the entire support history.
 
-It also breaks in some annoying ways. Semantic similarity is not the same as usefulness. An old deployment error may look very similar to the current one but belong to a different repository. Exact names and error codes sometimes work better with keyword search. Recency matters. Permissions matter. And facts change.
+It also breaks in some annoying ways. Semantic similarity is not the same as usefulness. An old duplicate-charge case may look very similar to the current one but involve a different payment provider or account. Exact order numbers and transaction IDs sometimes work better with keyword search. Recency matters. Permissions matter. And facts change.
 
 Imagine the memory store contains both of these:
 
 ```text
-Rafi prefers Python for backend services.
-Rafi now prefers Go for backend services.
+The customer prefers phone updates.
+The customer now prefers email updates.
 ```
 
 A vector search can easily retrieve the first one. Both are relevant and semantically similar, but only one is current. Now we need timestamps, metadata, ranking, invalidation, and rules for resolving conflicts. We started with embeddings and somehow ended up rebuilding a database.
@@ -90,25 +90,25 @@ I think this is where "agent memory" becomes a slightly misleading term. Much of
 
 Saving and retrieving old events is useful, but an agent that remembers every event has not necessarily learned anything from them.
 
-Suppose an agent spends 30 minutes trying to build a repository. It runs the build six times, searches through configuration files, and eventually discovers that generated database types must exist before TypeScript can compile. We could store the whole trajectory and hope a search finds it later. Or we could save one procedure:
+Suppose the support agent spends 30 minutes investigating a suspected duplicate charge. It calls the payment API six times, searches the refund policy, and eventually discovers that the second charge is only a pending authorization that will reverse automatically. We could store the whole trajectory and hope a search finds it later. Or we could save one procedure:
 
 ```text
-Before building this repository, run `pnpm db:generate`.
+Before refunding a suspected duplicate charge, compare the transaction IDs and settlement states.
 ```
 
 The second version keeps the useful lesson and drops the transcript that produced it.
 
 Memory systems often borrow three categories from cognitive science:
 
-- **Semantic memory** stores facts, such as a user's preferences or a project's architecture.
-- **Episodic memory** stores previous experiences, including what the agent tried and what happened.
-- **Procedural memory** stores how to do something, such as a runbook or an instruction.
+- **Semantic memory** stores facts, such as a customer's contact preference or the refund policy.
+- **Episodic memory** stores previous experiences, such as Lisa's investigation of order #1842.
+- **Procedural memory** stores how to do something, such as the duplicate-charge resolution playbook.
 
-The categories are useful, although real memories do not always fit cleanly into one box. A debugging session can contain facts about the codebase, an episode about a failed fix, and a new procedure for running the tests.
+The categories are useful, although real memories do not always fit cleanly into one box. A support case can contain facts about the customer, an episode about an unsuccessful resolution, and a new procedure for handling similar billing issues.
 
-Agents can form these memories while they work or in a separate reflection step. After a task, another model call examines the trajectory and asks what is worth keeping. Over time, several similar episodes can be consolidated into one general rule. A coding agent might stop remembering five individual migration failures and keep a single runbook for database changes.
+Agents can form these memories while they work or in a separate reflection step. After a case, another model call examines the trajectory and asks what is worth keeping. Over time, several similar episodes can be consolidated into one general rule. A support agent might stop remembering five individual duplicate-charge cases and keep a single playbook for checking pending authorizations.
 
-This is the newest of the three approaches, and I find it the most interesting. It is also easy to get wrong. A lesson learned from one failure may not apply to the next project. The agent can extract the wrong lesson, store it with complete confidence, and make every future run worse. Forgetting and correcting memories are as important as creating them.
+This is the newest of the three approaches, and I find it the most interesting. It is also easy to get wrong. A lesson learned from one case may not apply to a different customer, account, or payment provider. The agent can extract the wrong lesson, store it with complete confidence, and make every future case worse. Forgetting and correcting memories are as important as creating them.
 
 Recent work goes one step further and treats memory management as a policy. Instead of always saving a summary or always retrieving the nearest five chunks, the agent learns when to write, retrieve, update, and forget. Memory management then becomes another decision the agent has to make while it works.
 
@@ -118,9 +118,9 @@ These approaches solve different parts of the same problem.
 
 <AgentDeskVisualizer />
 
-Compaction keeps the current task within the context limit. Retrieval brings information back across tasks and sessions. Consolidation tries to turn the history into something more useful than a pile of transcripts.
+Compaction keeps the current case within the context limit. Retrieval brings information back across cases and support sessions. Consolidation tries to turn the history into something more useful than a pile of transcripts.
 
-A practical agent will probably use all three. It keeps recent messages in the prompt, clears stale tool results, writes durable notes to files or a database, and occasionally turns repeated experience into an instruction. The exact implementation can be a sophisticated temporal graph or a folder full of Markdown files. The hard questions stay the same.
+A practical support agent will probably use all three. It keeps the recent customer conversation in the prompt, clears stale CRM and API results, writes durable case notes to a database, and occasionally turns repeated resolutions into a support procedure. The exact implementation can be a sophisticated temporal graph or a collection of structured case summaries. The hard questions stay the same.
 
 What deserves to be remembered? When is an old memory no longer true? How does the agent know that a retrieved memory is relevant rather than merely similar? I don't think we have great answers yet.
 
