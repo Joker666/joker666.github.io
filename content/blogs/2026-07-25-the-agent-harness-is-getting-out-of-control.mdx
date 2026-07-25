@@ -1,0 +1,144 @@
+---
+title: "The Agent Harness Is Getting Out of Control"
+description: "The model is only one part of an AI agent. The harness around it is becoming the real system."
+author: Rafi Hasan
+date: "2026-07-25"
+tags: ["machine-learning", "llm", "agents", "software-engineering"]
+draft: true
+---
+
+I have been building AI agents for a while now. The first version always feels simple. Give the model some instructions, define a few tools, and keep calling the model until it returns an answer instead of another tool call.
+
+```text
+user request
+    -> model
+    -> tool call
+    -> tool result
+    -> model
+    -> final answer
+```
+
+That is an agent, at least in the smallest useful sense. Then the agent has to survive contact with a real application.
+
+What happens if a tool fails? How many times should the loop continue? Which messages should go back into the context? Where does the state live if the process restarts? Can the model call the refund tool without approval? How do we know why it called the tool? What if the conversation no longer fits in the context window? What if two tools run at the same time and both update the same record?
+
+Each question adds another piece around the model. Eventually, the model API call is the easiest part of the system.
+
+### The Idea
+
+The software around the model is often called the **agent harness**. It connects the model to tools and the outside world. Depending on the application, it may also manage:
+
+- Model APIs and streaming
+- Tool definitions, execution, and errors
+- The agent loop and its stopping conditions
+- Conversation and task state
+- Context selection and compaction
+- Short-term and long-term memory
+- Prompts and model-specific instructions
+- Permissions and human approvals
+- Guardrails and safety policies
+- Retries, budgets, tracing, and evaluation
+
+This is a strange amount of responsibility for something that started as a `while` loop.
+
+It also does not matter much whether we are building a coding agent, a customer support agent, or an assistant for a company wiki. The tools and policies change, but the harness has the same uncomfortable job. It has to turn a stateless model call into a stateful system that can act over time.
+
+> The model generates the next action. The harness has to make that action part of a reliable system.
+
+I used to think of the harness as glue code. I am no longer sure that is accurate. Glue code usually connects a few stable components. An agent harness is closer to a small runtime whose most important dependency changes behavior every few months.
+
+### How the Harness Grows
+
+Suppose we are building a customer support agent. The first version has a system prompt, a search tool, and a refund tool.
+
+The model occasionally searches forever, so we add a maximum number of turns. It sometimes calls the refund tool with an invalid order ID, so we validate tool arguments. It tries again after the refund API times out, so we add idempotency. It loads too many old messages, so we add context compaction. It forgets how a previous case was resolved, so we add memory. It retrieves an outdated policy, so we add timestamps and ranking. It issues a refund too eagerly, so we add an approval gate. Nobody can explain a bad decision afterward, so we add tracing.
+
+None of these additions are unreasonable. That is the problem. The harness grows through a series of sensible local decisions.
+
+The same thing happens with a coding agent. Replace the refund API with a shell, the customer history with a repository, and the approval gate with file permissions. A wiki assistant uses retrieval, citations, and access control. Underneath, they need much of the same machinery.
+
+Agent frameworks package these pieces for us, which is useful at the beginning. It also becomes easy to turn on routing, reflection, planning, multiple agents, and memory before measuring whether they improve anything. Anthropic's advice is surprisingly conservative: start with direct model calls and simple patterns, then add complexity when evaluation shows that it helps. That is difficult advice to follow when every harness feature sounds like something a serious production system should have.
+
+### Two Kinds of Complexity
+
+Some of this complexity belongs in the application and will not go away.
+
+A better model does not remove the need for permissions. It should not decide whether it is authorized to refund $2,000, delete a production database, or read a private document. Durable state, audit logs, idempotency, cost limits, and human approval are ordinary production concerns. The model may suggest an action, but the application still owns the consequences.
+
+Other parts of the harness exist because the current model cannot reliably do something itself.
+
+We ask the harness to split a task into steps, force the model to reflect, route work to specialist agents, summarize its context, choose which memories to retrieve, retry a malformed tool call, or follow a carefully arranged reasoning template. These techniques can improve performance, but they are tied to the behavior of a particular generation of models.
+
+That gives us two rough categories:
+
+```text
+Product infrastructure:
+    permissions, durable state, audit, verification, approvals
+
+Model scaffolding:
+    reasoning prompts, planners, reflection loops, routers, context tricks
+```
+
+The first category should be stable. The second should be easy to replace or delete. In practice, they often end up mixed together inside one framework, one runner, and one large system prompt.
+
+### Chain of Thought Crossed the Boundary
+
+Chain-of-thought prompting is a useful example of how quickly this boundary moves.
+
+In 2022, researchers showed that large language models performed better on several reasoning tasks when the prompt included intermediate reasoning steps. The familiar instruction was "think step by step." A prompting technique could unlock behavior that the plain model did not reliably show.
+
+ReAct extended this idea into an agent loop. The model would alternate between a thought, an action, and an observation:
+
+```text
+thought -> action -> observation -> thought -> action
+```
+
+The harness parsed the action, ran the tool, returned the observation, and asked the model to reason again. For a while, this pattern was almost synonymous with building an agent.
+
+Then reasoning models arrived. OpenAI trained o1 with reinforcement learning to improve the chain of thought it uses before answering. DeepSeek-R1-Zero showed that long reasoning behavior could emerge from large-scale reinforcement learning even without supervised fine-tuning as the first step.
+
+The exact training methods differ, but the direction is interesting. Something we used to construct outside the model with prompts and loops became a capability trained into the model.
+
+Current model guidance now sometimes tells us to remove the old scaffolding. Google's Gemini migration guide recommends replacing complex chain-of-thought prompts with simpler instructions and native thinking controls. It also changes temperature recommendations, tool behavior, and how reasoning state is carried between calls.
+
+The old prompt did not merely become unnecessary. It could make the new model worse.
+
+### Upgrading the Model Is Not a Dependency Bump
+
+This is what makes harness engineering feel unstable. A new model is not always a faster implementation of the same interface.
+
+One model wants explicit planning instructions. Another already plans internally and overthinks when given the same prompt. One needs the harness to preserve a reasoning signature between tool calls. Another hides that state behind the API. Tool calling and parallel execution differ too.
+
+We can standardize the JSON shape of a tool call, but we cannot standardize what makes a model use tools well.
+
+Recent harness benchmarks support this. Performance changes substantially across model and harness pairings. A strict scaffold can help one model and hurt another. Even when the model stays fixed, changes to the harness can cause quality to move in either direction.
+
+So when we say a model scored some percentage on an agent benchmark, part of that score belongs to the harness. The prompt, tools, context policy, retry behavior, and stopping rules all helped produce the result.
+
+### Building for Deletion
+
+I do not think the answer is to wait for models to absorb the whole harness. There will always be a system around the model because models should not own permissions, transactions, or the authoritative state of an application.
+
+But the boundary should be obvious in the code.
+
+The durable part can own events, tool execution, policy, state, and verification. A thinner model adapter can own prompts, context formatting, and model-specific tool behavior. An evaluation suite can test the complete pairing before an upgrade reaches production.
+
+Every piece of model scaffolding should have a reason to exist. If a reflection step does not improve the evaluation, remove it. If the model can choose tools without a router, remove the router. If native reasoning replaces a page of chain-of-thought instructions, delete the instructions.
+
+This is harder than adding features. Old scaffolding feels safe because it once fixed a real failure. Without regular evaluation, nobody knows whether it still helps.
+
+At first, I thought a good agent harness was one that handled every possible model failure. Now I think that is how the harness gets out of control. It remembers every weakness of every model we have used, long after the model is gone.
+
+The harness needs memory too, but unlike the agent, it should be much better at forgetting.
+
+### Resources
+
+- [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
+- [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903)
+- [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
+- [Learning to Reason with LLMs](https://openai.com/index/learning-to-reason-with-llms/)
+- [DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948)
+- [SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793)
+- [Harness-Bench: Measuring Harness Effects across Models in Realistic Agent Workflows](https://arxiv.org/abs/2605.27922)
+- [Don't Blame the Large Language Model: How Scaffolding Evolution Shapes Coding Agent Quality](https://arxiv.org/abs/2607.03691)
+- [Gemini Model Migration Guide](https://ai.google.dev/gemini-api/docs/gemini-3)
