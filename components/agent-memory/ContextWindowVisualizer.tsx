@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 type ContextBlock = {
   id: string;
@@ -74,6 +74,8 @@ const TOTAL_CAPACITY = 128000; // 128k Context Window
 export default function ContextWindowVisualizer() {
   const [mode, setMode] = useState<"normal" | "bloated">("normal");
   const [activeId, setActiveId] = useState<string>("tools");
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
 
   const totalUsed = BLOCKS.reduce(
     (acc, b) => acc + (mode === "bloated" && b.tokensBloated ? b.tokensBloated : b.tokens),
@@ -83,8 +85,21 @@ export default function ContextWindowVisualizer() {
   const usagePercent = Math.min(100, Math.round((totalUsed / TOTAL_CAPACITY) * 100));
   const activeBlock = BLOCKS.find((b) => b.id === activeId) || BLOCKS[0];
 
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const updateHeight = () => setContentHeight(content.offsetHeight);
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [mode, activeId]);
+
   return (
-    <div className="my-6 border-2 border-fd-foreground bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-foreground)] sm:p-6">
+    <div className="my-6 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-foreground)] sm:p-6">
       {/* Header */}
       <div className="flex flex-col gap-3 border-b-2 border-fd-foreground pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -123,8 +138,13 @@ export default function ContextWindowVisualizer() {
         </div>
       </div>
 
-      {/* Usage Meter */}
-      <div className="mt-4">
+      <div
+        className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
+        style={{ height: contentHeight ?? undefined }}
+      >
+        <div ref={contentRef} className="pt-4">
+          {/* Usage Meter */}
+          <div>
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="uppercase tracking-wider text-fd-muted-foreground">
             Window Capacity (128K Tokens)
@@ -224,26 +244,19 @@ export default function ContextWindowVisualizer() {
               {activeBlock.description}
             </p>
 
-            <div
-              aria-hidden={mode !== "bloated" || activeBlock.id !== "tools"}
-              className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-out ${
-                mode === "bloated" && activeBlock.id === "tools"
-                  ? "mt-3 grid-rows-[1fr] opacity-100"
-                  : "mt-0 grid-rows-[0fr] opacity-0"
-              }`}
-            >
-              <div className="min-h-0 overflow-hidden">
-                <div className="border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 dark:text-amber-200">
-                  <strong className="block font-bold">⚠️ Context Competition:</strong>
-                  A raw 2,000-line CRM export consumes over 50% of the entire window, crowding out the customer's conversation, support policies, and resolution plan.
-                </div>
+            {mode === "bloated" && activeBlock.id === "tools" && (
+              <div className="mt-3 animate-in fade-in border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 duration-300 dark:text-amber-200 motion-reduce:animate-none">
+                <strong className="block font-bold">⚠️ Context Competition:</strong>
+                A raw 2,000-line CRM export consumes over 50% of the entire window, crowding out the customer's conversation, support policies, and resolution plan.
               </div>
-            </div>
+            )}
           </div>
 
           <div className="mt-4 border-t-2 border-fd-foreground pt-3 text-[11px] font-sans text-fd-muted-foreground">
             💡 <strong className="text-fd-foreground">Key Takeaway:</strong> Everything in this stack is sent to the LLM on <em>every single API call</em>.
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
