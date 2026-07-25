@@ -12,7 +12,7 @@ Without batching, a GPU is like a giant bus carrying one passenger. It still get
 
 ### The Idea
 
-For something like an image classifier, batching is straightforward. Put requests in a queue, wait until there are 4 or 8 of them, run the batch through the GPU, and return the results. Each request takes a single trip through the model.
+For something like an image classifier, batching is straightforward. You put requests in a queue, wait until there are 4 or 8 of them, run the batch through the GPU, and return the results. Each request takes a single trip through the model.
 
 ```text
 input -> model -> output
@@ -85,7 +85,7 @@ After each step, the scheduler has a few decisions to make:
 
 - Which requests are still active?
 - Which requests just finished?
-- Which new requests are waiting?
+- What new requests are waiting?
 - Is there enough KV cache space?
 - Should a waiting request join the next step?
 

@@ -24,14 +24,7 @@ Deciding what "right" means is the whole problem. If you give it too little, the
 
 Let's separate the model from the agent. Every large language model has a context window. The agent is the system around it that fills that window. A coding agent's context might look something like this:
 
-```text
-system instructions
-repository instructions
-conversation
-files it has read
-tool calls and their results
-current plan
-```
+<ContextWindowVisualizer />
 
 All of this is sent to the model as input. If the agent reads a 2,000-line log file, those lines now compete with the original task for attention. A one million token context window gives us more room, but it does not decide which 2,000 lines matter. It only postpones that decision.
 

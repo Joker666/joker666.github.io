@@ -107,7 +107,7 @@ const TimeSeriesVisualizer = () => {
           <button
             type="button"
             onClick={handleNext}
-            disabled={step >= sequence.length}
+            disabled={step >= sequence.length || isPlaying}
             className="flex-1 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none sm:flex-none"
           >
             Step Forward

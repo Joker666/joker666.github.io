@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type CardTone = "default" | "active" | "muted" | "success";
 
@@ -185,6 +185,8 @@ function NoteCard({ card, step }: { card: MemoryCard; step: number }) {
 export default function AgentDeskVisualizer() {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
   const current = steps[step];
   const isComplete = step === steps.length - 1;
 
@@ -215,6 +217,19 @@ export default function AgentDeskVisualizer() {
     if (isComplete) setIsPlaying(false);
   }, [isComplete]);
 
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const updateHeight = () => setContentHeight(content.offsetHeight);
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [step]);
+
   return (
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-fd-foreground pb-3">
@@ -234,7 +249,7 @@ export default function AgentDeskVisualizer() {
           <button
             type="button"
             onClick={handleNext}
-            disabled={isComplete}
+            disabled={isComplete || isPlaying}
             className="flex-1 cursor-pointer border-2 border-fd-foreground bg-fd-primary px-3 py-1 text-sm font-semibold text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none sm:flex-none"
           >
             Step Forward
@@ -254,104 +269,111 @@ export default function AgentDeskVisualizer() {
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-6 gap-1" aria-label={`Step ${step + 1} of ${steps.length}`}>
-        {steps.map((item, index) => (
-          <div
-            key={item.title}
-            className={`h-2 border border-fd-foreground transition-colors ${
-              index <= step ? "bg-fd-primary" : "bg-fd-secondary"
-            }`}
-          />
-        ))}
-      </div>
-
       <div
-        className="mt-3 grid gap-2 border-2 border-fd-foreground bg-fd-background p-3 sm:grid-cols-[15rem_1fr] sm:items-center sm:gap-4"
-        aria-live="polite"
+        className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
+        style={{ height: contentHeight ?? undefined }}
       >
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-widest text-fd-primary">
-            Step {step + 1} of {steps.length}
+        <div ref={contentRef} className="pt-3">
+          <div className="grid grid-cols-6 gap-1" aria-label={`Step ${step + 1} of ${steps.length}`}>
+            {steps.map((item, index) => (
+              <div
+                key={item.title}
+                className={`h-2 border border-fd-foreground transition-colors ${
+                  index <= step ? "bg-fd-primary" : "bg-fd-secondary"
+                }`}
+              />
+            ))}
           </div>
-          <h4 className="mt-1 text-sm font-semibold uppercase">{current.title}</h4>
-        </div>
-        <p className="m-0 font-sans text-sm leading-5 text-fd-muted-foreground">{current.description}</p>
-      </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.8fr)_minmax(0,0.8fr)] lg:items-start">
-        <section className="border-2 border-fd-foreground bg-fd-background p-3">
-          <div className="flex items-end justify-between gap-4">
+          <div
+            className="mt-3 grid gap-2 border-2 border-fd-foreground bg-fd-background p-3 sm:grid-cols-[15rem_1fr] sm:items-center sm:gap-4"
+            aria-live="polite"
+          >
             <div>
-              <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Context desk</h4>
-              <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Only what is here reaches the model</p>
+              <div className="text-xs font-semibold uppercase tracking-widest text-fd-primary">
+                Step {step + 1} of {steps.length}
+              </div>
+              <h4 className="mt-1 text-sm font-semibold uppercase">{current.title}</h4>
             </div>
-            <span className="shrink-0 text-xs font-bold">{current.contextUsage}% full</span>
+            <p className="m-0 font-sans text-sm leading-5 text-fd-muted-foreground">{current.description}</p>
           </div>
 
-          <div className="mt-2 h-2 overflow-hidden border-2 border-fd-foreground bg-fd-secondary">
-            <div
-              className={`h-full transition-[width,background-color] duration-500 ${
-                current.contextUsage > 80 ? "bg-fd-foreground" : "bg-fd-primary"
-              }`}
-              style={{ width: `${current.contextUsage}%` }}
-            />
-          </div>
-
-          <div className="mt-3 min-h-36 border-x-2 border-t-2 border-fd-foreground bg-fd-card p-3">
-            {current.desk.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {current.desk.map((card) => (
-                  <NoteCard key={`${step}-${card.id}`} card={card} step={step} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex min-h-24 items-center justify-center border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-4 text-center font-sans text-sm text-fd-muted-foreground">
-                New session. The context window is empty.
-              </div>
-            )}
-          </div>
-          <div className="h-2 border-2 border-fd-foreground bg-fd-foreground" />
-        </section>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:contents">
-          <section className="border-2 border-fd-foreground bg-fd-background p-3">
-            <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Filing cabinet</h4>
-            <p className="mt-1 font-sans text-xs text-fd-muted-foreground">External memory</p>
-
-            <div className="mt-3 space-y-2">
-              {current.cabinet.length > 0 ? (
-                current.cabinet.map((card) => <NoteCard key={`${step}-${card.id}`} card={card} step={step} />)
-              ) : (
-                <div className="border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-3 font-sans text-xs text-fd-muted-foreground">
-                  No saved notes yet
+          <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.8fr)_minmax(0,0.8fr)] lg:items-start">
+            <section className="border-2 border-fd-foreground bg-fd-background p-3">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Context desk</h4>
+                  <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Only what is here reaches the model</p>
                 </div>
-              )}
-            </div>
-
-            <div className="mt-3 grid grid-cols-2 gap-1.5" aria-hidden="true">
-              <div className="h-6 border-2 border-fd-foreground bg-fd-secondary">
-                <div className="mx-auto mt-1.5 h-1 w-10 bg-fd-foreground" />
+                <span className="shrink-0 text-xs font-bold">{current.contextUsage}% full</span>
               </div>
-              <div className="h-6 border-2 border-fd-foreground bg-fd-secondary">
-                <div className="mx-auto mt-1.5 h-1 w-10 bg-fd-foreground" />
+
+              <div className="mt-2 h-2 overflow-hidden border-2 border-fd-foreground bg-fd-secondary">
+                <div
+                  className={`h-full transition-[width,background-color] duration-500 ${
+                    current.contextUsage > 80 ? "bg-fd-foreground" : "bg-fd-primary"
+                  }`}
+                  style={{ width: `${current.contextUsage}%` }}
+                />
               </div>
-            </div>
-          </section>
 
-          <section className="border-2 border-fd-foreground bg-fd-background p-3">
-            <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Handbook</h4>
-            <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Learned procedures</p>
+              <div className="mt-3 min-h-36 border-x-2 border-t-2 border-fd-foreground bg-fd-card p-3">
+                {current.desk.length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {current.desk.map((card) => (
+                      <NoteCard key={`${step}-${card.id}`} card={card} step={step} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex min-h-24 items-center justify-center border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-4 text-center font-sans text-sm text-fd-muted-foreground">
+                    New session. The context window is empty.
+                  </div>
+                )}
+              </div>
+              <div className="h-2 border-2 border-fd-foreground bg-fd-foreground" />
+            </section>
 
-            <div className="mt-3 border-l-4 border-fd-primary bg-fd-card p-2">
-              {current.handbook ? (
-                <NoteCard card={current.handbook} step={step} />
-              ) : (
-                <div className="font-sans text-xs leading-5 text-fd-muted-foreground">
-                  No reusable lesson has been written.
+            <div className="grid gap-3 sm:grid-cols-2 lg:contents">
+              <section className="border-2 border-fd-foreground bg-fd-background p-3">
+                <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Filing cabinet</h4>
+                <p className="mt-1 font-sans text-xs text-fd-muted-foreground">External memory</p>
+
+                <div className="mt-3 space-y-2">
+                  {current.cabinet.length > 0 ? (
+                    current.cabinet.map((card) => <NoteCard key={`${step}-${card.id}`} card={card} step={step} />)
+                  ) : (
+                    <div className="border-2 border-dashed border-fd-muted-foreground bg-fd-secondary p-3 font-sans text-xs text-fd-muted-foreground">
+                      No saved notes yet
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <div className="mt-3 grid grid-cols-2 gap-1.5" aria-hidden="true">
+                  <div className="h-6 border-2 border-fd-foreground bg-fd-secondary">
+                    <div className="mx-auto mt-1.5 h-1 w-10 bg-fd-foreground" />
+                  </div>
+                  <div className="h-6 border-2 border-fd-foreground bg-fd-secondary">
+                    <div className="mx-auto mt-1.5 h-1 w-10 bg-fd-foreground" />
+                  </div>
+                </div>
+              </section>
+
+              <section className="border-2 border-fd-foreground bg-fd-background p-3">
+                <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Handbook</h4>
+                <p className="mt-1 font-sans text-xs text-fd-muted-foreground">Learned procedures</p>
+
+                <div className="mt-3 border-l-4 border-fd-primary bg-fd-card p-2">
+                  {current.handbook ? (
+                    <NoteCard card={current.handbook} step={step} />
+                  ) : (
+                    <div className="font-sans text-xs leading-5 text-fd-muted-foreground">
+                      No reusable lesson has been written.
+                    </div>
+                  )}
+                </div>
+              </section>
             </div>
-          </section>
+          </div>
         </div>
       </div>
     </div>

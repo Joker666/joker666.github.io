@@ -12,6 +12,7 @@ type ContextBlock = {
   colorClass: string;
   borderClass: string;
   badgeClass: string;
+  activeRingClass: string;
 };
 
 const BLOCKS: ContextBlock[] = [
@@ -22,9 +23,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 2500,
     tokensBloated: 2500,
     description: "Core agent identity, capabilities, and safety boundaries defined by the platform.",
-    colorClass: "bg-purple-500/15 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300",
-    borderClass: "border-purple-500/40",
-    badgeClass: "bg-purple-500 text-white",
+    colorClass: "bg-purple-100/70 text-purple-900 dark:bg-purple-950/40 dark:text-purple-300",
+    borderClass: "border-purple-300 dark:border-purple-500/40",
+    badgeClass: "bg-purple-700 text-white dark:bg-purple-500",
+    activeRingClass: "ring-purple-400/70 dark:ring-fd-foreground",
   },
   {
     id: "rules",
@@ -33,9 +35,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 4000,
     tokensBloated: 4000,
     description: "Project guidelines such as AGENTS.md, style rules, and folder structure tips.",
-    colorClass: "bg-indigo-500/15 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300",
-    borderClass: "border-indigo-500/40",
-    badgeClass: "bg-indigo-500 text-white",
+    colorClass: "bg-slate-100/80 text-slate-900 dark:bg-slate-900/60 dark:text-slate-300",
+    borderClass: "border-slate-300 dark:border-slate-500/40",
+    badgeClass: "bg-slate-700 text-white dark:bg-slate-500",
+    activeRingClass: "ring-slate-400/70 dark:ring-fd-foreground",
   },
   {
     id: "history",
@@ -44,9 +47,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 12000,
     tokensBloated: 12000,
     description: "Multi-turn messages between user and agent recording requests and answers.",
-    colorClass: "bg-blue-500/15 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
-    borderClass: "border-blue-500/40",
-    badgeClass: "bg-blue-500 text-white",
+    colorClass: "bg-sky-100/70 text-sky-900 dark:bg-sky-950/40 dark:text-sky-300",
+    borderClass: "border-sky-300 dark:border-sky-500/40",
+    badgeClass: "bg-sky-700 text-white dark:bg-sky-500",
+    activeRingClass: "ring-sky-400/70 dark:ring-fd-foreground",
   },
   {
     id: "files",
@@ -55,9 +59,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 18000,
     tokensBloated: 18000,
     description: "Source code files, schema definitions, and markdown docs read by the agent.",
-    colorClass: "bg-emerald-500/15 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300",
-    borderClass: "border-emerald-500/40",
-    badgeClass: "bg-emerald-500 text-white",
+    colorClass: "bg-teal-100/70 text-teal-900 dark:bg-teal-950/40 dark:text-teal-300",
+    borderClass: "border-teal-300 dark:border-teal-500/40",
+    badgeClass: "bg-teal-700 text-white dark:bg-teal-500",
+    activeRingClass: "ring-teal-400/70 dark:ring-fd-foreground",
   },
   {
     id: "tools",
@@ -66,9 +71,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 16000,
     tokensBloated: 68000, // Bloated mode: huge 2000 line log file
     description: "Terminal command outputs, test run tracebacks, and tool execution payloads.",
-    colorClass: "bg-amber-500/15 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
-    borderClass: "border-amber-500/40",
-    badgeClass: "bg-amber-500 text-white",
+    colorClass: "bg-amber-100/70 text-amber-950 dark:bg-amber-950/40 dark:text-amber-300",
+    borderClass: "border-amber-300 dark:border-amber-500/40",
+    badgeClass: "bg-amber-700 text-white dark:bg-amber-500 dark:text-black",
+    activeRingClass: "ring-amber-400/70 dark:ring-fd-foreground",
   },
   {
     id: "plan",
@@ -77,9 +83,10 @@ const BLOCKS: ContextBlock[] = [
     tokens: 1500,
     tokensBloated: 1500,
     description: "Current step-by-step target task and active execution status.",
-    colorClass: "bg-rose-500/15 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300",
-    borderClass: "border-rose-500/40",
-    badgeClass: "bg-rose-500 text-white",
+    colorClass: "bg-rose-100/70 text-rose-900 dark:bg-rose-950/40 dark:text-rose-300",
+    borderClass: "border-rose-300 dark:border-rose-500/40",
+    badgeClass: "bg-rose-700 text-white dark:bg-rose-500",
+    activeRingClass: "ring-rose-400/70 dark:ring-fd-foreground",
   },
 ];
 
@@ -187,7 +194,7 @@ export default function ContextWindowVisualizer() {
                     b.borderClass
                   } ${b.colorClass} ${
                     isActive
-                      ? "ring-2 ring-fd-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] -translate-y-0.5"
+                      ? `ring-2 ${b.activeRingClass} shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] -translate-y-0.5`
                       : "opacity-85 hover:opacity-100 hover:-translate-y-0.5"
                   }`}
                 >
@@ -236,12 +243,21 @@ export default function ContextWindowVisualizer() {
               {activeBlock.description}
             </p>
 
-            {mode === "bloated" && activeBlock.id === "tools" && (
-              <div className="mt-3 border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 dark:text-amber-200">
-                <strong className="block font-bold">⚠️ Context Competition:</strong>
-                Raw terminal output from a 2,000-line build log consumes over 50% of the entire window, crowding out conversation history and file definitions.
+            <div
+              aria-hidden={mode !== "bloated" || activeBlock.id !== "tools"}
+              className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-out ${
+                mode === "bloated" && activeBlock.id === "tools"
+                  ? "mt-3 grid-rows-[1fr] opacity-100"
+                  : "mt-0 grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="min-h-0 overflow-hidden">
+                <div className="border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 dark:text-amber-200">
+                  <strong className="block font-bold">⚠️ Context Competition:</strong>
+                  Raw terminal output from a 2,000-line build log consumes over 50% of the entire window, crowding out conversation history and file definitions.
+                </div>
               </div>
-            )}
+            </div>
           </div>
 
           <div className="mt-4 border-t-2 border-fd-foreground pt-3 text-[11px] font-sans text-fd-muted-foreground">
