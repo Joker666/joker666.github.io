@@ -1,26 +1,28 @@
 ---
 title: "How AI Agents Remember"
-description: "The three approaches agents use to manage context: compaction, external retrieval, and learned experience."
+description: "Approaches agents use to manage context: compaction, external retrieval, and learned experience."
 author: Rafi Hasan
 date: "2026-07-24"
 tags: ["machine-learning", "llm", "agents", "memory"]
 ---
 
-I have been thinking about what people mean when they say an AI agent has memory. The word gets used for almost everything. The conversation history is memory. A vector database is memory. A `MEMORY.md` file is memory. Even a large context window is sometimes sold as memory.
+I have built static AI agents, where the agent has instructions and tools to fetch information (embeddings, files, etc.) from the vector database and a few other sources. It does not have to update its memory with any new information because the static information doesn't change.
 
-But the model does not remember a previous API call. We send it a collection of messages, tool results, and instructions, it produces an output, and that call is over. On the next call, the agent has to assemble everything again.
+But recently, I have been building this customer support AI agent where it needs to continually update its memory with information about customers, their issues, and resolutions. If Lisa (a customer support agent - real person) helped a customer with a specific issue using this AI agent, and then John (another customer support agent - real person) is trying to help another customer but with similar issues, the AI agent should know what Lisa did and suggest the same course of action to John. In short, the AI agent needs to have memory now.
+
+### The Idea
+
+Now what does it mean that an AI agent has memory? Is it sentient? The conversation history is memory. A vector database is memory. A `MEMORY.md` file is memory. Even a large context window is sometimes sold as memory. But the model does not remember a previous API call. We send it a collection of messages, tool results, and instructions, it produces an output, and that call is over. On the next call, the agent has to assemble everything again.
 
 So where does memory come from?
 
 > An agent remembers by rebuilding the right context for its next action.
 
-Deciding what "right" means is the whole problem. Include too little and the agent repeats work it has already done. Include too much and useful information gets buried under old file contents, command outputs, and conversations. From what I can tell, agents currently handle this in three broad ways: compact the current context, retrieve old information from external storage, and turn past work into reusable experience.
+Deciding what "right" means is the whole problem. If you give it too little, the agent has to repeat work it has already done. If you give it too much, useful information gets buried under old file contents, command outputs, and conversations. From what I can tell, the state of the art for handling agentic memory falls into three broad approaches: compact the current context, retrieve old information from external storage, and turn past work into reusable experience.
 
 ### The Context Window
 
-Before getting into the three approaches, it helps to separate the model from the agent. The model has a context window. The agent is the system around it that fills that window.
-
-A coding agent's context might look something like this:
+Let's separate the model from the agent. Every large language model has a context window. The agent is the system around it that fills that window. A coding agent's context might look something like this:
 
 ```text
 system instructions
@@ -31,7 +33,7 @@ tool calls and their results
 current plan
 ```
 
-All of this is sent to the model as input. If the agent reads a 2,000-line log file, those lines now compete with the original task for attention. A one-million-token context window gives us more room, but it does not decide which 2,000 lines matter. It only postpones that decision.
+All of this is sent to the model as input. If the agent reads a 2,000-line log file, those lines now compete with the original task for attention. A one million token context window gives us more room, but it does not decide which 2,000 lines matter. It only postpones that decision.
 
 Prompt caching is useful here, but I don't think it is memory. Caching can make a repeated prefix cheaper to process. It does not choose what the agent should remember.
 
