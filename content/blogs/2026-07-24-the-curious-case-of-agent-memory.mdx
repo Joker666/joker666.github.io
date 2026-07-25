@@ -1,5 +1,5 @@
 ---
-title: "How AI Agents Remember"
+title: "The Curious Case of Agent Memory"
 description: "Approaches agents use to manage context: compaction, external retrieval, and learned experience."
 author: Rafi Hasan
 date: "2026-07-24"
@@ -84,7 +84,7 @@ A vector search can easily retrieve the first one. Both are relevant and semanti
 
 Newer memory systems mix vector search with keyword search and metadata filters to handle these cases. Some use temporal knowledge graphs so that relationships can change without erasing their history. The graph can represent that one fact replaced another, instead of treating both as equally valid chunks of text.
 
-I think this is where "agent memory" becomes a slightly misleading term. Much of the difficult work is familiar information retrieval and database engineering. What should we write? How should we index it? How long should we retain it? Which result is authoritative? The LLM makes those decisions fuzzier, but it does not make them go away.
+I think this is where "agent memory" becomes a slightly misleading term. Much of the difficult work is familiar information retrieval and database engineering. What should we write? How should we index it? How long should we retain it? Which result is authoritative? The LLM blurs those trade-offs, but it does not make them go away.
 
 ### Approach 3: Learning From Experience
 
