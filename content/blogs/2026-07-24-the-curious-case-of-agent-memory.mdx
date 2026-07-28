@@ -32,7 +32,7 @@ Prompt caching is useful here, but I don't think it is memory. Caching can make 
 
 ### Approach 1: Context Compaction
 
-The simplest way to keep an agent running is to shrink its history when it gets too large. This is usually called compaction or context editing.
+The simplest way to keep an agent running is to shrink its history when it gets too large. This is what we call compaction or context editing.
 
 Some content can be removed without much thought. If the agent looks up an order several times, it probably does not need every copy of the same record. The same goes for an early troubleshooting path that the customer has already ruled out. CRM searches and API responses take up a surprising amount of the context, so deleting stale results can buy a lot of room.
 
@@ -53,7 +53,7 @@ After:
 
 The summary becomes a smaller representation of the work so far. It is similar to compressing a log into a checkpoint and continuing from there.
 
-This works well for the current case, but it is lossy. The summary may record that a refund was rejected and leave out the payment status that explained why. It can preserve the final decision but forget a policy constraint that led to it. Once the original context is removed, the agent cannot recover what the summary missed.
+This works well for the current case, but it is lossy. The summary may record that a refund was rejected and leave out the payment status that explained why. It can preserve the final decision but forget a policy that led to it. Once the original context is removed, the agent cannot recover what the summary missed.
 
 There is also a strange feedback loop here. We ask the same model that filled the context to decide which parts of that context future calls will need. Most of the time this is fine. Sometimes the model confidently throws away the one detail it should have kept.
 
@@ -61,7 +61,7 @@ There is also a strange feedback loop here. We ask the same model that filled th
 
 Compaction helps an agent survive one long support case. It does not help much when Lisa ends her session and John handles a similar case tomorrow. For that, the agent needs storage outside the context window.
 
-The common solution is to save conversations, customer facts, case results, or records and retrieve a small set before each model call. The first version usually looks like this:
+The common solution I see is to save conversations, customer facts, case results, or records and retrieve a small set before each model call. The first version usually looks like this:
 
 ```text
 memory -> embedding -> vector database
@@ -82,23 +82,23 @@ The customer now prefers email updates.
 
 A vector search can easily retrieve the first one. Both are relevant and semantically similar, but only one is current. Now we need timestamps, metadata, ranking, invalidation, and rules for resolving conflicts. We started with embeddings and somehow ended up rebuilding a database.
 
-Newer memory systems mix vector search with keyword search and metadata filters to handle these cases. Some use temporal knowledge graphs so that relationships can change without erasing their history. The graph can represent that one fact replaced another, instead of treating both as equally valid chunks of text.
+Newer memory systems are mixing vector search with keyword search like `BM25` and metadata filters to handle these cases. I'm seeing ideas like temporal knowledge graphs so that relationships can change without erasing their history. The graph explicitly links the two facts via a timestamped relationship. When the agent queries for the current truth, the system follows the graph links and returns only the active preference (email), rather than dumping two contradictory text snippets into the context window.
 
 I think this is where "agent memory" becomes a slightly misleading term. Much of the difficult work is familiar information retrieval and database engineering. What should we write? How should we index it? How long should we retain it? Which result is authoritative? The LLM blurs those trade-offs, but it does not make them go away.
 
 ### Approach 3: Learning From Experience
 
-Saving and retrieving old events is useful, but an agent that remembers every event has not necessarily learned anything from them.
+Saving and retrieving old events is a useful technique, but an agent that remembers every event has not necessarily learned anything from them.
 
-Suppose the support agent spends 30 minutes investigating a suspected duplicate charge. It calls the payment API six times, searches the refund policy, and eventually discovers that the second charge is only a pending authorization that will reverse automatically. We could store the whole trajectory and hope a search finds it later. Or we could save one procedure:
+Let's say the support agent spends 30 minutes investigating a suspected duplicate charge. It calls the payment API six times, searches the refund policy, and eventually discovers that the second charge is only a pending authorization that will reverse automatically. We could store the whole trajectory and hope a search finds it later. Or we could save one procedure:
 
 ```text
 Before refunding a suspected duplicate charge, compare the transaction IDs and settlement states.
 ```
 
-The second version keeps the useful lesson and drops the transcript that produced it.
+The second version of the agent's memory keeps the useful lesson and drops the transcript that produced it.
 
-Memory systems often borrow three categories from cognitive science:
+I'm seeing agentic memory systems borrowing three categories from cognitive science:
 
 - **Semantic memory** stores facts, such as a customer's contact preference or the refund policy.
 - **Episodic memory** stores previous experiences, such as Lisa's investigation of order #1842.
@@ -106,11 +106,11 @@ Memory systems often borrow three categories from cognitive science:
 
 The categories are useful, although real memories do not always fit cleanly into one box. A support case can contain facts about the customer, an episode about an unsuccessful resolution, and a new procedure for handling similar billing issues.
 
-Agents can form these memories while they work or in a separate reflection step. After a case, another model call examines the trajectory and asks what is worth keeping. Over time, several similar episodes can be consolidated into one general rule. A support agent might stop remembering five individual duplicate-charge cases and keep a single playbook for checking pending authorizations.
+Agents can form these memories while they work or in a separate reflection step. After a case, another model call can examine the trajectory and ask what is worth keeping. Over time, several similar episodes can be consolidated into one general rule. A support agent might stop remembering five individual duplicate-charge cases and keep a single playbook for checking pending authorizations.
 
-This is the newest of the three approaches, and I find it the most interesting. It is also easy to get wrong. A lesson learned from one case may not apply to a different customer, account, or payment provider. The agent can extract the wrong lesson, store it with complete confidence, and make every future case worse. Forgetting and correcting memories are as important as creating them.
+This is the newest of the three approaches, and I find it the most interesting. It is also easy to get wrong. A lesson learned from one case may not apply to a different customer, account, or payment provider. The agent can extract the wrong lesson, store it with complete confidence, and make every future case worse. Making sure to forget and correct memories is as important as creating them.
 
-Recent work goes one step further and treats memory management as a policy. Instead of always saving a summary or always retrieving the nearest five chunks, the agent learns when to write, retrieve, update, and forget. Memory management then becomes another decision the agent has to make while it works.
+I'm increasingly seeing that memory management is treated as a policy. Instead of always saving a summary or always retrieving the nearest five chunks, the agent learns when to write, retrieve, update, and forget. Memory management then becomes another decision the agent has to make while it works.
 
 ### Putting Them Together
 
