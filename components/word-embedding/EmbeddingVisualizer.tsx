@@ -14,7 +14,7 @@ const EmbeddingVisualizer = () => {
       <div className="mb-6 border-b-2 border-fd-foreground pb-4">
         <h3 className="mt-0 mb-2 text-lg font-semibold uppercase text-fd-foreground">The "Lookup Table" Trick</h3>
         <p className="font-sans text-sm leading-relaxed text-fd-muted-foreground">
-          Click a word to see how the one-hot input isolates a specific row in the hidden layer weights ($W_1$).
+          Click a word to see how the one-hot input isolates a specific row in the hidden layer weights (<var>W<sub>1</sub></var>).
         </p>
       </div>
 
@@ -49,7 +49,7 @@ const EmbeddingVisualizer = () => {
 
         {/* 2. Hidden Layer Weight Matrix (W1) */}
         <div className="flex flex-col items-center">
-          <div className="mb-2 font-semibold uppercase tracking-widest text-fd-foreground">2. Hidden Layer ($W_1$)</div>
+          <div className="mb-2 font-semibold uppercase tracking-widest text-fd-foreground">2. Hidden Layer (<var>W<sub>1</sub></var>)</div>
           <div className="border-2 border-fd-foreground bg-fd-background p-3">
             <div className="flex flex-col gap-1">
               {weightMatrix.map((row, i) => (
