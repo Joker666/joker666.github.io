@@ -150,7 +150,7 @@ export default function ContextWindowVisualizer() {
             Window Capacity (128K Tokens)
           </span>
           <span className={usagePercent > 70 ? "font-extrabold text-amber-600 dark:text-amber-400" : ""}>
-            {totalUsed.toLocaleString()} / {TOTAL_CAPACITY.toLocaleString()} tokens ({usagePercent}%)
+            {totalUsed.toLocaleString("en-US")} / {TOTAL_CAPACITY.toLocaleString("en-US")} tokens ({usagePercent}%)
           </span>
         </div>
         <div className="mt-1.5 flex h-3.5 w-full overflow-hidden border-2 border-fd-foreground bg-fd-secondary">
@@ -162,7 +162,7 @@ export default function ContextWindowVisualizer() {
                 key={b.id}
                 style={{ width: `${pct}%` }}
                 className={`h-full transition-all duration-300 ${b.meterClass}`}
-                title={`${b.name}: ${tokens.toLocaleString()} tokens`}
+                title={`${b.name}: ${tokens.toLocaleString("en-US")} tokens`}
               />
             );
           })}
@@ -212,7 +212,7 @@ export default function ContextWindowVisualizer() {
                   </div>
 
                   <div className="flex shrink-0 items-center gap-1.5 font-mono text-xs font-semibold text-fd-muted-foreground">
-                    <span className="whitespace-nowrap">{tokens.toLocaleString()} tokens</span>
+                    <span className="whitespace-nowrap">{tokens.toLocaleString("en-US")} tokens</span>
                     <span className="w-10 text-right font-bold text-fd-foreground">
                       ({pctOfUsed}%)
                     </span>
@@ -235,7 +235,7 @@ export default function ContextWindowVisualizer() {
                   mode === "bloated" && activeBlock.tokensBloated
                     ? activeBlock.tokensBloated
                     : activeBlock.tokens
-                ).toLocaleString()}{" "}
+                ).toLocaleString("en-US")}{" "}
                 tokens
               </span>
             </div>

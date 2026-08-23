@@ -1,9 +1,13 @@
+// Set by next.config.mjs at build time. Footer renders inside a "use client"
+// layout, so a live new Date() here would mismatch the prerendered HTML.
+const BUILD_YEAR = process.env.NEXT_PUBLIC_BUILD_YEAR ?? "2026";
+
 export function Footer() {
   return (
     <footer className="py-4 border-t lg:border-t-0 bg-card text-card-foreground">
       <div className="container max-w-4xl mx-auto px-4 flex flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
         <div className="flex flex-col gap-1 items-center sm:items-start">
-          <p>© {new Date().getFullYear()} Rafi Hasan.</p>
+          <p>© {BUILD_YEAR} Rafi Hasan.</p>
         </div>
 
         <div className="flex items-center gap-4">
