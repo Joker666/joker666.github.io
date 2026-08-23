@@ -18,7 +18,7 @@ const waitingInFlight: Record<number, string[]> = {
   3: [],
   4: ["E"],
   5: ["E"],
-  6: ["F"],
+  6: ["E", "F"],
   7: [],
   8: [],
   9: [],
@@ -65,7 +65,7 @@ const staticSchedule: Record<number, Seat[]> = {
   6: [
     { name: "A", remaining: 2 },
     { name: "empty", remaining: 0 },
-    { name: "empty", remaining: 0 },
+    { name: "C", remaining: 0, status: "finishes" },
   ],
   7: [
     { name: "A", remaining: 1 },
@@ -113,37 +113,52 @@ const inFlightSchedule: Record<number, Seat[]> = {
   6: [
     { name: "A", remaining: 2 },
     { name: "D", remaining: 0, status: "finishes" },
-    { name: "E", remaining: 2, status: "boards" },
+    { name: "C", remaining: 0, status: "finishes" },
   ],
   7: [
     { name: "A", remaining: 1 },
     { name: "F", remaining: 2, status: "boards" },
-    { name: "E", remaining: 1 },
+    { name: "E", remaining: 2, status: "boards" },
   ],
   8: [
     { name: "A", remaining: 0, status: "finishes" },
     { name: "F", remaining: 1 },
-    { name: "E", remaining: 0, status: "finishes" },
+    { name: "E", remaining: 1 },
   ],
   9: [
     { name: "empty", remaining: 0 },
     { name: "F", remaining: 0, status: "finishes" },
-    { name: "empty", remaining: 0 },
+    { name: "E", remaining: 0, status: "finishes" },
   ],
 };
 
-const modeCopy: Record<Mode, { title: string; detail: string; metric: string }> = {
+const modeCopy: Record<Mode, { title: string; detail: string }> = {
   static: {
     title: "Static batch",
     detail: "The bus leaves with A, B, and C. When B finishes early, the seat stays empty until the longest rider is done.",
-    metric: "5 wasted seat-steps",
   },
   inflight: {
     title: "In-flight batch",
     detail: "The bus is already moving, but the scheduler keeps swapping riders at token boundaries when capacity opens up.",
-    metric: "0 idle seats in this toy loop",
   },
 };
+
+// A seat-step is wasted when a slot sits idle while a request is still queued --
+// exactly the waste in-flight batching removes. Counted only through the step the
+// reader is on, so the tally builds alongside the seats instead of spoiling the
+// total up front, and derived from the schedules so it can never drift from them.
+const countWastedSeatSteps = (
+  schedule: Record<number, Seat[]>,
+  queue: Record<number, string[]>,
+  throughStep: number
+) =>
+  steps.reduce(
+    (total, item) =>
+      item > throughStep || queue[item].length === 0
+        ? total
+        : total + schedule[item].filter((seat) => seat.name === "empty").length,
+    0
+  );
 
 const SeatBox = ({ seat }: { seat: Seat }) => {
   const isEmpty = seat.name === "empty";
@@ -203,8 +218,10 @@ export default function InFlightBatchingBus() {
   }, [isPlaying]);
 
   const schedule = mode === "static" ? staticSchedule : inFlightSchedule;
+  const queue = mode === "static" ? waitingStatic : waitingInFlight;
   const seats = schedule[step];
-  const waiting = mode === "static" ? waitingStatic[step] : waitingInFlight[step];
+  const waiting = queue[step];
+  const wastedSeatSteps = countWastedSeatSteps(schedule, queue, step);
   const activeCopy = modeCopy[mode];
 
   const slotSummary = useMemo(() => {
@@ -352,7 +369,10 @@ export default function InFlightBatchingBus() {
             )}
           </div>
           <div className="mt-5 border-2 border-fd-primary bg-fd-card p-3 text-xs font-bold text-fd-primary">
-            {activeCopy.metric}
+            {wastedSeatSteps} wasted seat-step{wastedSeatSteps === 1 ? "" : "s"}
+            <span className="mt-1 block font-sans text-[11px] font-normal text-fd-muted-foreground">
+              Seats left idle so far while a request waited
+            </span>
           </div>
         </div>
       </div>
