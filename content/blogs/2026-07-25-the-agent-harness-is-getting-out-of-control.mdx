@@ -20,7 +20,7 @@ user request
 
 That is an agent, at least in the smallest useful sense. Then the agent has to survive contact with a real application.
 
-What happens if a tool fails? How many times should the loop continue? Which messages should go back into the context? Where does the state live if the process restarts? Can the model call the refund tool without approval? How do we know why it called the tool? What if the conversation no longer fits in the context window? What if two tools run at the same time and both update the same record?
+What happens if a tool fails? How many times should the loop continue? Where does the state live if the process restarts? Can the model call the refund tool without approval? How do we know why it called the tool? What if the conversation no longer fits in the context window?
 
 Each question adds another piece around the model. Eventually, the model API call is the easiest part of the system.
 
@@ -41,23 +41,23 @@ The software around the model is often called the **agent harness**. It connects
 
 This is a strange amount of responsibility for something that started as a `while` loop.
 
-It also does not matter much whether we are building a coding agent, a customer support agent, or an assistant for a company wiki. The tools and policies change, but the harness has the same uncomfortable job. It has to turn a stateless model call into a stateful system that can act over time.
+It does not matter much whether we are building a coding agent or a customer support agent. The same goes for an assistant over a company wiki. The tools and policies change, but the harness has the same job. It has to turn a stateless model call into a stateful system that can act over time.
 
 > The model generates the next action. The harness has to make that action part of a reliable system.
 
-I used to think of the harness as glue code. I am no longer sure that is accurate. Glue code usually connects a few stable components. An agent harness is closer to a small runtime whose most important dependency changes behavior every few months.
+I used to think of the harness as glue code. Glue code connects stable components. An agent harness is closer to a small runtime whose most important dependency changes behavior every few months.
 
 ### How the Harness Grows
 
 Suppose we are building a customer support agent. The first version has a system prompt, a search tool, and a refund tool.
 
-The model occasionally searches forever, so we add a maximum number of turns. It sometimes calls the refund tool with an invalid order ID, so we validate tool arguments. It tries again after the refund API times out, so we add idempotency. It loads too many old messages, so we add context compaction. It forgets how a previous case was resolved, so we add memory. It retrieves an outdated policy, so we add timestamps and ranking. It issues a refund too eagerly, so we add an approval gate. Nobody can explain a bad decision afterward, so we add tracing.
+The model searches forever, so we add a turn limit. It calls tools with invalid arguments, so we validate. The API times out and the model retries, so we add idempotency. Old messages pile up, so we add context compaction. It forgets prior cases, so we add memory. It refunds too eagerly, so we add an approval gate. Nobody can explain a bad decision, so we add tracing.
 
 None of these additions are unreasonable. That is the problem. The harness grows through a series of sensible local decisions.
 
-The same thing happens with a coding agent. Replace the refund API with a shell, the customer history with a repository, and the approval gate with file permissions. A wiki assistant uses retrieval, citations, and access control. Underneath, they need much of the same machinery.
+The same thing happens with a coding agent. Replace the refund API with a shell, the customer history with a repository, and the approval gate with file permissions. The tools change. The machinery underneath does not.
 
-Agent frameworks package these pieces for us, which is useful at the beginning. It also becomes easy to turn on routing, reflection, planning, multiple agents, and memory before measuring whether they improve anything. Anthropic's advice is surprisingly conservative: start with direct model calls and simple patterns, then add complexity when evaluation shows that it helps. That is difficult advice to follow when every harness feature sounds like something a serious production system should have.
+Agent frameworks package these pieces, which helps at the start. It also makes it easy to turn on routing, reflection, planning, and memory before measuring whether any of it helps. Anthropic's advice is surprisingly conservative: start simple, add complexity when evaluation shows that it helps. That is hard to follow when every harness feature sounds like something a serious system should have.
 
 ### Two Kinds of Complexity
 
@@ -79,53 +79,43 @@ Model scaffolding:
     reasoning prompts, planners, reflection loops, routers, context tricks
 ```
 
-The first category should be stable. The second should be easy to replace or delete. In practice, they often end up mixed together inside one framework, one runner, and one large system prompt.
+The first category should be stable. The second should be easy to replace or delete. Some pieces sit between both. Context compaction is a product concern because cost and latency demand it, but how you compact depends on the model. The boundary is not perfectly clean. I think even a rough version of it is better than treating the entire harness as one blob. In practice, the two categories often end up mixed inside one framework, one runner, and one large system prompt.
 
 ### Chain of Thought Crossed the Boundary
 
 Chain-of-thought prompting is a useful example of how quickly this boundary moves.
 
-In 2022, researchers showed that large language models performed better on several reasoning tasks when the prompt included intermediate reasoning steps. The familiar instruction was "think step by step." A prompting technique could unlock behavior that the plain model did not reliably show.
-
-ReAct extended this idea into an agent loop. The model would alternate between a thought, an action, and an observation:
+In 2022, prompting models to "think step by step" improved reasoning. ReAct extended this into an agent loop:
 
 ```text
 thought -> action -> observation -> thought -> action
 ```
 
-The harness parsed the action, ran the tool, returned the observation, and asked the model to reason again. For a while, this pattern was almost synonymous with building an agent.
+The harness parsed each action, ran the tool, and asked the model to reason again. For a while, this was almost synonymous with building an agent.
 
-Then reasoning models arrived. OpenAI trained o1 with reinforcement learning to improve the chain of thought it uses before answering. DeepSeek-R1-Zero showed that long reasoning behavior could emerge from large-scale reinforcement learning even without supervised fine-tuning as the first step.
+Then reasoning models arrived. OpenAI's o1 and DeepSeek-R1 trained chains of thought into the model itself through reinforcement learning. Something we used to construct outside the model became a native capability.
 
-The exact training methods differ, but the direction is interesting. Something we used to construct outside the model with prompts and loops became a capability trained into the model.
+Google's Gemini migration guide now recommends replacing complex chain-of-thought prompts with simpler instructions and native thinking controls.
 
-Current model guidance now sometimes tells us to remove the old scaffolding. Google's Gemini migration guide recommends replacing complex chain-of-thought prompts with simpler instructions and native thinking controls. It also changes temperature recommendations, tool behavior, and how reasoning state is carried between calls.
-
-The old prompt did not merely become unnecessary. It could make the new model worse.
+The old prompt became worse than useless. It could hurt the new model.
 
 ### Upgrading the Model Is Not a Dependency Bump
 
-This is what makes harness engineering feel unstable. A new model is not always a faster implementation of the same interface.
+This is what makes harness engineering feel unstable. A new model is not a faster implementation of the same interface.
 
-One model wants explicit planning instructions. Another already plans internally and overthinks when given the same prompt. One needs the harness to preserve a reasoning signature between tool calls. Another hides that state behind the API. Tool calling and parallel execution differ too.
+One model wants explicit planning instructions. Another already plans internally and overthinks when given the same prompt. We can standardize the JSON shape of a tool call, but we cannot standardize what makes a model use tools well.
 
-We can standardize the JSON shape of a tool call, but we cannot standardize what makes a model use tools well.
-
-Recent harness benchmarks support this. Performance changes substantially across model and harness pairings. A strict scaffold can help one model and hurt another. Even when the model stays fixed, changes to the harness can cause quality to move in either direction.
-
-So when we say a model scored some percentage on an agent benchmark, part of that score belongs to the harness. The prompt, tools, context policy, retry behavior, and stopping rules all helped produce the result.
+Harness-Bench and other recent benchmarks support this. Performance changes substantially across model and harness pairings. A strict scaffold can help one model and hurt another. So when we say a model scored some percentage on an agent benchmark, part of that score belongs to the harness.
 
 ### Building for Deletion
 
-I do not think the answer is to wait for models to absorb the whole harness. There will always be a system around the model because models should not own permissions, transactions, or the authoritative state of an application.
+I do not think the answer is to wait for models to absorb the whole harness. Models should not own permissions or transactions, and they should not be the authoritative state of an application.
 
-But the boundary should be obvious in the code.
+But the boundary should be obvious in the code. The durable part owns events, tool execution, policy, and verification. A thinner model adapter owns the prompts and context formatting, plus whatever else is specific to one model. An evaluation suite tests the pairing before an upgrade reaches production.
 
-The durable part can own events, tool execution, policy, state, and verification. A thinner model adapter can own prompts, context formatting, and model-specific tool behavior. An evaluation suite can test the complete pairing before an upgrade reaches production.
+Every piece of scaffolding should have a reason to exist. If a reflection step does not improve the evaluation, remove it. If the model can choose tools without a router, remove the router. If native reasoning replaces chain-of-thought instructions, delete them.
 
-Every piece of model scaffolding should have a reason to exist. If a reflection step does not improve the evaluation, remove it. If the model can choose tools without a router, remove the router. If native reasoning replaces a page of chain-of-thought instructions, delete the instructions.
-
-This is harder than adding features. Old scaffolding feels safe because it once fixed a real failure. Without regular evaluation, nobody knows whether it still helps.
+This is harder than adding features. Old scaffolding feels safe because it once fixed a real failure. Without evaluation, nobody knows whether it still helps.
 
 At first, I thought a good agent harness was one that handled every possible model failure. Now I think that is how the harness gets out of control. It remembers every weakness of every model we have used, long after the model is gone.
 
