@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useMeasuredHeight } from "@/lib/use-measured-height";
 
 type Mode = "static" | "inflight";
 
@@ -162,18 +163,7 @@ const countWastedSeatSteps = (
 
 const SeatBox = ({ seat }: { seat: Seat }) => {
   const isEmpty = seat.name === "empty";
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const update = () => setHeight(el.offsetHeight);
-    update();
-    const obs = new ResizeObserver(update);
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [seat.status, seat.name, seat.remaining]);
+  const [contentRef, height] = useMeasuredHeight();
 
   return (
     <div

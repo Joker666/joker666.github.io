@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useMeasuredHeight } from "@/lib/use-measured-height";
 
 type ContextBlock = {
   id: string;
@@ -74,8 +75,7 @@ const TOTAL_CAPACITY = 128000; // 128k Context Window
 export default function ContextWindowVisualizer() {
   const [mode, setMode] = useState<"normal" | "bloated">("normal");
   const [activeId, setActiveId] = useState<string>("tools");
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const [contentRef, contentHeight] = useMeasuredHeight();
 
   const totalUsed = BLOCKS.reduce(
     (acc, b) => acc + (mode === "bloated" && b.tokensBloated ? b.tokensBloated : b.tokens),
@@ -84,19 +84,6 @@ export default function ContextWindowVisualizer() {
 
   const usagePercent = Math.min(100, Math.round((totalUsed / TOTAL_CAPACITY) * 100));
   const activeBlock = BLOCKS.find((b) => b.id === activeId) || BLOCKS[0];
-
-  useLayoutEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
-
-    const updateHeight = () => setContentHeight(content.offsetHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [mode, activeId]);
 
   return (
     <div className="my-6 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-foreground)] sm:p-6">

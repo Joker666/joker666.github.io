@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useMeasuredHeight } from "@/lib/use-measured-height";
 
 // Simulated ECG-like sequence
 const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
@@ -30,8 +31,7 @@ const StateBar = ({ value, className }: { value: number; className: string }) =>
 const TimeSeriesVisualizer = () => {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const rnnContentRef = useRef<HTMLDivElement>(null);
-  const [rnnContentHeight, setRnnContentHeight] = useState<number | null>(null);
+  const [rnnContentRef, rnnContentHeight] = useMeasuredHeight();
 
   // Calculate states after processing each completed input.
   const states = [[0.0, 0.0, 0.0]]; // Initial state
@@ -71,19 +71,6 @@ const TimeSeriesVisualizer = () => {
       setIsPlaying(false);
     }
   }, [step]);
-
-  useLayoutEffect(() => {
-    const content = rnnContentRef.current;
-    if (!content) return;
-
-    const updateHeight = () => setRnnContentHeight(content.offsetHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [isComplete]);
 
   return (
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">

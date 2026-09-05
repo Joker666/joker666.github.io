@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useMeasuredHeight } from "@/lib/use-measured-height";
 
 type CardTone = "default" | "active" | "muted" | "success";
 
@@ -185,8 +186,7 @@ function NoteCard({ card, step }: { card: MemoryCard; step: number }) {
 export default function AgentDeskVisualizer() {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const [contentRef, contentHeight] = useMeasuredHeight();
   const current = steps[step];
   const isComplete = step === steps.length - 1;
 
@@ -216,19 +216,6 @@ export default function AgentDeskVisualizer() {
   useEffect(() => {
     if (isComplete) setIsPlaying(false);
   }, [isComplete]);
-
-  useLayoutEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
-
-    const updateHeight = () => setContentHeight(content.offsetHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [step]);
 
   return (
     <div className="my-8 overflow-hidden border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
