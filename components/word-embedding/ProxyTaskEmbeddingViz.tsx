@@ -1,344 +1,292 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { EmbeddingWord } from "./toy-embeddings";
-import { getToyEmbedding } from "./toy-embeddings";
+import { useState } from "react";
+import {
+  EXAMPLES,
+  MAP_RANGE,
+  TRAINED_AT,
+  UNIFORM_PROBABILITY,
+  VOCAB,
+  type Vec,
+  type Weights,
+  exampleAt,
+  initialWeights,
+  meanContextProbability,
+  predict,
+  train,
+} from "./skipgram";
 
-const examples: Array<{
-  sentence: string[];
-  center: EmbeddingWord;
-  context: string[];
-  prediction: Record<string, number>;
-}> = [
-  {
-    sentence: ["machine", "learning", "algorithms", "use", "data"],
-    center: "learning",
-    context: ["machine", "algorithms"],
-    prediction: {
-      machine: 0.42,
-      algorithms: 0.31,
-      data: 0.15,
-      model: 0.08,
-      weather: 0.04,
-    },
-  },
-  {
-    sentence: ["neural", "network", "model", "learns", "patterns"],
-    center: "model",
-    context: ["network", "learns"],
-    prediction: {
-      network: 0.36,
-      learns: 0.29,
-      data: 0.18,
-      training: 0.11,
-      banana: 0.06,
-    },
-  },
-  {
-    sentence: ["training", "data", "improves", "the", "model"],
-    center: "data",
-    context: ["training", "improves"],
-    prediction: {
-      training: 0.39,
-      improves: 0.27,
-      model: 0.18,
-      learning: 0.1,
-      ocean: 0.06,
-    },
-  },
+const VIEW_W = 240;
+const VIEW_H = 160;
+const RADIUS = 80;
+// Slightly more than the rendered height of a 9-unit label (~11.9 units with
+// ascenders and descenders), so stacked labels clear each other.
+const LABEL_GAP = 13;
+
+const project = ([x, y]: Vec): [number, number] => [
+  VIEW_W / 2 + (x / MAP_RANGE) * RADIUS,
+  VIEW_H / 2 - (y / MAP_RANGE) * RADIUS,
 ];
 
-type Step = "task" | "prediction" | "embedding";
+/**
+ * Labels sit beside their dot, but training pulls words into tight clusters, so a
+ * fixed offset per word always ends up colliding for some pair. Instead, stack each
+ * side's labels top-to-bottom and push any that land too close to their neighbour.
+ */
+function layoutLabels(points: [number, number][]): number[] {
+  const labelY = points.map(([, y]) => y + 3);
+  const indices = points.map((_, i) => i);
 
-const stepCards: Array<{ id: Step; title: string; detail: string }> = [
-  {
-    id: "task",
-    title: "1. Create proxy task",
-    detail: "Use a center word to predict nearby words.",
-  },
-  {
-    id: "prediction",
-    title: "2. Train prediction",
-    detail: "Misses and hits push the weights around.",
-  },
-  {
-    id: "embedding",
-    title: "3. Keep embedding",
-    detail: "The selected W1 row is the useful artifact.",
-  },
-];
+  for (const side of [true, false]) {
+    const column = indices
+      .filter((i) => points[i][0] >= VIEW_W / 2 === side)
+      .sort((a, b) => points[a][1] - points[b][1]);
+
+    for (let k = 1; k < column.length; k++) {
+      const above = labelY[column[k - 1]];
+      if (labelY[column[k]] - above < LABEL_GAP) labelY[column[k]] = above + LABEL_GAP;
+    }
+
+    // If pushing down ran the stack off the bottom, slide the whole column back up.
+    const last = column[column.length - 1];
+    if (last !== undefined) {
+      const overflow = labelY[last] - (VIEW_H - 4);
+      if (overflow > 0) for (const i of column) labelY[i] -= overflow;
+    }
+  }
+
+  return labelY;
+}
+
+const percent = (p: number) => `${Math.round(p * 100)}%`;
 
 export default function ProxyTaskEmbeddingViz() {
-  const [exampleIndex, setExampleIndex] = useState(0);
-  const [step, setStep] = useState<Step>("task");
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [stageHeight, setStageHeight] = useState<number | null>(null);
+  const [weights, setWeights] = useState<Weights>(initialWeights);
+  const [previous, setPrevious] = useState<Weights>(initialWeights);
+  const [stepCount, setStepCount] = useState(0);
+  const [discarded, setDiscarded] = useState(false);
 
-  const example = examples[exampleIndex];
-  const embedding = getToyEmbedding(example.center);
+  const example = exampleAt(stepCount);
+  const probabilities = predict(weights, example.center);
+  const progress = meanContextProbability(weights);
+  const centerVector = weights.w1[VOCAB.indexOf(example.center)];
+  const isTrained = stepCount >= TRAINED_AT;
+  const points = weights.w1.map(project);
+  const labelYs = layoutLabels(points);
 
-  const predictedWords = useMemo(() => Object.entries(example.prediction).sort((a, b) => b[1] - a[1]), [example]);
+  const runTraining = (count: number) => {
+    setPrevious(weights);
+    setWeights(train(weights, stepCount, count));
+    setStepCount(stepCount + count);
+  };
 
-  const flowItems = [
-    { label: "center word", value: example.center },
-    { label: "predict context", value: example.context.join(" + ") },
-    { label: "error updates", value: `W1[${example.center}]` },
-    { label: "keep vector", value: `[${embedding.map((value) => value.toFixed(2)).join(", ")}]` },
-  ];
+  const reset = () => {
+    const fresh = initialWeights();
+    setWeights(fresh);
+    setPrevious(fresh);
+    setStepCount(0);
+    setDiscarded(false);
+  };
 
-  useLayoutEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-
-    const updateHeight = () => setStageHeight(panel.offsetHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(panel);
-
-    return () => observer.disconnect();
-  }, [step, exampleIndex]);
+  const buttonBase =
+    "cursor-pointer border-2 border-fd-foreground px-3 py-1 text-sm font-semibold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] active:translate-x-0 active:translate-y-0 active:shadow-none";
 
   return (
     <div className="my-8 border-2 border-fd-foreground bg-fd-card p-4 font-mono text-sm text-fd-foreground shadow-[6px_6px_0px_0px_var(--color-fd-foreground)] sm:p-6">
-      <div className="border-b-2 border-fd-foreground pb-4">
+      <div className="border-b-2 border-fd-foreground pb-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-fd-primary">Word2Vec intuition</p>
-        <h3 className="mt-2 text-xl font-semibold uppercase">A proxy task creates a real embedding</h3>
-        <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-fd-muted-foreground">
-          Word2Vec predicts nearby words during training, but the prediction is not the thing we keep. The useful
-          artifact is the row learned inside the first weight matrix.
+        <h3 className="mt-1 text-xl font-semibold uppercase">Train the fake task, keep the map</h3>
+        <p className="mt-2 max-w-2xl font-sans text-sm leading-6 text-fd-muted-foreground">
+          A real skip-gram model, eight words, two-dimensional embeddings, training in your browser. Nothing is
+          pre-computed. Press a button and watch the prediction improve as the words rearrange.
         </p>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {examples.map((item, index) => (
-          <button
-            key={item.center}
-            type="button"
-            aria-pressed={exampleIndex === index}
-            onClick={() => {
-              setExampleIndex(index);
-              setStep("task");
-            }}
-            className={`cursor-pointer border-2 px-3 py-1 text-sm font-semibold transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
-              exampleIndex === index
-                ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
-                : "border-fd-foreground bg-fd-background text-fd-foreground hover:bg-fd-secondary hover:shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
-            }`}
-          >
-            {item.center}
-          </button>
-        ))}
-      </div>
+      {/* Controls */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => runTraining(1)} className={`${buttonBase} bg-fd-background hover:bg-fd-secondary`}>
+          Train ×1
+        </button>
+        <button
+          type="button"
+          onClick={() => runTraining(20)}
+          className={`${buttonBase} bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]`}
+        >
+          Train ×20
+        </button>
+        <button type="button" onClick={reset} className={`${buttonBase} bg-fd-background hover:bg-fd-secondary`}>
+          Reset
+        </button>
 
-      <div className="mt-6 grid gap-0 border-2 border-fd-foreground bg-fd-background md:grid-cols-4">
-        {flowItems.map((item, index) => (
-          <div key={item.label} className="border-fd-foreground p-3 md:border-r md:last:border-r-0">
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-fd-muted-foreground">
-              {index + 1}. {item.label}
-            </div>
-            <div className={`mt-2 text-[12px] font-semibold ${index === 2 ? "text-fd-primary" : "text-fd-foreground"}`}>
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 grid gap-3 md:grid-cols-3">
-        {stepCards.map((card) => (
-          <button
-            key={card.id}
-            type="button"
-            aria-pressed={step === card.id}
-            onClick={() => setStep(card.id)}
-            className={`cursor-pointer border-2 p-4 text-left transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${
-              step === card.id
-                ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
-                : "border-fd-foreground bg-fd-card hover:bg-fd-secondary hover:shadow-[4px_4px_0px_0px_var(--color-fd-foreground)]"
-            }`}
-          >
-            <div className="text-sm font-semibold uppercase">{card.title}</div>
-            <div
-              className={`mt-2 text-xs leading-5 ${step === card.id ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
-            >
-              {card.detail}
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div
-        className="mt-8 overflow-hidden border-2 border-fd-foreground bg-fd-background transition-[height] duration-200 ease-out motion-reduce:transition-none"
-        style={{ height: stageHeight ?? undefined }}
-      >
-        <div ref={panelRef} className="p-4 sm:p-5">
-          {step === "task" && (
-            <div>
-              <h4 className="mt-0 text-sm font-semibold uppercase">The proxy task</h4>
-
-              <div className="mt-5 flex flex-wrap items-stretch justify-center gap-2">
-                {example.sentence.map((word) => {
-                  const isCenter = word === example.center;
-                  const isContext = example.context.includes(word);
-
-                  return (
-                    <div
-                      key={word}
-                      className={`border-2 px-4 py-3 text-center text-sm transition ${
-                        isCenter
-                          ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]"
-                          : isContext
-                            ? "border-fd-foreground bg-fd-secondary text-fd-foreground"
-                            : "border-fd-muted bg-fd-card text-fd-muted-foreground"
-                      }`}
-                    >
-                      <div className="font-semibold">{word}</div>
-                      <div
-                        className={`mt-1 text-[10px] uppercase tracking-widest ${isCenter ? "text-fd-primary-foreground" : "text-fd-muted-foreground"}`}
-                      >
-                        {isCenter ? "center" : isContext ? "context" : "other"}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 grid gap-3 text-center md:grid-cols-[1fr_auto_1fr] md:items-center">
-                <div className="border-2 border-fd-foreground bg-fd-card px-4 py-3">
-                  center word: <strong>{example.center}</strong>
-                </div>
-                <div className="font-bold text-fd-primary">-&gt;</div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {example.context.map((word) => (
-                    <div key={word} className="border-2 border-fd-foreground bg-fd-secondary px-4 py-3 text-sm">
-                      predict: <strong>{word}</strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <p className="mt-6 border-l-4 border-fd-primary bg-fd-card p-4 font-sans text-sm leading-6 text-fd-muted-foreground">
-                The task is a training signal. It forces the model to organize words by the company they keep.
-              </p>
-            </div>
-          )}
-
-          {step === "prediction" && (
-            <div>
-              <h4 className="mt-0 text-sm font-semibold uppercase">Prediction creates useful pressure</h4>
-
-              <div className="mt-5 grid gap-3">
-                {predictedWords.map(([word, probability]) => {
-                  const isActualContext = example.context.includes(word);
-
-                  return (
-                    <div key={word} className="grid gap-2">
-                      <div className="flex items-center justify-between gap-3 text-sm">
-                        <span
-                          className={isActualContext ? "font-semibold text-fd-foreground" : "text-fd-muted-foreground"}
-                        >
-                          {word}
-                          {isActualContext ? (
-                            <span className="ml-2 border border-fd-primary px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-fd-primary">
-                              actual context
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="font-mono text-xs text-fd-muted-foreground">
-                          {(probability * 100).toFixed(0)}%
-                        </span>
-                      </div>
-
-                      <div className="h-3 border border-fd-foreground bg-fd-secondary">
-                        <div
-                          className={`h-full transition-all ${isActualContext ? "bg-fd-primary" : "bg-fd-foreground"}`}
-                          style={{ width: `${probability * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 grid gap-3 border-2 border-fd-foreground bg-fd-card p-4 text-sm leading-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
-                <span>Prediction misses become error</span>
-                <span className="font-bold text-fd-primary">-&gt;</span>
-                <span>
-                  Error updates <strong className="text-fd-primary">W1[{example.center}]</strong>
-                </span>
-              </div>
-            </div>
-          )}
-
-          {step === "embedding" && (
-            <div>
-              <h4 className="mt-0 text-sm font-semibold uppercase">The useful result is hidden in W1</h4>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
-                <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                  <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                    One-hot input
-                  </div>
-
-                  <div className="mt-4 grid gap-2">
-                    {example.sentence.map((word) => {
-                      const isCenter = word === example.center;
-
-                      return (
-                        <div
-                          key={word}
-                          className={`grid grid-cols-[minmax(0,1fr)_2.5rem] items-center border-2 ${
-                            isCenter
-                              ? "border-fd-foreground bg-fd-primary text-fd-primary-foreground"
-                              : "border-fd-foreground bg-fd-secondary text-fd-muted-foreground"
-                          }`}
-                        >
-                          <div className="truncate px-3 py-2 text-[10px] uppercase tracking-widest">{word}</div>
-                          <div className="border-l-2 border-current px-2 py-2 text-center text-lg font-bold">
-                            {isCenter ? "1" : "0"}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="hidden font-bold text-fd-primary md:block">x</div>
-
-                <div className="border-2 border-fd-foreground bg-fd-card p-4">
-                  <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                    Updated W1 row
-                  </div>
-                  <div className="mt-4 border-2 border-fd-primary bg-fd-background p-3 font-mono text-sm font-semibold text-fd-primary">
-                    W1[{example.center}]
-                  </div>
-                  <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
-                    Training changed this row while solving the prediction task.
-                  </p>
-                </div>
-
-                <div className="hidden font-bold text-fd-primary md:block">=</div>
-
-                <div className="border-2 border-fd-primary bg-fd-card p-4 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
-                  <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
-                    Embedding kept
-                  </div>
-                  <div className="mt-4 bg-fd-secondary p-3 font-mono text-sm font-semibold text-fd-primary">
-                    [{embedding.map((v) => v.toFixed(2)).join(", ")}]
-                  </div>
-                  <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
-                    This vector is the artifact reused after training.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 border-2 border-fd-foreground bg-fd-secondary p-4 font-sans text-sm leading-6">
-                The proxy task is not the final product. It is the pressure that shapes the embedding.
-              </div>
-            </div>
-          )}
+        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs font-bold" aria-live="polite">
+          <span className="border-2 border-fd-foreground bg-fd-background px-2 py-1">{stepCount} steps</span>
+          <span className="border-2 border-fd-primary bg-fd-card px-2 py-1 text-fd-primary">
+            avg P(context) {percent(progress)}
+          </span>
+          <span className="font-sans font-normal text-fd-muted-foreground">chance {percent(UNIFORM_PROBABILITY)}</span>
         </div>
       </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        {/* Output layer -- the half that gets thrown away */}
+        <section
+          className={`border-2 p-4 transition-opacity duration-500 ${
+            discarded
+              ? "border-dashed border-fd-muted-foreground bg-fd-secondary/40 opacity-50"
+              : "border-fd-foreground bg-fd-background"
+          }`}
+        >
+          <div className="flex items-baseline justify-between gap-2">
+            <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Output layer</h4>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-fd-muted-foreground">
+              {discarded ? "deleted" : "P(word | " + example.center + ")"}
+            </span>
+          </div>
+
+          {/* The proxy task: this window's centre word has to predict its neighbours */}
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-fd-muted-foreground">
+              Example {(stepCount % EXAMPLES.length) + 1}/{EXAMPLES.length}
+            </span>
+            <span className="border-2 border-fd-foreground bg-fd-primary px-2 py-0.5 font-semibold text-fd-primary-foreground">
+              {example.center}
+            </span>
+            <span role="img" aria-label="predicts" className="font-bold text-fd-primary">
+              →
+            </span>
+            {example.context.map((word) => (
+              <span key={word} className="border-2 border-fd-foreground bg-fd-secondary px-2 py-0.5 font-semibold">
+                {word}
+              </span>
+            ))}
+          </div>
+
+          <div className={`mt-3 space-y-1 ${discarded ? "line-through" : ""}`}>
+            {VOCAB.map((word, i) => {
+              const p = probabilities[i];
+              const isTarget = example.context.includes(word);
+              return (
+                <div key={word} className="grid grid-cols-[5.5rem_1fr_2.5rem] items-center gap-2">
+                  <span
+                    className={`truncate text-[11px] ${isTarget ? "font-bold text-fd-foreground" : "text-fd-muted-foreground"}`}
+                  >
+                    {word}
+                  </span>
+                  <span className="h-3 border border-fd-foreground bg-fd-secondary">
+                    <span
+                      className={`block h-full transition-all duration-300 ${isTarget ? "bg-fd-primary" : "bg-fd-foreground/40"}`}
+                      style={{ width: `${p * 100}%` }}
+                    />
+                  </span>
+                  <span className="text-right font-mono text-[11px] text-fd-muted-foreground">{percent(p)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-3 font-sans text-xs leading-5 text-fd-muted-foreground">
+            {discarded
+              ? "Gone. The prediction task existed only to generate the error signal above."
+              : "Highlighted rows are the true neighbours. Every miss becomes error that pushes the input embedding."}
+          </p>
+        </section>
+
+        {/* W1 -- the artifact we keep */}
+        <section className="border-2 border-fd-primary bg-fd-background p-4 shadow-[4px_4px_0px_0px_var(--color-fd-primary)]">
+          <div className="flex items-baseline justify-between gap-2">
+            <h4 className="m-0 text-xs font-bold uppercase tracking-widest">Word map (W1)</h4>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-fd-primary">kept</span>
+          </div>
+
+          <svg
+            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+            className="mt-2 w-full"
+            role="img"
+            aria-label={`Two-dimensional map of ${VOCAB.length} word embeddings after ${stepCount} training steps`}
+          >
+            <line x1={VIEW_W / 2} y1="6" x2={VIEW_W / 2} y2={VIEW_H - 6} stroke="currentColor" strokeWidth="0.5" opacity="0.15" />
+            <line x1="6" y1={VIEW_H / 2} x2={VIEW_W - 6} y2={VIEW_H / 2} stroke="currentColor" strokeWidth="0.5" opacity="0.15" />
+
+            {VOCAB.map((word, i) => {
+              const [x, y] = points[i];
+              const [px, py] = project(previous.w1[i]);
+              const isCenter = word === example.center;
+              const isTarget = example.context.includes(word);
+              const moved = Math.hypot(x - px, y - py) > 1.5;
+              // Anchor labels away from the centre so the two clusters' text splits apart.
+              const outward = x >= VIEW_W / 2;
+              const labelX = outward ? x + 7 : x - 7;
+              const labelY = labelYs[i];
+
+              return (
+                <g key={word}>
+                  {moved && (
+                    <>
+                      <line x1={px} y1={py} x2={x} y2={y} stroke="currentColor" strokeWidth="1" opacity="0.25" />
+                      <circle cx={px} cy={py} r="2" fill="none" stroke="currentColor" strokeWidth="0.75" opacity="0.3" />
+                    </>
+                  )}
+                  {Math.abs(labelY - (y + 3)) > 4 && (
+                    <line x1={x} y1={y} x2={labelX} y2={labelY - 3} stroke="currentColor" strokeWidth="0.5" opacity="0.25" />
+                  )}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={isCenter ? 5 : 3.5}
+                    className={isCenter || isTarget ? "fill-fd-primary" : "fill-fd-foreground"}
+                    opacity={isCenter || isTarget ? 1 : 0.45}
+                  />
+                  <text
+                    x={labelX}
+                    y={labelY}
+                    textAnchor={outward ? "start" : "end"}
+                    className={`text-[9px] ${isCenter ? "fill-fd-primary font-bold" : "fill-fd-muted-foreground"}`}
+                  >
+                    {word}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          <div className="mt-2 font-mono text-xs text-fd-primary">
+            W1[{example.center}] = [{centerVector[0].toFixed(2)}, {centerVector[1].toFixed(2)}]
+          </div>
+          <p className="mt-2 font-sans text-xs leading-5 text-fd-muted-foreground">
+            Rings show where each word sat before the last click. The groups form from shared neighbours alone.
+          </p>
+        </section>
+      </div>
+
+      {/* The trick */}
+      {!discarded && isTrained && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-2 border-fd-primary bg-fd-card p-3">
+          <p className="m-0 min-w-[14rem] flex-1 font-sans text-xs leading-5">
+            The words are sorted. Now do what Word2Vec does with the output layer.
+          </p>
+          <button
+            type="button"
+            onClick={() => setDiscarded(true)}
+            className={`${buttonBase} bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]`}
+          >
+            Throw away the output layer →
+          </button>
+        </div>
+      )}
+
+      {discarded && (
+        <div className="mt-4 border-2 border-fd-foreground bg-fd-secondary p-3 font-sans text-xs leading-5">
+          What survives training is the lookup table on the right. The task we optimised is deleted. The geometry it
+          forced into W1 is the entire point.
+        </div>
+      )}
+
+      {!isTrained && (
+        <p className="mt-4 font-sans text-xs leading-5 text-fd-muted-foreground">
+          Keep training until the words settle into two groups ({TRAINED_AT} steps is plenty), then the last step
+          unlocks.
+        </p>
+      )}
     </div>
   );
 }
