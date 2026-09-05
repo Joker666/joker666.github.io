@@ -95,7 +95,15 @@ export default function AgentDeskVisualizer() {
                 : "bg-fd-background text-fd-foreground hover:bg-fd-secondary"
             }`}
           >
-            {isPlaying ? "Pause ⏸" : "Play ▶"}
+            {isPlaying ? (
+              <>
+                Pause <span aria-hidden="true">⏸</span>
+              </>
+            ) : (
+              <>
+                Play <span aria-hidden="true">▶</span>
+              </>
+            )}
           </button>
         </div>
       </div>

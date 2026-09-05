@@ -101,7 +101,15 @@ const TimeSeriesVisualizer = () => {
             }`}
             title={isPlaying ? "Pause Sequence" : "Play Sequence"}
           >
-            {isPlaying ? "Pause ⏸" : "Play ▶"}
+            {isPlaying ? (
+              <>
+                Pause <span aria-hidden="true">⏸</span>
+              </>
+            ) : (
+              <>
+                Play <span aria-hidden="true">▶</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -112,7 +120,10 @@ const TimeSeriesVisualizer = () => {
           <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
             Input Sequence (Time Series)
           </div>
-          <div className="shrink-0 border-2 border-fd-primary bg-fd-card px-2 py-1 text-xs font-bold text-fd-primary">
+          <div
+            className="shrink-0 border-2 border-fd-primary bg-fd-card px-2 py-1 text-xs font-bold text-fd-primary"
+            aria-live="polite"
+          >
             t={Math.min(step, sequence.length - 1)}
           </div>
         </div>
@@ -202,7 +213,9 @@ const TimeSeriesVisualizer = () => {
                   </div>
 
                   {/* Arrow */}
-                  <div className="text-xl font-bold text-fd-muted-foreground md:mt-10 md:mr-2 md:text-2xl">→</div>
+                  <div className="text-xl font-bold text-fd-muted-foreground md:mt-10 md:mr-2 md:text-2xl" aria-hidden="true">
+            →
+          </div>
 
                   {/* Next State */}
                   <div className="flex w-32 flex-col items-center gap-2">

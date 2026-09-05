@@ -26,6 +26,8 @@ const EmbeddingVisualizer = () => {
             {vocabulary.map((word, i) => (
               <button
                 key={word}
+                type="button"
+                aria-pressed={selectedIndex === i}
                 onClick={() => setSelectedIndex(i)}
                 className={`flex cursor-pointer items-center gap-3 border px-3 py-1 transition-colors ${
                   selectedIndex === i

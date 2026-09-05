@@ -35,6 +35,7 @@ export default function ContextWindowVisualizer() {
           <button
             type="button"
             onClick={() => setMode("normal")}
+            aria-pressed={mode === "normal"}
             className={`cursor-pointer px-2.5 py-1 font-sans text-xs font-bold transition-all ${
               mode === "normal"
                 ? "border-2 border-fd-foreground bg-fd-primary text-fd-primary-foreground shadow-[2px_2px_0px_0px_var(--color-fd-foreground)]"
@@ -46,6 +47,7 @@ export default function ContextWindowVisualizer() {
           <button
             type="button"
             onClick={() => setMode("bloated")}
+            aria-pressed={mode === "bloated"}
             className={`cursor-pointer px-2.5 py-1 font-sans text-xs font-bold transition-all ${
               mode === "bloated"
                 ? "border-2 border-fd-foreground bg-amber-500 text-black shadow-[2px_2px_0px_0px_var(--color-fd-foreground)]"
@@ -64,7 +66,7 @@ export default function ContextWindowVisualizer() {
         <div ref={contentRef} className="pt-4">
           {/* Usage Meter */}
           <div>
-        <div className="flex items-center justify-between text-xs font-bold">
+        <div className="flex items-center justify-between text-xs font-bold" aria-live="polite">
           <span className="uppercase tracking-wider text-fd-muted-foreground">
             Window Capacity (128K Tokens)
           </span>
@@ -72,7 +74,11 @@ export default function ContextWindowVisualizer() {
             {totalUsed.toLocaleString("en-US")} / {TOTAL_CAPACITY.toLocaleString("en-US")} tokens ({usagePercent}%)
           </span>
         </div>
-        <div className="mt-1.5 flex h-3.5 w-full overflow-hidden border-2 border-fd-foreground bg-fd-secondary">
+        <div
+          className="mt-1.5 flex h-3.5 w-full overflow-hidden border-2 border-fd-foreground bg-fd-secondary"
+          role="img"
+          aria-label={`Context window usage: ${totalUsed.toLocaleString("en-US")} of ${TOTAL_CAPACITY.toLocaleString("en-US")} tokens, ${usagePercent}%`}
+        >
           {BLOCKS.map((b) => {
             const tokens = mode === "bloated" && b.tokensBloated ? b.tokensBloated : b.tokens;
             const pct = (tokens / TOTAL_CAPACITY) * 100;
@@ -108,6 +114,7 @@ export default function ContextWindowVisualizer() {
                   key={b.id}
                   type="button"
                   onClick={() => setActiveId(b.id)}
+                  aria-pressed={isActive}
                   className={`group flex w-full cursor-pointer items-center justify-between gap-3 border-2 p-2.5 text-left text-fd-foreground transition-all ${
                     isActive
                       ? "border-fd-foreground border-l-4 border-l-fd-primary bg-fd-card shadow-[3px_3px_0px_0px_var(--color-fd-foreground)] -translate-y-0.5"
@@ -165,14 +172,17 @@ export default function ContextWindowVisualizer() {
 
             {mode === "bloated" && activeBlock.id === "tools" && (
               <div className="mt-3 animate-in fade-in border-2 border-dashed border-amber-500 bg-amber-500/10 p-2.5 font-sans text-xs text-amber-800 duration-300 dark:text-amber-200 motion-reduce:animate-none">
-                <strong className="block font-bold">⚠️ Context Competition:</strong>
+                <strong className="block font-bold">
+                  <span aria-hidden="true">⚠️ </span>Context Competition:
+                </strong>
                 A raw 2,000-line CRM export consumes over 50% of the entire window, crowding out the customer's conversation, support policies, and resolution plan.
               </div>
             )}
           </div>
 
           <div className="mt-4 border-t-2 border-fd-foreground pt-3 text-[11px] font-sans text-fd-muted-foreground">
-            💡 <strong className="text-fd-foreground">Key Takeaway:</strong> Everything in this stack is sent to the LLM on <em>every single API call</em>.
+            <span aria-hidden="true">💡 </span>
+            <strong className="text-fd-foreground">Key Takeaway:</strong> Everything in this stack is sent to the LLM on <em>every single API call</em>.
           </div>
         </div>
       </div>

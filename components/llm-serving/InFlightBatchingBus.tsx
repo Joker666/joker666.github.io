@@ -115,7 +115,7 @@ export default function InFlightBatchingBus() {
       <div className="mt-6 grid gap-3 md:grid-cols-[1fr_14rem]">
         <div className="border-2 border-fd-foreground bg-fd-background p-4">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
+            <div aria-live="polite">
               <div className="text-xs font-semibold uppercase tracking-widest text-fd-muted-foreground">
                 {activeCopy.title}
               </div>
@@ -159,7 +159,15 @@ export default function InFlightBatchingBus() {
                   }`}
                   title={isPlaying ? "Pause Simulation" : "Play Simulation"}
                 >
-                  {isPlaying ? "Pause ⏸" : "Play ▶"}
+                  {isPlaying ? (
+                    <>
+                      Pause <span aria-hidden="true">⏸</span>
+                    </>
+                  ) : (
+                    <>
+                      Play <span aria-hidden="true">▶</span>
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -179,6 +187,7 @@ export default function InFlightBatchingBus() {
                 <button
                   key={item}
                   type="button"
+                  aria-pressed={step === item}
                   onClick={() => {
                     setIsPlaying(false);
                     setStep(item);

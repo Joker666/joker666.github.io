@@ -269,7 +269,7 @@ export default function ProxyTaskEmbeddingViz() {
             onClick={() => setDiscarded(true)}
             className={`${buttonBase} bg-fd-primary text-fd-primary-foreground shadow-[3px_3px_0px_0px_var(--color-fd-foreground)]`}
           >
-            Throw away the output layer →
+            Throw away the output layer <span aria-hidden="true">→</span>
           </button>
         </div>
       )}
