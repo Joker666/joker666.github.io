@@ -136,11 +136,11 @@ const inFlightSchedule: Record<number, Seat[]> = {
 const modeCopy: Record<Mode, { title: string; detail: string }> = {
   static: {
     title: "Static batch",
-    detail: "The bus leaves with A, B, and C. When B finishes early, the seat stays empty until the longest rider is done.",
+    detail: "Seats freed early stay empty until the last rider finishes.",
   },
   inflight: {
     title: "In-flight batch",
-    detail: "The bus is already moving, but the scheduler keeps swapping riders at token boundaries when capacity opens up.",
+    detail: "The bus never stops. Seats refill at token boundaries.",
   },
 };
 
