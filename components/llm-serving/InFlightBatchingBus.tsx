@@ -259,7 +259,7 @@ export default function InFlightBatchingBus() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-[1fr_12rem]">
+      <div className="mt-6 grid gap-3 md:grid-cols-[1fr_14rem]">
         <div className="border-2 border-fd-foreground bg-fd-background p-4">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
