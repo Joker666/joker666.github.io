@@ -2,23 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useMeasuredHeight } from "@/lib/use-measured-height";
-
-// Simulated ECG-like sequence
-const sequence = [0.1, 0.2, 0.5, 0.9, -0.6, -0.2, 0.1, 0.2, 0.3, 0.1];
-const maxPositiveValue = Math.max(...sequence, 0);
-const maxNegativeMagnitude = Math.max(...sequence.map((value) => Math.max(Math.abs(Math.min(value, 0)), 0)));
-const positiveChartPercent = 65;
-const negativeChartPercent = 35;
-
-// A dummy function to simulate "hidden state" update
-// We'll just generate some "features" based on the input and previous state to look cool.
-const computeNextState = (x: number, prevState: number[]) => {
-  return [
-    Math.tanh(prevState[0] * 0.5 + x * 0.8),
-    Math.tanh(prevState[1] * -0.4 + x * 1.2),
-    Math.tanh(prevState[2] * 0.9 + x * -0.5),
-  ];
-};
+import {
+  computeNextState,
+  maxNegativeMagnitude,
+  maxPositiveValue,
+  negativeChartPercent,
+  positiveChartPercent,
+  sequence,
+} from "./time-series";
 
 const StateBar = ({ value, className }: { value: number; className: string }) => {
   return (
