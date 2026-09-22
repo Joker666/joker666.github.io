@@ -3,10 +3,22 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "A selection of projects I've worked on, including AskMyDocs, Cogman, Journey+, Imgforge, and Today.",
+  description: "A selection of software projects I've worked on.",
 };
 
 const projects = [
+  {
+    id: "paper",
+    title: "Paper",
+    description: "A minimal WYSIWYG Markdown editor for macOS that hides the syntax and formats text in place.",
+    url: "https://usepaper.github.io/",
+  },
+  {
+    id: "reflex",
+    title: "Reflex",
+    description: "A native macOS link router that sends each link to the right browser or browser profile.",
+    url: "https://rafihasan.com/Reflex/",
+  },
   {
     id: "askmydocs",
     title: "AskMyDocs",

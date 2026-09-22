@@ -10,6 +10,13 @@ export interface ReadingEntry {
 
 export const readingList: ReadingEntry[] = [
   {
+    title: "Choose your pain",
+    author: "Sharif Shameem",
+    url: "https://sharif.io/pain",
+    note: "I learned that there is no way to avoid pain. Either you face it head-on, or you live in despair as a lost soul.",
+    tags: ["pain", "choice", "courage"],
+  },
+  {
     title: "The Last Quiet Thing",
     author: "Terry Godier",
     url: "https://www.terrygodier.com/the-last-quiet-thing",
