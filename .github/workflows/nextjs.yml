@@ -36,7 +36,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 12
       - name: Detect package manager
         id: detect-package-manager
         run: |
