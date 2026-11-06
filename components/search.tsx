@@ -1,5 +1,5 @@
 "use client";
-import { create } from "@orama/orama";
+import { create } from "zbsearch";
 import { useDocsSearch } from "fumadocs-core/search/client";
 import {
   SearchDialog,
@@ -14,10 +14,10 @@ import {
 } from "fumadocs-ui/components/dialog/search";
 import { useI18n } from "fumadocs-ui/contexts/i18n";
 
-function initOrama() {
+function initDB() {
   return create({
     schema: { _: "string" },
-    // https://docs.orama.com/docs/orama-js/supported-languages
+    // https://zbsearch.dev/docs/zbsearch/text-analysis/stemming
     language: "english",
   });
 }
@@ -26,7 +26,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
     type: "static",
-    initOrama,
+    initDB,
     locale,
   });
 
